@@ -19,7 +19,7 @@ export default {
   },
   // 登录页面国际化
   login: {
-    title: "H UI",
+    title: "Honest-UI",
     username: "用户名",
     password: "密码",
     login: "登 录",
@@ -101,11 +101,11 @@ export default {
     releaseKickTip: "解除下线状态",
   },
   config: {
-    huiWebPort: "H UI Web 端口",
-    huiWebContext: "H UI Web 上下文",
+    huiWebPort: "Honest-UI Web 端口",
+    huiWebContext: "Honest-UI Web 上下文",
     hysteria2TrafficTime: "Hysteria2 流量倍数",
-    huiCrtPath: "H UI CRT 证书路径",
-    huiKeyPath: "H UI KEY 证书路径",
+    huiCrtPath: "Honest-UI CRT 证书路径",
+    huiKeyPath: "Honest-UI KEY 证书路径",
     uploadCrtFile: "上传 CRT 证书",
     uploadKeyFile: "上传 KEY 证书",
     restartServer: "重启面板",
@@ -119,7 +119,7 @@ export default {
     resetTrafficWeek: "每周运行一次，周六/周日午夜",
   },
   monitor: {
-    huiVersion: "H UI 版本",
+    huiVersion: "Honest-UI 版本",
     cpuPercent: "CPU 使用率",
     memPercent: "内存使用率",
     diskPercent: "磁盘使用率",

@@ -19,7 +19,7 @@ export default {
   },
   // 登录页面国际化
   login: {
-    title: "H UI",
+    title: "Honest-UI",
     username: "Имя пользователя",
     password: "Пароль",
     login: "Войти",
@@ -103,11 +103,11 @@ export default {
     releaseKickTip: "Убрать статус офлайн",
   },
   config: {
-    huiWebPort: "Веб-порт H UI",
-    huiWebContext: "Веб-контекст H UI",
+    huiWebPort: "Веб-порт Honest-UI",
+    huiWebContext: "Веб-контекст Honest-UI",
     hysteria2TrafficTime: "Время учета трафика Hysteria2",
-    huiCrtPath: "Путь к CRT-файлу H UI",
-    huiKeyPath: "Путь к KEY-файлу H UI",
+    huiCrtPath: "Путь к CRT-файлу Honest-UI",
+    huiKeyPath: "Путь к KEY-файлу Honest-UI",
     uploadCrtFile: "Загрузить CRT-файл",
     uploadKeyFile: "Загрузить KEY-файл",
     restartServer: "Перезапустить панель",
@@ -122,7 +122,7 @@ export default {
       "Запуск раз в неделю, в полночь между субботой и воскресеньем",
   },
   monitor: {
-    huiVersion: "Версия H UI",
+    huiVersion: "Версия Honest-UI",
     cpuPercent: "Использование CPU",
     memPercent: "Использование памяти",
     diskPercent: "Использование диска",

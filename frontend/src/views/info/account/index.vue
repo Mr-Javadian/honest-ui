@@ -138,7 +138,7 @@ const greetings = computed(() => {
   } else if (hours >= 0 && hours < 6) {
     return t("info.greeting5");
   }
-  return "Hello H UI";
+  return "Hello Honest-UI";
 });
 
 const state = reactive({

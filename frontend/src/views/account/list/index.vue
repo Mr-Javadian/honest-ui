@@ -35,44 +35,34 @@
         </el-form-item>
 
         <el-form-item>
-          <el-button type="primary" :icon="Search" @click="handleQuery"
-            >{{ $t("common.search") }}
-          </el-button>
-        </el-form-item>
-        <el-form-item>
-          <el-button :icon="Refresh" @click="resetQuery"
-            >{{ $t("common.reset") }}
-          </el-button>
-        </el-form-item>
-        <el-form-item>
-          <el-button :icon="Plus" @click="handleAdd"
-            >{{ $t("common.add") }}
-          </el-button>
-        </el-form-item>
-        <el-form-item>
-          <el-upload
-            v-model:file-list="fileList"
-            :http-request="handleImport"
-            :show-file-list="false"
-            accept=".json"
-            :limit="1"
-            :before-upload="beforeImport"
-          >
-            <el-button>
-              <template #icon>
-                <i-ep-upload />
-              </template>
-              {{ $t("common.import") }}
+          <div class="action-buttons">
+            <el-button type="primary" :icon="Search" @click="handleQuery">
+              {{ $t("common.search") }}
             </el-button>
-          </el-upload>
-        </el-form-item>
-        <el-form-item>
-          <el-button @click="handleExport">
-            <template #icon>
-              <i-ep-download />
-            </template>
-            {{ $t("common.export") }}
-          </el-button>
+            <el-button :icon="Refresh" @click="resetQuery">
+              {{ $t("common.reset") }}
+            </el-button>
+            <el-button :icon="Plus" @click="handleAdd">
+              {{ $t("common.add") }}
+            </el-button>
+            <el-upload
+              v-model:file-list="fileList"
+              :http-request="handleImport"
+              :show-file-list="false"
+              accept=".json"
+              :limit="1"
+              :before-upload="beforeImport"
+            >
+              <el-button>
+                <template #icon><i-ep-upload /></template>
+                {{ $t("common.import") }}
+              </el-button>
+            </el-upload>
+            <el-button @click="handleExport">
+              <template #icon><i-ep-download /></template>
+              {{ $t("common.export") }}
+            </el-button>
+          </div>
         </el-form-item>
       </el-form>
     </div>
@@ -516,7 +506,7 @@ const dataFormAddRules = {
       trigger: ["change", "blur"],
     },
     {
-      pattern: /^[a-zA-Z0-9!@#$%^&*()_+-=]{6,32}$/,
+      pattern: /^[a-zA-Z0-9!@#$%^&*()_+=-]{6,32}$/,
       message: "Username format is incorrect",
       trigger: ["change", "blur"],
     },
@@ -528,7 +518,7 @@ const dataFormAddRules = {
       trigger: ["change", "blur"],
     },
     {
-      pattern: /^[a-zA-Z0-9!@#$%^&*()_+-=]{6,32}$/,
+      pattern: /^[a-zA-Z0-9!@#$%^&*()_+=-]{6,32}$/,
       message: "Pass format is incorrect",
       trigger: ["change", "blur"],
     },
@@ -540,7 +530,7 @@ const dataFormAddRules = {
       trigger: ["change", "blur"],
     },
     {
-      pattern: /^[a-zA-Z0-9!@#$%^&*()_+-=]{6,32}$/,
+      pattern: /^[a-zA-Z0-9!@#$%^&*()_+=-]{6,32}$/,
       message: "ConPass format is incorrect",
       trigger: ["change", "blur"],
     },
@@ -579,21 +569,21 @@ const dataFormUpdateRules = {
   ],
   username: [
     {
-      pattern: /^[a-zA-Z0-9!@#$%^&*()_+-=]{6,32}$/,
+      pattern: /^[a-zA-Z0-9!@#$%^&*()_+=-]{6,32}$/,
       message: "Username format is incorrect",
       trigger: ["change", "blur"],
     },
   ],
   pass: [
     {
-      pattern: /^[a-zA-Z0-9!@#$%^&*()_+-=]{6,32}$/,
+      pattern: /^[a-zA-Z0-9!@#$%^&*()_+=-]{6,32}$/,
       message: "Pass format is incorrect",
       trigger: ["change", "blur"],
     },
   ],
   conPass: [
     {
-      pattern: /^[a-zA-Z0-9!@#$%^&*()_+-=]{6,32}$/,
+      pattern: /^[a-zA-Z0-9!@#$%^&*()_+=-]{6,32}$/,
       message: "Pass format is incorrect",
       trigger: ["change", "blur"],
     },
@@ -982,5 +972,12 @@ onMounted(() => {
   right: 0;
   z-index: 1;
   border: 0;
+}
+
+.action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
 }
 </style>

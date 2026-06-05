@@ -178,7 +178,7 @@ generate_random_port() {
 
 generate_strong_password() {
   local len=${1:-16}
-  < /dev/urandom tr -dc 'A-Za-z0-9!@#%^&*()-_=+' | head -c "$len"
+  < /dev/urandom tr -dc 'A-Za-z0-9!@#%^&*()_=+-' | head -c "$len"
 }
 
 generate_context_path() {

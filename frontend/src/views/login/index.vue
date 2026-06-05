@@ -135,7 +135,7 @@ import { AccountLoginDto } from "@/api/account/types";
 const accountStore = useAccountStore();
 const route = useRoute();
 
-const appVersion = "0.4.1";
+const appVersion = "0.4.2";
 const loading = ref(false);
 const isCapslock = ref(false);
 const passVisible = ref(false);
@@ -172,11 +172,11 @@ const refreshCaptcha = () => { generateCaptcha(); };
 const loginRules = {
   username: [
     { required: true, message: "Required", trigger: ["change", "blur"] },
-    { pattern: /^[a-zA-Z0-9!@#$%^&*()_+-=]{6,32}$/, message: "Username format is incorrect", trigger: ["change", "blur"] },
+    { pattern: /^[a-zA-Z0-9!@#$%^&*()_+=-]{6,32}$/, message: "Username format is incorrect", trigger: ["change", "blur"] },
   ],
   pass: [
     { required: true, message: "Required", trigger: ["change", "blur"] },
-    { pattern: /^[a-zA-Z0-9!@#$%^&*()_+-=]{6,32}$/, message: "Password format is incorrect", trigger: ["change", "blur"] },
+    { pattern: /^[a-zA-Z0-9!@#$%^&*()_+=-]{6,32}$/, message: "Password format is incorrect", trigger: ["change", "blur"] },
   ],
   captcha: [
     { required: true, message: "Enter captcha", trigger: ["change", "blur"] },
