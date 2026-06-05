@@ -33,17 +33,15 @@ init_var() {
   h_ui_port=8081
   h_ui_time_zone=Asia/Tehran
   selected_ip=""
+  major_version=""
 }
 
 can_connect() {
   ping -c2 -i0.3 -W1 "$1" &>/dev/null
 }
 
-check_sys() {
-  if [[ $(id -u) != "0" ]]; then
-    echo_content red "You must be root to run this script"
-    exit 1
-  fi
+detect_system() {
+  [[ $(id -u) != "0" ]] && { echo_content red "  [!] You must be root"; exit 1; }
 
   echo "  [*] Checking network connection..."
   can_connect github.com || { echo_content red "  [!] Network connection failed"; exit 1; }
@@ -55,7 +53,7 @@ check_sys() {
   elif command -v apt-get &>/dev/null; then package_manager='apt-get'
   elif command -v apt &>/dev/null;    then package_manager='apt'
   fi
-  [[ -z "${package_manager}" ]] && { echo_content red "  [!] Unsupported system"; exit 1; }
+  [[ -z "${package_manager}" ]] && { echo_content red "  [!] Unsupported package manager"; exit 1; }
   echo -e "  [\xE2\x9C\x93] Package manager: ${package_manager}"
 
   echo "  [*] Detecting OS..."
@@ -97,16 +95,36 @@ get_installed_version() {
 }
 
 get_system_info() {
+  local os_info arch_info kernel_info mem_info disk_info
   os_info=$(grep PRETTY_NAME /etc/os-release 2>/dev/null | cut -d'"' -f2)
   [[ -z "${os_info}" ]] && os_info="${release^} ${version}"
-  echo "OS       : ${os_info}"
-  echo "Arch     : ${get_arch}"
-  echo "Kernel   : $(uname -r)"
-  echo "Memory   : $(free -m | awk '/^Mem:/{print $2 "MiB"}')"
-  echo "Disk     : $(df -BG / | awk 'NR==2{print $4}') free"
+  arch_info="${get_arch:-$(arch)}"
+  kernel_info=$(uname -r)
+  mem_info=$(free -m | awk '/^Mem:/{print $2 "MiB"}')
+  disk_info=$(df -BG / | awk 'NR==2{print $4}')" free"
+  printf "  |  %-58s |\n" "OS     : ${os_info}"
+  printf "  |  %-58s |\n" "Arch   : ${arch_info}"
+  printf "  |  %-58s |\n" "Kernel : ${kernel_info}"
+  printf "  |  %-58s |\n" "Memory : ${mem_info}"
+  printf "  |  %-58s |\n" "Disk   : ${disk_info}"
 }
 
 # ────────────────────────────────────────────── IP selection ──────────────────────────────────────────────
+get_local_ips() {
+  ip -4 addr show 2>/dev/null | grep -oP 'inet \K[\d.]+' | grep -v '127.0.0.1'
+}
+
+detect_public_ip() {
+  local ip=""
+  ip=$(curl -s --max-time 3 https://api.ipify.org 2>/dev/null || echo "")
+  [[ -z "${ip}" ]] && ip=$(curl -s --max-time 3 https://ipinfo.io/ip 2>/dev/null || echo "")
+  [[ -z "${ip}" ]] && ip=$(curl -s --max-time 3 https://ifconfig.me 2>/dev/null || echo "")
+  # validate basic IPv4 format
+  if [[ "${ip}" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    echo "${ip}"
+  fi
+}
+
 select_ip_address() {
   echo
   echo "  -- Network Interfaces ----------------------------------------------"
@@ -114,7 +132,7 @@ select_ip_address() {
   local ips=()
   while IFS= read -r line; do
     [[ -n "$line" ]] && ips+=("$line")
-  done < <(ip -4 addr show 2>/dev/null | grep -oP 'inet \K[\d.]+' | grep -v '127.0.0.1')
+  done < <(get_local_ips)
 
   if [[ ${#ips[@]} -eq 0 ]]; then
     echo_content red "  [!] No external IP found (only 127.0.0.1)"
@@ -167,8 +185,32 @@ generate_context_path() {
   < /dev/urandom tr -dc 'a-zA-Z0-9' | head -c 19
 }
 
+# ────────────────────────────────────────────── DB helpers ────────────────────────────────────────────────
+db_set_config() {
+  local db="$1" key="$2" val="$3"
+  [[ -f "${db}" ]] && command -v sqlite3 &>/dev/null && \
+    sqlite3 "${db}" "INSERT OR REPLACE INTO config (key, value) VALUES ('${key}', '${val}')" 2>/dev/null || true
+}
+
+db_get_config() {
+  local db="$1" key="$2"
+  if [[ -f "${db}" ]] && command -v sqlite3 &>/dev/null; then
+    sqlite3 "${db}" "SELECT value FROM config WHERE key='${key}'" 2>/dev/null || echo ""
+  fi
+}
+
+db_get_username() {
+  local db="$1"
+  if [[ -f "${db}" ]] && command -v sqlite3 &>/dev/null; then
+    sqlite3 "${db}" "SELECT username FROM account WHERE id=1" 2>/dev/null || echo ""
+  fi
+}
+
 # ────────────────────────────────────────────── systemd install ────────────────────────────────────────────
 install_h_ui_systemd() {
+  detect_system
+  install_depend
+
   if systemctl status honest-ui >/dev/null 2>&1; then
     echo_content red "  [!] Honest-UI is already installed"
     read -r -p "  Press Enter to continue..."
@@ -242,7 +284,6 @@ SERVICEEOF
   systemctl enable honest-ui
   echo -e "  [\xE2\x9C\x93] Service installed & enabled"
 
-  # First start to initialize DB
   echo "  [*] First start (initializing database)..."
   systemctl start honest-ui
   sleep 3
@@ -251,39 +292,26 @@ SERVICEEOF
 
   local db_path="${HUI_DATA_SYSTEMD}data/h_ui.db"
 
-  # Set context path
   echo "  [*] Configuring secure access path..."
-  if [[ -f "${db_path}" ]] && command -v sqlite3 &>/dev/null; then
-    sqlite3 "${db_path}" "INSERT OR REPLACE INTO config (key, value) VALUES ('H_UI_WEB_CONTEXT', '/${ctx_path}')" 2>/dev/null || true
-    echo -e "  [\xE2\x9C\x93] Access path: /${ctx_path}"
-  else
-    echo "  [!] Could not set access path"
-  fi
+  db_set_config "${db_path}" "H_UI_WEB_CONTEXT" "/${ctx_path}"
+  echo -e "  [\xE2\x9C\x93] Access path: /${ctx_path}"
 
-  # Set admin credentials
   echo "  [*] Setting admin credentials..."
   if [[ -f "${db_path}" ]] && command -v sqlite3 &>/dev/null && command -v openssl &>/dev/null; then
     local pass_hash
     pass_hash=$(echo -n "${admin_pass}" | openssl dgst -sha224 2>/dev/null | awk '{print $NF}')
     if [[ -n "${pass_hash}" ]]; then
       sqlite3 "${db_path}" "UPDATE account SET username='${admin_user}', pass='${pass_hash}', con_pass='${con_pass}' WHERE id=1" 2>/dev/null || true
-      sqlite3 "${db_path}" "INSERT OR REPLACE INTO config (key, value) VALUES ('H_UI_WEB_PORT', '${h_ui_port}')" 2>/dev/null || true
+      db_set_config "${db_path}" "H_UI_WEB_PORT" "${h_ui_port}"
+      db_set_config "${db_path}" "H_UI_IP" "${selected_ip}"
       echo -e "  [\xE2\x9C\x93] Admin credentials configured"
     fi
   else
     echo "  [!] Using default credentials (run 'honest-ui reset' to change)"
   fi
 
-  # Install menu command
-  if [[ ! -f /usr/local/honest-ui/honest-ui-menu.sh ]]; then
-    cp "$0" /usr/local/honest-ui/honest-ui-menu.sh 2>/dev/null || \
-      curl -fsSL "https://raw.githubusercontent.com/Mr-Javadian/honest-ui/main/install.sh" -o /usr/local/honest-ui/honest-ui-menu.sh
-    chmod +x /usr/local/honest-ui/honest-ui-menu.sh
-    ln -sf /usr/local/honest-ui/honest-ui-menu.sh /usr/local/bin/honest-ui 2>/dev/null || true
-    echo -e "  [\xE2\x9C\x93] Menu command installed: type 'honest-ui'"
-  fi
+  install_menu_command
 
-  # Final start
   echo "  [*] Starting Honest-UI service..."
   systemctl start honest-ui
   sleep 3
@@ -316,6 +344,8 @@ SERVICEEOF
 }
 
 upgrade_h_ui_systemd() {
+  [[ -z "${get_arch}" ]] && detect_system
+
   if ! systemctl list-units --type=service --all 2>/dev/null | grep -q 'honest-ui.service'; then
     echo_content red "  [!] Honest-UI not installed"
     read -r -p "  Press Enter to continue..."
@@ -386,6 +416,8 @@ install_docker_engine() {
 }
 
 install_h_ui_docker() {
+  detect_system
+
   docker ps -a -q -f "name=^honest-ui$" 2>/dev/null | grep -q . && { echo_content red "  [!] Honest-UI already installed"; read -r -p "  Press Enter to continue..."; return; }
 
   install_docker_engine
@@ -417,9 +449,8 @@ install_h_ui_docker() {
   local db_path="${HUI_DATA_DOCKER}data/h_ui.db"
 
   echo "  [*] Configuring access path..."
-  [[ -f "${db_path}" ]] && command -v sqlite3 &>/dev/null && \
-    sqlite3 "${db_path}" "INSERT OR REPLACE INTO config (key, value) VALUES ('H_UI_WEB_CONTEXT', '/${ctx_path}')" 2>/dev/null && \
-    echo -e "  [\xE2\x9C\x93] Access path: /${ctx_path}"
+  db_set_config "${db_path}" "H_UI_WEB_CONTEXT" "/${ctx_path}"
+  echo -e "  [\xE2\x9C\x93] Access path: /${ctx_path}"
 
   echo "  [*] Setting admin credentials..."
   if [[ -f "${db_path}" ]] && command -v sqlite3 &>/dev/null && command -v openssl &>/dev/null; then
@@ -427,7 +458,8 @@ install_h_ui_docker() {
     pass_hash=$(echo -n "${admin_pass}" | openssl dgst -sha224 2>/dev/null | awk '{print $NF}')
     if [[ -n "${pass_hash}" ]]; then
       sqlite3 "${db_path}" "UPDATE account SET username='${admin_user}', pass='${pass_hash}', con_pass='${con_pass}' WHERE id=1" 2>/dev/null || true
-      sqlite3 "${db_path}" "INSERT OR REPLACE INTO config (key, value) VALUES ('H_UI_WEB_PORT', '${h_ui_port}')" 2>/dev/null || true
+      db_set_config "${db_path}" "H_UI_WEB_PORT" "${h_ui_port}"
+      db_set_config "${db_path}" "H_UI_IP" "${selected_ip}"
       echo -e "  [\xE2\x9C\x93] Admin credentials configured"
     fi
   fi
@@ -501,13 +533,11 @@ change_web_port() {
 
   if systemctl list-units --type=service --all 2>/dev/null | grep -q 'honest-ui.service'; then
     db_path="${HUI_DATA_SYSTEMD}data/h_ui.db"
-    [[ -f "${db_path}" ]] && command -v sqlite3 &>/dev/null && \
-      current_port=$(sqlite3 "${db_path}" "SELECT value FROM config WHERE key='H_UI_WEB_PORT'" 2>/dev/null)
+    current_port=$(db_get_config "${db_path}" "H_UI_WEB_PORT")
     [[ -z "${current_port}" ]] && current_port=$(grep -oP '(?<=-p )\d+' /etc/systemd/system/honest-ui.service 2>/dev/null || echo "8081")
   elif command -v docker &>/dev/null && docker ps -a -q -f "name=^honest-ui$" 2>/dev/null | grep -q .; then
     db_path="${HUI_DATA_DOCKER}data/h_ui.db"
-    [[ -f "${db_path}" ]] && command -v sqlite3 &>/dev/null && \
-      current_port=$(sqlite3 "${db_path}" "SELECT value FROM config WHERE key='H_UI_WEB_PORT'" 2>/dev/null)
+    current_port=$(db_get_config "${db_path}" "H_UI_WEB_PORT")
     [[ -z "${current_port}" ]] && current_port="8081"
   else
     echo_content red "  [!] Honest-UI not installed"; read -r -p "  Press Enter to continue..."; return
@@ -541,8 +571,7 @@ change_web_port() {
     echo -e "  [\xE2\x9C\x93] Docker port changed"
   fi
 
-  command -v sqlite3 &>/dev/null && [[ -f "${db_path}" ]] && \
-    sqlite3 "${db_path}" "INSERT OR REPLACE INTO config (key, value) VALUES ('H_UI_WEB_PORT', '${new_port}')" 2>/dev/null || true
+  db_set_config "${db_path}" "H_UI_WEB_PORT" "${new_port}"
 
   echo -e "  [\xE2\x9C\x93] Port updated to ${new_port}"
   read -r -p "  Press Enter to continue..."
@@ -569,46 +598,70 @@ view_status() {
 
   if systemctl list-units --type=service --all 2>/dev/null | grep -q 'honest-ui.service'; then
     found=true
-    echo "  -- systemd ------------------------------------------------"
+    echo "  +- systemd ----------------------------------------------------------+"
     local status
     status=$(systemctl is-active honest-ui 2>/dev/null || echo "inactive")
-    if [[ "${status}" == "active" ]]; then echo -e "  \xE2\x97\x8F Running"; else echo -e "  \xE2\x97\x8F ${status}"; fi
+    printf "  |  %-57s |\n" "Status:   ${status^}"
+    printf "  +-------------------------------------------------------------------+"
+    echo
 
     local db_path="${HUI_DATA_SYSTEMD}data/h_ui.db"
-    local port_val="" ctx_val="" user_val="" ip_val=""
-    if [[ -f "${db_path}" ]] && command -v sqlite3 &>/dev/null; then
-      port_val=$(sqlite3 "${db_path}" "SELECT value FROM config WHERE key='H_UI_WEB_PORT'" 2>/dev/null || echo "")
-      ctx_val=$(sqlite3 "${db_path}" "SELECT value FROM config WHERE key='H_UI_WEB_CONTEXT'" 2>/dev/null || echo "/")
-      user_val=$(sqlite3 "${db_path}" "SELECT username FROM account WHERE id=1" 2>/dev/null || echo "")
-      ip_val=$(curl -s --max-time 2 ifconfig.me 2>/dev/null || echo "")
-    fi
+    local port_val ctx_val user_val ip_val
+    port_val=$(db_get_config "${db_path}" "H_UI_WEB_PORT")
+    ctx_val=$(db_get_config "${db_path}" "H_UI_WEB_CONTEXT")
+    user_val=$(db_get_username "${db_path}")
+    ip_val=$(db_get_config "${db_path}" "H_UI_IP")
 
-    echo "  Port:       ${port_val:-15360}"
-    echo "  Path:       ${ctx_val:-/}"
-    echo "  Username:   ${user_val:-sysadmin}"
-    echo "  Access URL: http://${ip_val:-your-server-ip}:${port_val:-15360}${ctx_val:-/}"
+    # Auto-detect IP if not saved
+    [[ -z "${ip_val}" ]] && ip_val=$(get_local_ips | head -1)
+    # Fall back to public IP detection
+    [[ -z "${ip_val}" ]] && ip_val=$(detect_public_ip)
+    [[ -z "${ip_val}" ]] && ip_val="your-server-ip"
+
+    port_val="${port_val:-15360}"
+    ctx_val="${ctx_val:-/}"
+    user_val="${user_val:-sysadmin}"
+
+    printf "  |  %-57s |\n" "Port:     ${port_val}"
+    printf "  |  %-57s |\n" "Path:     ${ctx_val}"
+    printf "  |  %-57s |\n" "Username: ${user_val}"
+    printf "  |  %-57s |\n" "Access:   http://${ip_val}:${port_val}${ctx_val}"
+    printf "  +-------------------------------------------------------------------+"
+    echo
     systemctl status honest-ui --no-pager -l 2>&1 | head -6
+    echo
   fi
 
   if command -v docker &>/dev/null && docker ps -a -q -f "name=^honest-ui$" 2>/dev/null | grep -q .; then
     found=true
-    echo "  -- Docker --------------------------------------------------"
+    echo "  +- Docker ------------------------------------------------------------+"
     local status
     status=$(docker inspect honest-ui --format '{{.State.Status}}' 2>/dev/null || echo "not found")
-    if [[ "${status}" == "running" ]]; then echo -e "  \xE2\x97\x8F Running"; else echo -e "  \xE2\x97\x8F ${status}"; fi
+    printf "  |  %-57s |\n" "Status:   ${status^}"
+    printf "  +-------------------------------------------------------------------+"
+    echo
 
     local db_path="${HUI_DATA_DOCKER}data/h_ui.db"
-    if [[ -f "${db_path}" ]] && command -v sqlite3 &>/dev/null; then
-      local port_val ctx_val user_val ip_val
-      port_val=$(sqlite3 "${db_path}" "SELECT value FROM config WHERE key='H_UI_WEB_PORT'" 2>/dev/null || echo "")
-      ctx_val=$(sqlite3 "${db_path}" "SELECT value FROM config WHERE key='H_UI_WEB_CONTEXT'" 2>/dev/null || echo "/")
-      user_val=$(sqlite3 "${db_path}" "SELECT username FROM account WHERE id=1" 2>/dev/null || echo "")
-      ip_val=$(curl -s --max-time 2 ifconfig.me 2>/dev/null || echo "")
-      echo "  Port:       ${port_val:-15360}"
-      echo "  Path:       ${ctx_val:-/}"
-      echo "  Username:   ${user_val:-sysadmin}"
-      echo "  Access URL: http://${ip_val:-your-server-ip}:${port_val:-15360}${ctx_val:-/}"
-    fi
+    local port_val ctx_val user_val ip_val
+    port_val=$(db_get_config "${db_path}" "H_UI_WEB_PORT")
+    ctx_val=$(db_get_config "${db_path}" "H_UI_WEB_CONTEXT")
+    user_val=$(db_get_username "${db_path}")
+    ip_val=$(db_get_config "${db_path}" "H_UI_IP")
+
+    [[ -z "${ip_val}" ]] && ip_val=$(get_local_ips | head -1)
+    [[ -z "${ip_val}" ]] && ip_val=$(detect_public_ip)
+    [[ -z "${ip_val}" ]] && ip_val="your-server-ip"
+
+    port_val="${port_val:-15360}"
+    ctx_val="${ctx_val:-/}"
+    user_val="${user_val:-sysadmin}"
+
+    printf "  |  %-57s |\n" "Port:     ${port_val}"
+    printf "  |  %-57s |\n" "Path:     ${ctx_val}"
+    printf "  |  %-57s |\n" "Username: ${user_val}"
+    printf "  |  %-57s |\n" "Access:   http://${ip_val}:${port_val}${ctx_val}"
+    printf "  +-------------------------------------------------------------------+"
+    echo
   fi
 
   ${found} || echo_content yellow "  Honest-UI is not installed"
@@ -624,12 +677,18 @@ ssh_local_port_forwarding() {
   read -r -p "  Press Enter to continue..."
 }
 
+install_menu_command() {
+  cp "$0" /usr/local/honest-ui/honest-ui-menu.sh 2>/dev/null || \
+    curl -fsSL "https://raw.githubusercontent.com/Mr-Javadian/honest-ui/main/install.sh" -o /usr/local/honest-ui/honest-ui-menu.sh
+  chmod +x /usr/local/honest-ui/honest-ui-menu.sh
+  ln -sf /usr/local/honest-ui/honest-ui-menu.sh /usr/local/bin/honest-ui
+  echo -e "  [\xE2\x9C\x93] Menu command installed: type 'honest-ui'"
+}
+
 # ────────────────────────────────────────────── Main ───────────────────────────────────────────────────────
 main() {
   cd "$HOME" || exit 0
   init_var
-  check_sys
-  install_depend
 
   while :; do
     clear
@@ -640,26 +699,23 @@ main() {
     # Banner
     cat <<'BANNER'
 
-  ==================================================
+  ======================================================
   |
-  |   ██╗  ██╗ ██████╗ ███╗   ██╗███████╗███████╗████████╗
-  |   ██║  ██║██╔═══██╗████╗  ██║██╔════╝██╔════╝╚══██╔══╝
-  |   ███████║██║   ██║██╔██╗ ██║█████╗  ███████╗   ██║
-  |   ██╔══██║██║   ██║██║╚██╗██║██╔══╝  ╚════██║   ██║
-  |   ██║  ██║╚██████╔╝██║ ╚████║███████╗███████║   ██║
-  |   ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝╚══════╝╚══════╝   ╚═╝
-  |                                                   |
-  |        Hysteria 2 Management Panel                |
+  |     _   _                   _   _ ___ ___
+  |    | | | | ___  _ __   ___ | |_(_) _ \_ _|
+  |    | |_| |/ _ \| '_ \ / _ \| __| |  _/| |
+  |    |  _  | (_) | | | | (_) | |_| | |  | |
+  |    |_| |_|\___/|_| |_|\___/ \__|_|_| |___|
+  |
+  |        Hysteria 2 Management Panel
 BANNER
-    printf "  |        Version %-37s|\n" "${installed_ver}"
-    echo "  =================================================="
+    printf "  |        Version %-41s|\n" "${installed_ver}"
+    echo "  ======================================================"
     echo
 
     # System Info
     echo "  +- System Information ------------------------------------------------+"
-    while IFS= read -r line; do
-      printf "  |  %-58s |\n" "$line"
-    done < <(get_system_info)
+    get_system_info
     echo "  +---------------------------------------------------------------------+"
     echo
 

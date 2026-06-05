@@ -25,6 +25,7 @@
           <span class="headline-word is-hidden">Management Panel</span>
           <span class="headline-word is-hidden">Secure & Fast</span>
         </div>
+        <span class="version-text">v{{ appVersion }}</span>
       </div>
 
       <el-form ref="loginFormRef" :model="loginForm" :rules="loginRules" class="login-form">
@@ -66,6 +67,34 @@
           </el-form-item>
         </el-tooltip>
 
+        <el-form-item prop="captcha">
+          <div class="captcha-row">
+            <div class="captcha-code">
+              <span
+                v-for="(d, i) in captchaDigits"
+                :key="i"
+                class="captcha-digit"
+                :style="captchaStyle(i)"
+              >{{ d }}</span>
+              <button class="captcha-refresh" type="button" @click="refreshCaptcha" title="Refresh">
+                <svg-icon icon-class="refresh" class="refresh-icon" />
+              </button>
+            </div>
+            <el-input
+              v-model="loginForm.captcha"
+              placeholder="Captcha"
+              size="large"
+              maxlength="4"
+              class="captcha-input"
+              @keyup.enter="handleLogin"
+            >
+              <template #prefix>
+                <svg-icon icon-class="report" class="input-icon" />
+              </template>
+            </el-input>
+          </div>
+        </el-form-item>
+
         <el-form-item class="login-btn-item">
           <div class="btn-wave-bg">
             <el-button
@@ -106,16 +135,39 @@ import { AccountLoginDto } from "@/api/account/types";
 const accountStore = useAccountStore();
 const route = useRoute();
 
+const appVersion = "0.4.0";
 const loading = ref(false);
 const isCapslock = ref(false);
 const passVisible = ref(false);
+const captchaValue = ref("");
+const captchaDigits = ref<string[]>([]);
 const loginFormRef = ref(ElForm);
 let animationTimer: ReturnType<typeof setInterval> | null = null;
 
-const loginForm = ref<AccountLoginDto>({
+interface LoginForm extends AccountLoginDto {
+  captcha: string;
+}
+
+const loginForm = ref<LoginForm>({
   username: "",
   pass: "",
+  captcha: "",
 });
+
+const captchaStyle = (i: number) => ({
+  transform: `rotate(${(i - 1.5) * 8}deg) translateY(${i % 2 === 0 ? -2 : 2}px)`,
+  color: ["#818cf8", "#a78bfa", "#6366f1", "#7c3aed"][i],
+  fontSize: `${22 + (i % 2) * 4}px`,
+});
+
+const generateCaptcha = () => {
+  const code = Math.floor(1000 + Math.random() * 9000).toString();
+  captchaDigits.value = code.split("");
+  captchaValue.value = code;
+  loginForm.value.captcha = "";
+};
+
+const refreshCaptcha = () => { generateCaptcha(); };
 
 const loginRules = {
   username: [
@@ -126,6 +178,10 @@ const loginRules = {
     { required: true, message: "Required", trigger: ["change", "blur"] },
     { pattern: /^[a-zA-Z0-9!@#$%^&*()_+-=]{6,32}$/, message: "Password format is incorrect", trigger: ["change", "blur"] },
   ],
+  captcha: [
+    { required: true, message: "Enter captcha", trigger: ["change", "blur"] },
+    { pattern: /^\d{4}$/, message: "4 digits required", trigger: ["change", "blur"] },
+  ],
 };
 
 const checkCapslock = (e: any) => {
@@ -135,22 +191,27 @@ const checkCapslock = (e: any) => {
 
 const handleLogin = () => {
   loginFormRef.value.validate((valid: boolean) => {
-    if (valid) {
-      loading.value = true;
-      accountStore
-        .login({ ...loginForm.value })
-        .then(() => {
-          const query: LocationQuery = route.query;
-          const redirect = (query.redirect as LocationQueryValue) ?? "/";
-          const otherQueryParams = Object.keys(query).reduce((acc: any, cur: string) => {
-            if (cur !== "redirect") acc[cur] = query[cur];
-            return acc;
-          }, {});
-          router.push({ path: redirect, query: otherQueryParams });
-        })
-        .catch(() => {})
-        .finally(() => { loading.value = false; });
+    if (!valid) return;
+    if (loginForm.value.captcha !== captchaValue.value) {
+      ElMessage.warning("Captcha does not match");
+      refreshCaptcha();
+      return;
     }
+    loading.value = true;
+    const { captcha: _, ...creds } = loginForm.value;
+    accountStore
+      .login(creds)
+      .then(() => {
+        const query: LocationQuery = route.query;
+        const redirect = (query.redirect as LocationQueryValue) ?? "/";
+        const otherQueryParams = Object.keys(query).reduce((acc: any, cur: string) => {
+          if (cur !== "redirect") acc[cur] = query[cur];
+          return acc;
+        }, {});
+        router.push({ path: redirect, query: otherQueryParams });
+      })
+      .catch(() => { refreshCaptcha(); })
+      .finally(() => { loading.value = false; });
   });
 };
 
@@ -169,6 +230,7 @@ const initHeadline = () => {
 };
 
 onMounted(() => {
+  generateCaptcha();
   setTimeout(initHeadline, 1000);
 });
 
@@ -252,7 +314,7 @@ onBeforeUnmount(() => {
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(99, 102, 241, 0.15);
   border-radius: 16px;
-  padding: 40px 36px 32px;
+  padding: 36px 36px 28px;
   box-shadow:
     0 0 60px rgba(99, 102, 241, 0.06),
     0 8px 32px rgba(0, 0, 0, 0.4);
@@ -267,26 +329,36 @@ onBeforeUnmount(() => {
 
 .card-header {
   text-align: center;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
 }
 
 .logo-area {
   display: flex;
   justify-content: center;
-  margin-bottom: 12px;
+  margin-bottom: 0;
 }
 
 .logo-icon {
-  width: 52px;
-  height: 52px;
+  width: 72px;
+  height: 72px;
+  filter: drop-shadow(0 0 12px rgba(99, 102, 241, 0.3));
 }
 
 .panel-title {
-  margin: 0 0 8px;
-  font-size: 24px;
+  margin: 16px 0 8px;
+  font-size: 26px;
   font-weight: 700;
   color: #fff;
   letter-spacing: 0.5px;
+}
+
+.version-text {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(148, 163, 184, 0.45);
+  letter-spacing: 0.3px;
 }
 
 /* ── Animated Headline ── */
@@ -393,9 +465,74 @@ onBeforeUnmount(() => {
   }
 }
 
+/* ── Captcha ── */
+.captcha-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.captcha-code {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0 14px;
+  height: 44px;
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.15);
+  border-radius: 10px;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.captcha-digit {
+  font-family: "Courier New", monospace;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.captcha-refresh {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 6px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: rgba(148, 163, 184, 0.4);
+  transition: color 0.2s;
+
+  &:hover {
+    color: rgba(99, 102, 241, 0.7);
+  }
+}
+
+.refresh-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.captcha-input {
+  flex: 1;
+  min-width: 0;
+
+  :deep(.el-input__wrapper) {
+    padding: 0 10px;
+  }
+
+  :deep(.el-input__inner) {
+    text-align: center;
+    font-family: "Courier New", monospace;
+    font-size: 18px;
+    letter-spacing: 4px;
+  }
+}
+
 /* ── Login Button ── */
 .login-btn-item {
-  margin-top: 8px;
+  margin-top: 4px;
 }
 
 .btn-wave-bg {
@@ -472,7 +609,12 @@ onBeforeUnmount(() => {
 /* ── Responsive ── */
 @media (max-width: 480px) {
   .login-card {
-    padding: 28px 20px 24px;
+    padding: 24px 20px 20px;
+  }
+
+  .logo-icon {
+    width: 60px;
+    height: 60px;
   }
 
   .panel-title {

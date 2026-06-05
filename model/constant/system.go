@@ -15,5 +15,5 @@ const (
 
 	TokenType = "Bearer"
 
-	Version = "v0.3.0"
+	Version = "v0.4.0"
 )
