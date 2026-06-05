@@ -29,8 +29,9 @@ func runServer(port string, contextPath string) error {
 	}
 
 	if contextPath != "" {
+		key := constant.HUIWebContext
 		if err := dao.UpsertConfig([]entity.Config{{
-			Key:   &constant.HUIWebContext,
+			Key:   &key,
 			Value: &contextPath,
 		}}); err != nil {
 			logrus.Errorf("set context path err: %v", err)
