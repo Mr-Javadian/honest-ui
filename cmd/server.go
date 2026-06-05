@@ -8,6 +8,7 @@ import (
 	"github.com/Mr-Javadian/honest-ui/dao"
 	"github.com/Mr-Javadian/honest-ui/middleware"
 	"github.com/Mr-Javadian/honest-ui/model/constant"
+	"github.com/Mr-Javadian/honest-ui/model/entity"
 	"github.com/Mr-Javadian/honest-ui/router"
 	"github.com/Mr-Javadian/honest-ui/service"
 	"github.com/Mr-Javadian/honest-ui/util"
@@ -15,7 +16,7 @@ import (
 	"os"
 )
 
-func runServer(port string) error {
+func runServer(port string, contextPath string) error {
 	defer releaseResource()
 
 	middleware.InitLog()
@@ -25,6 +26,15 @@ func runServer(port string) error {
 	}
 	if err := dao.InitSql(port); err != nil {
 		return err
+	}
+
+	if contextPath != "" {
+		if err := dao.UpsertConfig([]entity.Config{{
+			Key:   &constant.HUIWebContext,
+			Value: &contextPath,
+		}}); err != nil {
+			logrus.Errorf("set context path err: %v", err)
+		}
 	}
 	if err := middleware.InitCron(); err != nil {
 		return err

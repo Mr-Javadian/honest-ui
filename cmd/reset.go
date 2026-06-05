@@ -20,12 +20,12 @@ func init() {
 }
 
 func runReset(cmd *cobra.Command, args []string) {
-	username, err := util.RandomString(6)
+	username, err := util.RandomString(12)
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
-	password, err := util.RandomString(6)
+	password, err := util.RandomString(20)
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)

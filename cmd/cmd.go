@@ -16,13 +16,15 @@ var rootCmd = &cobra.Command{
 }
 
 var (
-	version bool
-	port    string
+	version     bool
+	port        string
+	contextPath string
 )
 
 func init() {
 	rootCmd.Flags().BoolVarP(&version, "version", "v", false, "Show version")
 	rootCmd.Flags().StringVarP(&port, "port", "p", "", "The port of the web server")
+	rootCmd.Flags().StringVarP(&contextPath, "context-path", "c", "", "The base path of the web server (e.g. /my-panel)")
 }
 
 func run(cmd *cobra.Command, args []string) {
@@ -36,7 +38,7 @@ func run(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 	for {
-		if err := runServer(port); err != nil {
+		if err := runServer(port, contextPath); err != nil {
 			fmt.Println(err.Error())
 			os.Exit(1)
 		}

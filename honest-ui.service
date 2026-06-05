@@ -6,7 +6,10 @@ Wants=network.target
 [Service]
 Type=simple
 WorkingDirectory=/usr/local/honest-ui/
+Environment=HUI_DATA=/usr/local/honest-ui/
 ExecStart=/usr/local/honest-ui/honest-ui
+Restart=on-failure
+RestartSec=5
 
 [Install]
 WantedBy=multi-user.target
