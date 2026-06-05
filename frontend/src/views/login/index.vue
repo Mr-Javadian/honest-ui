@@ -135,7 +135,7 @@ import { AccountLoginDto } from "@/api/account/types";
 const accountStore = useAccountStore();
 const route = useRoute();
 
-const appVersion = "0.4.0";
+const appVersion = "0.4.1";
 const loading = ref(false);
 const isCapslock = ref(false);
 const passVisible = ref(false);

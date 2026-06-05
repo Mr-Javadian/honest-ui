@@ -48,16 +48,14 @@
   display: table-cell !important;
 }
 
-// Modern tag styles
 .el-tag {
   border-radius: 6px;
   font-weight: 500;
 }
 
-// Smooth button transitions
 .el-button {
   transition: all 0.25s ease;
-  
+
   &:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
@@ -73,9 +71,25 @@
   --el-button-active-border-color: #4f46e5;
 }
 
-// Card improvements
 .el-card {
   border-radius: 12px;
   border: 1px solid var(--el-border-color-light);
   overflow: hidden;
+}
+
+.el-table {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.el-dialog {
+  border-radius: 14px;
+}
+
+.el-message-box {
+  border-radius: 14px;
+}
+
+.el-notification {
+  border-radius: 12px;
 }

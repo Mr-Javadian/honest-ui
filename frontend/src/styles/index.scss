@@ -34,17 +34,15 @@
   }
 }
 
-// Card hover effect
 .el-card {
   transition: transform 0.2s ease, box-shadow 0.3s ease;
-  
+
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
   }
 }
 
-// Smooth page transitions
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s ease;
@@ -55,7 +53,6 @@
   opacity: 0;
 }
 
-// Modern scrollbar
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -68,7 +65,7 @@
 ::-webkit-scrollbar-thumb {
   background: var(--el-border-color-darker);
   border-radius: 3px;
-  
+
   &:hover {
     background: var(--el-text-color-placeholder);
   }

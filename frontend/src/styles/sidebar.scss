@@ -61,11 +61,12 @@
       height: 100%;
       border: none;
       background: transparent !important;
+      padding: 4px 0;
     }
 
     .el-menu-item {
-      margin: 2px 8px;
-      border-radius: 8px;
+      margin: 2px 12px;
+      border-radius: 10px;
       transition: all 0.2s ease;
 
       &:hover {
@@ -73,18 +74,21 @@
       }
 
       &.is-active {
-        background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(99, 102, 241, 0.05) 100%) !important;
-        
-        &::before {
-          opacity: 1;
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
+        color: #fff !important;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+
+        .svg-icon {
+          color: #fff !important;
+          fill: #fff !important;
         }
       }
     }
 
     .el-sub-menu__title {
-      margin: 2px 8px;
-      border-radius: 8px;
-      
+      margin: 2px 12px;
+      border-radius: 10px;
+
       &:hover {
         background-color: $menuHover !important;
       }
@@ -98,7 +102,7 @@
     & .el-sub-menu .el-menu-item {
       min-width: $sideBarWidth !important;
       background-color: $subMenuBg !important;
-      margin: 2px 12px 2px 8px;
+      margin: 2px 16px 2px 12px;
       border-radius: 8px;
 
       &:hover {
@@ -204,8 +208,9 @@
   > .el-menu--popup {
     max-height: 100vh;
     overflow-y: auto;
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
     padding: 4px !important;
+    background: #1e1e2e;
   }
 }

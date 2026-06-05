@@ -1,126 +1,79 @@
 <template>
   <div class="dashboard-container">
-    <el-card shadow="never">
-      <el-row justify="space-between">
-        <el-col :span="12" :xs="24">
-          <div class="flex h-full items-center">
-            <img
-              class="w-20 h-20 mr-5 rounded-full"
-              src="/src/assets/logo.png"
-            />
-            <div>
-              <p>{{ greetings }}</p>
-              <p class="text-sm text-gray">
-                {{ $t("account.createTime") }}:
-                {{ timestampToDateTime(account.createTime) }}
-              </p>
-            </div>
-          </div>
-        </el-col>
+    <div class="profile-card">
+      <div class="profile-info">
+        <div class="avatar-wrapper">
+          <img class="avatar" src="/src/assets/logo.png" />
+        </div>
+        <div class="profile-text">
+          <h2 class="greeting">{{ greetings }}</h2>
+          <p class="member-since">
+            {{ $t("account.createTime") }}: {{ timestampToDateTime(account.createTime) }}
+          </p>
+        </div>
+      </div>
 
-        <el-col :span="12" :xs="24">
-          <div class="flex h-full items-center" style="justify-content: right">
-            <el-button type="primary" :icon="Share" @click="handleSubscribe">
-              {{ $t("common.subscribe") }}
-            </el-button>
-            <el-button
-              type="primary"
-              :icon="Share"
-              @click="handleSubscribeQrCode"
-            >
-              {{ $t("common.subscribeQrCode") }}
-            </el-button>
-            <el-button type="primary" :icon="Share" @click="handleNodeUrl">
-              {{ $t("common.nodeUrl") }}
-            </el-button>
-            <el-button type="primary" :icon="Share" @click="handleUrlQrCode">
-              {{ $t("common.nodeQrCode") }}
-            </el-button>
-          </div>
-        </el-col>
-      </el-row>
-    </el-card>
+      <div class="profile-actions">
+        <el-button type="primary" :icon="Share" @click="handleSubscribe">
+          {{ $t("common.subscribe") }}
+        </el-button>
+        <el-button type="primary" :icon="Share" @click="handleSubscribeQrCode">
+          {{ $t("common.subscribeQrCode") }}
+        </el-button>
+        <el-button :icon="Share" @click="handleNodeUrl">
+          {{ $t("common.nodeUrl") }}
+        </el-button>
+        <el-button :icon="Share" @click="handleUrlQrCode">
+          {{ $t("common.nodeQrCode") }}
+        </el-button>
+      </div>
+    </div>
 
-    <el-row :gutter="10" class="mt-3">
-      <el-col :xs="24" :sm="12" :lg="6">
-        <el-card shadow="never">
-          <template #header>
-            <div class="flex items-center justify-between">
-              <span class="text-[var(--el-text-color-secondary)]">
-                {{ $t("account.quota") }}
-              </span>
-              <el-tag type="success"
-                >{{ formatStorageUnit(account.quota) }}
-              </el-tag>
-            </div>
-          </template>
-          <div class="flex items-center justify-between mt-5">
-            <div class="text-lg text-right">
-              {{ formatBytes(account.quota) }}
-            </div>
-            <svg-icon icon-class="quota" size="2em" />
-          </div>
-        </el-card>
-      </el-col>
-      <el-col :xs="24" :sm="12" :lg="6">
-        <el-card shadow="never">
-          <template #header>
-            <div class="flex items-center justify-between">
-              <span class="text-[var(--el-text-color-secondary)]">
-                {{ $t("account.download") }}
-              </span>
-              <el-tag type="success"
-                >{{ formatStorageUnit(account.download) }}
-              </el-tag>
-            </div>
-          </template>
-          <div class="flex items-center justify-between mt-5">
-            <div class="text-lg text-right">
-              {{ formatBytes(account.download) }}
-            </div>
-            <svg-icon icon-class="download" size="2em" />
-          </div>
-        </el-card>
-      </el-col>
-      <el-col :xs="24" :sm="12" :lg="6">
-        <el-card shadow="never">
-          <template #header>
-            <div class="flex items-center justify-between">
-              <span class="text-[var(--el-text-color-secondary)]">
-                {{ $t("account.upload") }}
-              </span>
-              <el-tag type="success"
-                >{{ formatStorageUnit(account.upload) }}
-              </el-tag>
-            </div>
-          </template>
-          <div class="flex items-center justify-between mt-5">
-            <div class="text-lg text-right">
-              {{ formatBytes(account.upload) }}
-            </div>
-            <svg-icon icon-class="upload" size="2em" />
-          </div>
-        </el-card>
-      </el-col>
-      <el-col :xs="24" :sm="12" :lg="6">
-        <el-card shadow="never">
-          <template #header>
-            <div class="flex items-center justify-between">
-              <span class="text-[var(--el-text-color-secondary)]">
-                {{ $t("account.expireTime") }}
-              </span>
-              <el-tag type="success">{{ $t("info.expireTime") }}</el-tag>
-            </div>
-          </template>
-          <div class="flex items-center justify-between mt-5">
-            <div class="text-lg text-right">
-              {{ timestampToDateTime(account.expireTime) }}
-            </div>
-            <svg-icon icon-class="expire-time" size="2em" />
-          </div>
-        </el-card>
-      </el-col>
-    </el-row>
+    <div class="stats-grid">
+      <div class="stat-card quota-card">
+        <div class="stat-icon">
+          <svg-icon icon-class="quota" size="1.6em" />
+        </div>
+        <div class="stat-body">
+          <span class="stat-label">{{ $t("account.quota") }}</span>
+          <span class="stat-value">{{ formatBytes(account.quota) }}</span>
+          <span class="stat-unit">{{ formatStorageUnit(account.quota) }}</span>
+        </div>
+      </div>
+
+      <div class="stat-card download-card">
+        <div class="stat-icon">
+          <svg-icon icon-class="download" size="1.6em" />
+        </div>
+        <div class="stat-body">
+          <span class="stat-label">{{ $t("account.download") }}</span>
+          <span class="stat-value">{{ formatBytes(account.download) }}</span>
+          <span class="stat-unit">{{ formatStorageUnit(account.download) }}</span>
+        </div>
+      </div>
+
+      <div class="stat-card upload-card">
+        <div class="stat-icon">
+          <svg-icon icon-class="upload" size="1.6em" />
+        </div>
+        <div class="stat-body">
+          <span class="stat-label">{{ $t("account.upload") }}</span>
+          <span class="stat-value">{{ formatBytes(account.upload) }}</span>
+          <span class="stat-unit">{{ formatStorageUnit(account.upload) }}</span>
+        </div>
+      </div>
+
+      <div class="stat-card expire-card">
+        <div class="stat-icon">
+          <svg-icon icon-class="expire-time" size="1.6em" />
+        </div>
+        <div class="stat-body">
+          <span class="stat-label">{{ $t("account.expireTime") }}</span>
+          <span class="stat-value stat-value--sm">{{ timestampToDateTime(account.expireTime) }}</span>
+          <span class="stat-unit">{{ $t("info.expireTime") }}</span>
+        </div>
+      </div>
+    </div>
 
     <el-dialog
       :title="qrCodeDialog.title"
@@ -137,8 +90,8 @@
       </el-form>
       <template #footer>
         <div class="dialog-footer">
-          <el-button type="primary" @click="qrCodeDialog.visible = false"
-            >{{ $t("common.confirm") }}
+          <el-button type="primary" @click="qrCodeDialog.visible = false">
+            {{ $t("common.confirm") }}
           </el-button>
         </div>
       </template>
@@ -148,7 +101,7 @@
 
 <script lang="ts">
 export default {
-  name: "index",
+  name: "AccountInfo",
 };
 </script>
 
@@ -177,11 +130,11 @@ const greetings = computed(() => {
   if (hours >= 6 && hours < 8) {
     return t("info.greeting1");
   } else if (hours >= 8 && hours < 12) {
-    return t("info.greeting2") + accountStore.username + "！";
+    return t("info.greeting2") + accountStore.username + "!";
   } else if (hours >= 12 && hours < 18) {
-    return t("info.greeting3") + accountStore.username + "！";
+    return t("info.greeting3") + accountStore.username + "!";
   } else if (hours >= 18 && hours < 24) {
-    return t("info.greeting4") + accountStore.username + "！";
+    return t("info.greeting4") + accountStore.username + "!";
   } else if (hours >= 0 && hours < 6) {
     return t("info.greeting5");
   }
@@ -286,54 +239,189 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .dashboard-container {
-  position: relative;
   padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
 
-  .user-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
+/* ── Profile Card ── */
+.profile-card {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(99, 102, 241, 0.02) 100%);
+  border: 1px solid rgba(99, 102, 241, 0.12);
+  border-radius: 16px;
+  padding: 24px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.profile-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.avatar-wrapper {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+}
+
+.profile-text {
+  .greeting {
+    margin: 0 0 4px;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--el-text-color-primary);
   }
 
-  .github-corner {
-    position: absolute;
-    top: 0;
-    right: 0;
-    z-index: 1;
-    border: 0;
-  }
-
-  .data-box {
-    display: flex;
-    justify-content: space-between;
-    padding: 20px;
-    font-weight: bold;
-    color: var(--el-text-color-regular);
-    background: var(--el-bg-color-overlay);
-    border-color: var(--el-border-color);
-    box-shadow: var(--el-box-shadow-dark);
-  }
-
-  .svg-icon {
-    fill: currentcolor !important;
+  .member-since {
+    margin: 0;
+    font-size: 13px;
+    color: var(--el-text-color-secondary);
   }
 }
 
-.flex.h-full.items-center {
-  .el-button {
-    margin: 10px;
+.profile-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* ── Stats Grid ── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px;
+  border-radius: 14px;
+  border: 1px solid var(--el-border-color-light);
+  background: var(--el-bg-color-overlay);
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.stat-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--el-text-color-secondary);
+  margin-bottom: 2px;
+}
+
+.stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--el-text-color-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  &--sm {
+    font-size: 14px;
+  }
+}
+
+.stat-unit {
+  font-size: 11px;
+  color: var(--el-text-color-placeholder);
+  margin-top: 1px;
+}
+
+/* Per-card accent colors */
+.quota-card {
+  .stat-icon {
+    background: rgba(99, 102, 241, 0.1);
+    color: #818cf8;
+  }
+}
+
+.download-card {
+  .stat-icon {
+    background: rgba(52, 211, 153, 0.1);
+    color: #34d399;
+  }
+}
+
+.upload-card {
+  .stat-icon {
+    background: rgba(251, 191, 36, 0.1);
+    color: #fbbf24;
+  }
+}
+
+.expire-card {
+  .stat-icon {
+    background: rgba(244, 114, 182, 0.1);
+    color: #f472b6;
   }
 }
 
 @media (max-width: 768px) {
-  .flex.h-full.items-center {
-    justify-content: center;
+  .dashboard-container {
+    padding: 16px;
   }
-}
 
-@media (max-width: 634px) {
-  .flex.h-full.items-center {
+  .profile-card {
     flex-direction: column;
+    align-items: flex-start;
+    padding: 20px;
+  }
+
+  .profile-actions {
+    width: 100%;
+    flex-wrap: wrap;
+
+    .el-button {
+      flex: 1;
+      min-width: calc(50% - 4px);
+    }
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
   }
 }
 </style>

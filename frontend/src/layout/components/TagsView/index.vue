@@ -303,51 +303,62 @@ onMounted(() => {
   width: 100%;
   height: 34px;
   background-color: var(--el-bg-color);
-  border: 1px solid var(--el-border-color-light);
-  box-shadow: 0 1px 1px var(--el-box-shadow-light);
+  border-bottom: 1px solid var(--el-border-color-light);
 
   .tags-item {
-    display: inline-block;
-    padding: 3px 8px;
-    margin: 4px 0 0 5px;
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    margin: 4px 0 0 4px;
     font-size: 12px;
     cursor: pointer;
-    border: 1px solid var(--el-border-color-light);
+    border-radius: 6px;
+    color: var(--el-text-color-secondary);
+    text-decoration: none;
+    transition: all 0.2s ease;
 
     &:first-of-type {
-      margin-left: 15px;
+      margin-left: 10px;
     }
 
     &:last-of-type {
-      margin-right: 15px;
+      margin-right: 10px;
     }
 
     &:hover {
       color: var(--el-color-primary);
+      background: rgba(99, 102, 241, 0.06);
     }
 
     &.active {
-      color: #fff;
-      background-color: var(--el-color-primary);
-      border-color: var(--el-color-primary);
+      color: var(--el-color-primary);
+      background: rgba(99, 102, 241, 0.1);
+      font-weight: 600;
 
       &::before {
         display: inline-block;
-        width: 8px;
-        height: 8px;
-        margin-right: 5px;
+        width: 6px;
+        height: 6px;
+        margin-right: 6px;
         content: "";
-        background: #fff;
+        background: var(--el-color-primary);
         border-radius: 50%;
       }
     }
 
     &-close {
-      border-radius: 100%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      margin-left: 4px;
+      border-radius: 50%;
+      transition: all 0.15s ease;
 
       &:hover {
         color: #fff;
-        background: rgb(0 0 0 / 16%);
+        background: var(--el-color-primary);
       }
     }
   }
@@ -358,15 +369,27 @@ onMounted(() => {
   z-index: 99;
   font-size: 12px;
   background: var(--el-bg-color-overlay);
-  border-radius: 4px;
-  box-shadow: var(--el-box-shadow-light);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  padding: 4px;
+  min-width: 140px;
 
   li {
-    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 6px;
     cursor: pointer;
+    transition: background 0.15s;
 
     &:hover {
       background: var(--el-fill-color-light);
+    }
+
+    .svg-icon {
+      width: 14px;
+      height: 14px;
     }
   }
 }

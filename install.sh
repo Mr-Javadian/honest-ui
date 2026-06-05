@@ -102,11 +102,11 @@ get_system_info() {
   kernel_info=$(uname -r)
   mem_info=$(free -m | awk '/^Mem:/{print $2 "MiB"}')
   disk_info=$(df -BG / | awk 'NR==2{print $4}')" free"
-  printf "  |  %-58s |\n" "OS     : ${os_info}"
-  printf "  |  %-58s |\n" "Arch   : ${arch_info}"
-  printf "  |  %-58s |\n" "Kernel : ${kernel_info}"
-  printf "  |  %-58s |\n" "Memory : ${mem_info}"
-  printf "  |  %-58s |\n" "Disk   : ${disk_info}"
+  printf "  ║  %-56s ║\n" "OS     : ${os_info}"
+  printf "  ║  %-56s ║\n" "Arch   : ${arch_info}"
+  printf "  ║  %-56s ║\n" "Kernel : ${kernel_info}"
+  printf "  ║  %-56s ║\n" "Memory : ${mem_info}"
+  printf "  ║  %-56s ║\n" "Disk   : ${disk_info}"
 }
 
 # ────────────────────────────────────────────── IP selection ──────────────────────────────────────────────
@@ -697,26 +697,30 @@ main() {
     [[ -z "${installed_ver}" ]] && installed_ver="${hui_systemd_version}"
 
     # Banner
-    cat <<'BANNER'
-
-  ======================================================
-  |
-  |     _   _                   _   _ ___ ___
-  |    | | | | ___  _ __   ___ | |_(_) _ \_ _|
-  |    | |_| |/ _ \| '_ \ / _ \| __| |  _/| |
-  |    |  _  | (_) | | | | (_) | |_| | |  | |
-  |    |_| |_|\___/|_| |_|\___/ \__|_|_| |___|
-  |
-  |        Hysteria 2 Management Panel
-BANNER
-    printf "  |        Version %-41s|\n" "${installed_ver}"
-    echo "  ======================================================"
+    local cyan="\033[36m"
+    local reset="\033[0m"
+    echo -e "${cyan}"
+    echo '  ╔═══════════════════════════════════════════════════╗'
+    echo '  ║                                                   ║'
+    echo '  ║   ██╗  ██╗ ██████╗ ███╗   ██╗███████╗███████╗████████╗'
+    echo '  ║   ██║  ██║██╔═══██╗████╗  ██║██╔════╝██╔════╝╚══██╔══╝'
+    echo '  ║   ███████║██║   ██║██╔██╗ ██║█████╗  ███████╗   ██║   '
+    echo '  ║   ██╔══██║██║   ██║██║╚██╗██║██╔══╝  ╚════██║   ██║   '
+    echo '  ║   ██║  ██║╚██████╔╝██║ ╚████║███████╗███████║   ██║   '
+    echo '  ║   ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝╚══════╝╚══════╝   ╚═╝   '
+    echo '  ║                                                   ║'
+    echo '  ║        Hysteria 2 Management Panel                ║'
+    printf "  ║        Version %-41s║\n" "${installed_ver}"
+    echo '  ╚═══════════════════════════════════════════════════╝'
+    echo -e "${reset}"
     echo
 
     # System Info
-    echo "  +- System Information ------------------------------------------------+"
+    echo -e "${cyan}"
+    echo '  ╔═══════════════════════════════════════════════════╗'
     get_system_info
-    echo "  +---------------------------------------------------------------------+"
+    echo '  ╚═══════════════════════════════════════════════════╝'
+    echo -e "${reset}"
     echo
 
     # Menu
