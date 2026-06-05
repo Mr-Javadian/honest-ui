@@ -1,0 +1,11 @@
+/.idea
+/bin
+/build
+/data
+/export
+/logs
+frontend/dist
+frontend/node_modules
+
+*.exe
+*.rar

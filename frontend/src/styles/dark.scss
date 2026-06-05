@@ -1,0 +1,31 @@
+html.dark {
+  --menuBg: #11111b;
+  --menuText: #cdd6f4;
+  --menuActiveText: #89b4fa;
+  --menuHover: #181825;
+  --subMenuBg: #11111b;
+  --subMenuActiveText: #b4befe;
+  --subMenuHover: #181825;
+
+  .navbar {
+    color: var(--el-text-color-regular);
+    background-color: var(--el-bg-color);
+    border-bottom: 1px solid var(--el-border-color-light);
+
+    .setting-container .setting-item:hover {
+      background: var(--el-fill-color-light);
+    }
+  }
+
+  .right-panel-btn {
+    background-color: var(--el-color-primary);
+  }
+
+  .sidebar-container {
+    border-right: 1px solid rgba(255, 255, 255, 0.03);
+    
+    .el-menu-item.is-active .svg-icon {
+      fill: var(--el-color-primary);
+    }
+  }
+}

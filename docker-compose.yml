@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  honest-ui:
+    image: mr-javadian/honest-ui
+    cap_add:
+      - NET_ADMIN
+    container_name: honest-ui
+    restart: always
+    network_mode: host
+    volumes:
+      - /honest-ui/bin:/honest-ui/bin
+      - /honest-ui/data:/honest-ui/data
+      - /honest-ui/export:/honest-ui/export
+      - /honest-ui/logs:/honest-ui/logs
+    environment:
+      TZ: Asia/Tehran

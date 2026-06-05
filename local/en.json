@@ -1,0 +1,15 @@
+{
+  "menu": {
+    "recommend_os": "Recommended OS",
+    "description": "Description: Quick Installation of Honest-UI",
+    "author": "Author",
+    "install_hui_systemd": "Install Honest-UI (systemd)",
+    "upgrade_h_ui_systemd": "Upgrade Honest-UI (systemd)",
+    "uninstall_h_ui_systemd": "Uninstall Honest-UI (systemd)",
+    "install_h_ui_docker": "Install Honest-UI (Docker)",
+    "upgrade_h_ui_docker": "Upgrade Honest-UI (Docker)",
+    "uninstall_h_ui_docker": "Uninstall Honest-UI (Docker)",
+    "ssh_local_port_forwarding": "SSH local port forwarding (Invalid after restarting the server)",
+    "reset_sysadmin": "Reset sysadmin username and password"
+  }
+}

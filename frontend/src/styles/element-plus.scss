@@ -1,0 +1,81 @@
+:root {
+  --el-color-primary: #6366f1;
+  --el-color-primary-light-3: #818cf8;
+  --el-color-primary-light-5: #a5b4fc;
+  --el-color-primary-light-7: #c7d2fe;
+  --el-color-primary-light-8: #ddd6fe;
+  --el-color-primary-light-9: #ede9fe;
+  --el-color-primary-dark-2: #4f46e5;
+  --el-border-radius-base: 8px;
+  --el-border-radius-small: 6px;
+}
+
+.el-breadcrumb__inner,
+.el-breadcrumb__inner a {
+  font-weight: 400 !important;
+}
+
+.el-upload {
+  input[type="file"] {
+    display: none !important;
+  }
+}
+
+.el-upload__input {
+  display: none;
+}
+
+.el-dropdown-menu {
+  a {
+    display: block;
+  }
+}
+
+.el-range-separator {
+  box-sizing: content-box;
+}
+
+.el-table__body tr.current-row td {
+  background-color: rgba(99, 102, 241, 0.08) !important;
+}
+
+.el-card__header {
+  height: 56px !important;
+  padding: 16px 20px !important;
+}
+
+.el-table__header col[name="gutter"] {
+  display: table-cell !important;
+}
+
+// Modern tag styles
+.el-tag {
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+// Smooth button transitions
+.el-button {
+  transition: all 0.25s ease;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  }
+}
+
+.el-button--primary {
+  --el-button-bg-color: #6366f1;
+  --el-button-border-color: #6366f1;
+  --el-button-hover-bg-color: #818cf8;
+  --el-button-hover-border-color: #818cf8;
+  --el-button-active-bg-color: #4f46e5;
+  --el-button-active-border-color: #4f46e5;
+}
+
+// Card improvements
+.el-card {
+  border-radius: 12px;
+  border: 1px solid var(--el-border-color-light);
+  overflow: hidden;
+}

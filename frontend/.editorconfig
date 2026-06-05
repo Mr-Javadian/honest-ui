@@ -1,0 +1,14 @@
+# http://editorconfig.org
+root = true
+
+# Applies to all files
+[*]
+charset = utf-8 # Set file charset to utf-8
+end_of_line = lf # Line ending type (lf | cr | crlf)
+indent_style = tab # Indent style (tab | space)
+insert_final_newline = true # Always insert a newline at end of file
+
+# Applies to md files only
+[*.md]
+max_line_length = off # Disable max line length limit
+trim_trailing_whitespace = false # Disable trailing whitespace trimming

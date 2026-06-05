@@ -1,0 +1,75 @@
+@import "./sidebar";
+@import "./reset";
+@import "./dark";
+@import "./element-plus";
+
+.app-container {
+  padding: 20px;
+
+  .search {
+    padding: 18px 0 0 10px;
+    margin-bottom: 16px;
+    background-color: var(--el-bg-color-overlay);
+    border: 1px solid var(--el-border-color-light);
+    border-radius: 12px;
+    box-shadow: var(--el-box-shadow-light);
+    transition: box-shadow 0.3s ease;
+
+    &:hover {
+      box-shadow: var(--el-box-shadow);
+    }
+  }
+}
+
+.dashboard-container {
+  position: relative;
+  padding: 24px;
+
+  .svg-icon {
+    fill: currentcolor !important;
+  }
+
+  .el-col {
+    margin-bottom: 10px;
+  }
+}
+
+// Card hover effect
+.el-card {
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  }
+}
+
+// Smooth page transitions
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+// Modern scrollbar
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--el-border-color-darker);
+  border-radius: 3px;
+  
+  &:hover {
+    background: var(--el-text-color-placeholder);
+  }
+}

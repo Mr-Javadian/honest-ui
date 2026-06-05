@@ -1,0 +1,21 @@
+:root {
+  --menuBg: #1e1e2e;
+  --menuText: #cdd6f4;
+  --menuActiveText: #89b4fa;
+  --menuHover: #313244;
+  --subMenuBg: #181825;
+  --subMenuActiveText: #b4befe;
+  --subMenuHover: #1e1e2e;
+  --sidebarWidth: 260px;
+}
+
+$menuBg: var(--menuBg);
+$menuText: var(--menuText);
+$menuActiveText: var(--menuActiveText);
+$menuHover: var(--menuHover);
+
+$subMenuBg: var(--subMenuBg);
+$subMenuActiveText: var(--subMenuActiveText);
+$subMenuHover: var(--subMenuHover);
+
+$sideBarWidth: var(--sidebarWidth);
