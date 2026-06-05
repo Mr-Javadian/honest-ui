@@ -1,179 +1,178 @@
 <template>
-  <div class="app-container">
-    <div class="search">
-      <el-form inline>
-        <el-form-item>
-          <el-button type="primary" @click="submitForm" :icon="Select">
-            {{ $t("common.save") }}
+  <div class="page-container">
+    <div class="page-header">
+      <div class="header-left">
+        <h2 class="page-title">{{ $t("route.configList") }}</h2>
+      </div>
+      <div class="header-actions">
+        <el-button type="primary" @click="submitForm" :icon="Select">
+          {{ $t("common.save") }}
+        </el-button>
+        <el-button @click="handleRestartServer">
+          <template #icon><i-ep-refreshRight /></template>
+          {{ $t("config.restartServer") }}
+        </el-button>
+        <el-upload
+          v-model:file-list="fileList"
+          :http-request="handleImport"
+          :show-file-list="false"
+          accept=".json"
+          :limit="1"
+          :before-upload="beforeImport"
+        >
+          <el-button>
+            <template #icon><i-ep-upload /></template>
+            {{ $t("common.import") }}
           </el-button>
-        </el-form-item>
-        <el-form-item>
-          <el-button @click="handleRestartServer">
-            <template #icon>
-              <i-ep-refreshRight />
-            </template>
-            {{ $t("config.restartServer") }}
-          </el-button>
-        </el-form-item>
-        <el-form-item>
-          <el-upload
-            v-model:file-list="fileList"
-            :http-request="handleImport"
-            :show-file-list="false"
-            accept=".json"
-            :limit="1"
-            :before-upload="beforeImport"
-          >
-            <el-button>
-              <template #icon>
-                <i-ep-upload />
-              </template>
-              {{ $t("common.import") }}
-            </el-button>
-          </el-upload>
-        </el-form-item>
-        <el-form-item>
-          <el-button @click="handleExport">
-            <template #icon>
-              <i-ep-download />
-            </template>
-            {{ $t("common.export") }}
-          </el-button>
-        </el-form-item>
-      </el-form>
+        </el-upload>
+        <el-button @click="handleExport">
+          <template #icon><i-ep-download /></template>
+          {{ $t("common.export") }}
+        </el-button>
+      </div>
     </div>
 
-    <el-card shadow="never">
+    <el-card shadow="never" class="content-card">
       <el-form
         ref="dataFormRef"
         :rules="dataFormRules"
         :model="dataForm"
         label-position="top"
       >
-        <el-form-item :label="$t('config.huiWebPort')" prop="huiWebPort">
-          <el-input
-            v-model="dataForm.huiWebPort"
-            :placeholder="$t('config.huiWebPort')"
-            clearable
-          />
-        </el-form-item>
-        <el-form-item :label="$t('config.huiWebContext')" prop="huiWebContext">
-          <el-input
-            v-model="dataForm.huiWebContext"
-            :placeholder="$t('config.huiWebContext')"
-            clearable
-          />
-        </el-form-item>
-        <el-form-item
-          :label="$t('config.hysteria2TrafficTime')"
-          prop="hysteria2TrafficTime"
-        >
-          <el-input
-            v-model="dataForm.hysteria2TrafficTime"
-            :placeholder="$t('config.hysteria2TrafficTime')"
-            clearable
-          />
-        </el-form-item>
-        <el-form-item :label="$t('config.huiHttps')" prop="huiHttps">
-          <el-select v-model="huiHttps" style="width: 50%" ref="huiHttpsRef">
-            <el-option
-              v-for="item in huiHttpsList"
-              :key="item.key"
-              :label="item.key"
-              :value="item.value"
-            />
-          </el-select>
-          <el-button v-if="huiHttps" @click="setCertPath"
-            >{{ t("config.useHysteria2Cert") }}
-          </el-button>
-        </el-form-item>
-        <el-form-item
-          v-if="huiHttps"
-          :label="$t('config.huiCrtPath')"
-          prop="huiCrtPath"
-        >
-          <el-input
-            v-model="dataForm.huiCrtPath"
-            :placeholder="$t('config.huiCrtPath')"
-            style="width: 50%"
-            clearable
-          />
-          <el-upload
-            style="height: 32px"
-            ref="uploadCrtFile"
-            action=""
-            :file-list="crtFileList"
-            :http-request="uploadCertFile"
-            accept=".crt"
-            :before-upload="
-              () => {
-                crtFileList = [];
-              }
-            "
-            :show-file-list="false"
-            :limit="1"
-          >
-            <template #trigger>
-              <el-button>{{ t("config.uploadCrtFile") }}</el-button>
-            </template>
-          </el-upload>
-        </el-form-item>
-        <el-form-item
-          v-if="huiHttps"
-          :label="$t('config.huiKeyPath')"
-          prop="huiKeyPath"
-        >
-          <el-input
-            v-model="dataForm.huiKeyPath"
-            :placeholder="$t('config.huiKeyPath')"
-            style="width: 50%"
-            clearable
-          />
-          <el-upload
-            style="height: 32px"
-            ref="uploadKeyFile"
-            action=""
-            :file-list="keyFileList"
-            :http-request="uploadCertFile"
-            accept=".key"
-            :before-upload="
-              () => {
-                keyFileList = [];
-              }
-            "
-            :show-file-list="false"
-            :limit="1"
-          >
-            <template #trigger>
-              <el-button>{{ t("config.uploadKeyFile") }}</el-button>
-            </template>
-          </el-upload>
-        </el-form-item>
-        <el-tooltip
-          :content="$t('config.resetTrafficCronTip')"
-          placement="bottom"
-        >
-          <el-form-item
-            :label="$t('config.resetTrafficCron')"
-            prop="resetTrafficCron"
-          >
-            <el-select
-              v-model="dataForm.resetTrafficCron"
-              filterable
-              allow-create
-              clearable
-              :placeholder="$t('config.resetTrafficCron')"
-              style="width: 50%"
-            >
-              <el-option
-                v-for="item in cronResetTraffic"
-                :key="item.value"
-                :label="item.key"
-                :value="item.value"
+        <div class="form-section">
+          <h3 class="section-title">Web Settings</h3>
+          <div class="form-row">
+            <el-form-item :label="$t('config.huiWebPort')" prop="huiWebPort">
+              <el-input
+                v-model="dataForm.huiWebPort"
+                :placeholder="$t('config.huiWebPort')"
+                clearable
               />
-            </el-select>
-          </el-form-item>
-        </el-tooltip>
+            </el-form-item>
+            <el-form-item :label="$t('config.huiWebContext')" prop="huiWebContext">
+              <el-input
+                v-model="dataForm.huiWebContext"
+                :placeholder="$t('config.huiWebContext')"
+                clearable
+              />
+            </el-form-item>
+          </div>
+        </div>
+
+        <el-divider />
+
+        <div class="form-section">
+          <h3 class="section-title">Hysteria2 Settings</h3>
+          <div class="form-row">
+            <el-form-item
+              :label="$t('config.hysteria2TrafficTime')"
+              prop="hysteria2TrafficTime"
+            >
+              <el-input
+                v-model="dataForm.hysteria2TrafficTime"
+                :placeholder="$t('config.hysteria2TrafficTime')"
+                clearable
+              />
+            </el-form-item>
+            <el-form-item
+              :label="$t('config.resetTrafficCron')"
+              prop="resetTrafficCron"
+            >
+              <el-tooltip
+                :content="$t('config.resetTrafficCronTip')"
+                placement="bottom"
+              >
+                <el-select
+                  v-model="dataForm.resetTrafficCron"
+                  filterable
+                  allow-create
+                  clearable
+                  :placeholder="$t('config.resetTrafficCron')"
+                >
+                  <el-option
+                    v-for="item in cronResetTraffic"
+                    :key="item.value"
+                    :label="item.key"
+                    :value="item.value"
+                  />
+                </el-select>
+              </el-tooltip>
+            </el-form-item>
+          </div>
+        </div>
+
+        <el-divider />
+
+        <div class="form-section">
+          <h3 class="section-title">HTTPS Settings</h3>
+          <div class="form-row">
+            <el-form-item :label="$t('config.huiHttps')" prop="huiHttps">
+              <div class="https-toggle">
+                <el-select v-model="huiHttps" ref="huiHttpsRef">
+                  <el-option
+                    v-for="item in huiHttpsList"
+                    :key="item.key"
+                    :label="item.key"
+                    :value="item.value"
+                  />
+                </el-select>
+                <el-button v-if="huiHttps" @click="setCertPath" class="ml-2">
+                  {{ t("config.useHysteria2Cert") }}
+                </el-button>
+              </div>
+            </el-form-item>
+          </div>
+          <div v-if="huiHttps" class="form-row">
+            <el-form-item
+              :label="$t('config.huiCrtPath')"
+              prop="huiCrtPath"
+            >
+              <el-input
+                v-model="dataForm.huiCrtPath"
+                :placeholder="$t('config.huiCrtPath')"
+                clearable
+              />
+              <el-upload
+                ref="uploadCrtFile"
+                action=""
+                :file-list="crtFileList"
+                :http-request="uploadCertFile"
+                accept=".crt"
+                :before-upload="() => { crtFileList = []; }"
+                :show-file-list="false"
+                :limit="1"
+              >
+                <template #trigger>
+                  <el-button class="ml-2">{{ t("config.uploadCrtFile") }}</el-button>
+                </template>
+              </el-upload>
+            </el-form-item>
+            <el-form-item
+              :label="$t('config.huiKeyPath')"
+              prop="huiKeyPath"
+            >
+              <el-input
+                v-model="dataForm.huiKeyPath"
+                :placeholder="$t('config.huiKeyPath')"
+                clearable
+              />
+              <el-upload
+                ref="uploadKeyFile"
+                action=""
+                :file-list="keyFileList"
+                :http-request="uploadCertFile"
+                accept=".key"
+                :before-upload="() => { keyFileList = []; }"
+                :show-file-list="false"
+                :limit="1"
+              >
+                <template #trigger>
+                  <el-button class="ml-2">{{ t("config.uploadKeyFile") }}</el-button>
+                </template>
+              </el-upload>
+            </el-form-item>
+          </div>
+        </div>
       </el-form>
     </el-card>
   </div>
@@ -406,7 +405,6 @@ const handleExport = async () => {
     a.href = url;
     let dis = response.headers["content-disposition"];
     a.download = dis.split("attachment; filename=")[1];
-    // Simulate click to download
     a.click();
     window.URL.revokeObjectURL(url);
     ElMessage.success(t("common.success"));
@@ -479,8 +477,98 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-.el-card .el-form {
-  max-width: 800px;
-  margin: 0 auto;
+.page-container {
+  padding: 24px;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+
+  .header-left {
+    .page-title {
+      margin: 0 0 4px;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-primary, #1a1a2e);
+    }
+    .page-subtitle {
+      font-size: 13px;
+      color: var(--text-secondary, #8b8fa3);
+    }
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+}
+
+.content-card {
+  border-radius: 8px;
+  border: 1px solid var(--border-color, #e8e8ef);
+
+  :deep(.el-card__body) {
+    padding: 32px;
+  }
+}
+
+.form-section {
+  .section-title {
+    margin: 0 0 20px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary, #1a1a2e);
+    padding-left: 12px;
+    border-left: 3px solid var(--el-color-primary, #5b6abf);
+  }
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 24px;
+
+  .el-form-item {
+    margin-bottom: 18px;
+  }
+}
+
+.https-toggle {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+
+  .el-select {
+    width: 160px;
+  }
+}
+
+.ml-2 {
+  margin-left: 8px;
+}
+
+.el-divider {
+  margin: 24px 0;
+  border-color: var(--border-color, #e8e8ef);
+}
+
+.el-form-item:last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

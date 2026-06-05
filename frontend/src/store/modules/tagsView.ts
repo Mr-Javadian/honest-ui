@@ -181,21 +181,6 @@ export const useTagsViewStore = defineStore("tagsView", () => {
     });
   }
 
-  function delAllVisitedViews() {
-    return new Promise((resolve) => {
-      const affixTags = visitedViews.value.filter((tag) => tag.meta?.affix);
-      visitedViews.value = affixTags;
-      resolve([...visitedViews.value]);
-    });
-  }
-
-  function delAllCachedViews() {
-    return new Promise((resolve) => {
-      cachedViews.value = [];
-      resolve([...cachedViews.value]);
-    });
-  }
-
   return {
     visitedViews,
     cachedViews,
@@ -212,7 +197,5 @@ export const useTagsViewStore = defineStore("tagsView", () => {
     delLeftViews,
     delRightViews,
     delAllViews,
-    delAllVisitedViews,
-    delAllCachedViews,
   };
 });
