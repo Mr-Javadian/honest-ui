@@ -7,7 +7,7 @@ declare module "*.vue" {
   export default component;
 }
 
-// 环境变量 TypeScript的智能提示
+// Environment variable TypeScript hints
 interface ImportMetaEnv {
   VITE_APP_TITLE: string;
   VITE_APP_PORT: string;
