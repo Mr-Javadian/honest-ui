@@ -26,7 +26,7 @@ jobs:
       - name: Build frontend
         run: |
           cd frontend
-          vite build --mode production
+          pnpm exec vite build --mode production
       - name: Upload frontend dist
         uses: actions/upload-artifact@v4
         with:
