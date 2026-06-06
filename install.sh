@@ -102,11 +102,11 @@ get_system_info() {
   kernel_info=$(uname -r)
   mem_info=$(free -m | awk '/^Mem:/{print $2 "MiB"}')
   disk_info=$(df -BG / | awk 'NR==2{print $4}')" free"
-  printf "  ║  %-56s ║\n" "OS     : ${os_info}"
-  printf "  ║  %-56s ║\n" "Arch   : ${arch_info}"
-  printf "  ║  %-56s ║\n" "Kernel : ${kernel_info}"
-  printf "  ║  %-56s ║\n" "Memory : ${mem_info}"
-  printf "  ║  %-56s ║\n" "Disk   : ${disk_info}"
+  printf "     %-56s \n" "OS     : ${os_info}"
+  printf "     %-56s \n" "Arch   : ${arch_info}"
+  printf "     %-56s \n" "Kernel : ${kernel_info}"
+  printf "     %-56s \n" "Memory : ${mem_info}"
+  printf "     %-56s \n" "Disk   : ${disk_info}"
 }
 
 # ────────────────────────────────────────────── IP selection ──────────────────────────────────────────────
@@ -710,7 +710,7 @@ main() {
     echo '  ║   ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝╚══════╝╚══════╝   ╚═╝   '
     echo '  ║                                                   ║'
     echo '  ║        Hysteria 2 Management Panel                ║'
-    printf "  ║        Version %-41s║\n" "${installed_ver}"
+    printf "  ║  Version %-41s║\n" "${installed_ver}"
     echo '  ╚═══════════════════════════════════════════════════╝'
     echo -e "${reset}"
     echo
