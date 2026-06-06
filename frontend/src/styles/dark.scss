@@ -23,3 +23,27 @@ html.dark {
     .el-menu-item.is-active .svg-icon { fill: var(--el-color-primary); }
   }
 }
+
+html[data-theme="ultra-dark"] {
+  --menuBg: #050507;
+  --menuText: #a0a0b0;
+  --menuActiveText: #89b4fa;
+  --menuHover: #0a0a0f;
+  --subMenuBg: #050507;
+  --subMenuActiveText: #b4befe;
+  --subMenuHover: #0a0a0f;
+
+  .sidebar-container {
+    background: linear-gradient(180deg, #050507 0%, #000 100%) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.02);
+  }
+
+  .navbar {
+    background-color: #0a0a0f !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  }
+
+  .right-panel-btn {
+    background-color: var(--el-color-primary);
+  }
+}

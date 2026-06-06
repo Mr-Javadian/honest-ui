@@ -6,20 +6,12 @@ const appStore = useAppStore();
 
 const { device } = storeToRefs(appStore);
 
-function toggleSideBar() {
-  appStore.toggleSidebar(true);
-}
-
 const { isFullscreen, toggle } = useFullscreen();
 </script>
 
 <template>
   <div class="navbar modern-navbar">
     <div class="flex">
-      <hamburger
-        :is-active="appStore.sidebar.opened"
-        @toggleClick="toggleSideBar"
-      />
       <breadcrumb />
     </div>
 
@@ -45,7 +37,7 @@ const { isFullscreen, toggle } = useFullscreen();
   align-items: center;
   justify-content: space-between;
   height: 56px;
-  padding: 0 16px;
+  padding: 0 20px;
   background-color: var(--el-bg-color);
   border-bottom: 1px solid var(--el-border-color-light);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
@@ -70,27 +62,6 @@ const { isFullscreen, toggle } = useFullscreen();
         background: var(--el-fill-color-light);
         color: var(--el-text-color-primary);
       }
-    }
-  }
-
-  .avatar-container {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 8px;
-    margin-left: 8px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-
-    &:hover {
-      background: var(--el-fill-color-light);
-    }
-
-    img {
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
     }
   }
 }

@@ -1,25 +1,15 @@
 <script setup lang="ts">
 import { useSettingsStore } from "@/store/modules/settings";
+import { useAppTheme } from "@/hooks/useTheme";
 
-import IconEpSunny from "~icons/ep/sunny";
-import IconEpMoon from "~icons/ep/moon";
-
-/**
- * Dark mode
- */
 const settingsStore = useSettingsStore();
-const isDark = useDark();
-const toggleDark = () => useToggle(isDark);
+const { theme, cycleTheme } = useAppTheme();
 
-/**
- * Toggle layout
- */
 function changeLayout(layout: string) {
   settingsStore.changeSetting({ key: "layout", value: layout });
   window.document.body.setAttribute("layout", settingsStore.layout);
 }
 
-// Theme colors
 const themeColors = ref<string[]>([
   "#409EFF",
   "#304156",
@@ -29,9 +19,6 @@ const themeColors = ref<string[]>([
   "#f5222d",
 ]);
 
-/**
- * Toggle theme color
- */
 function changeThemeColor(color: string) {
   settingsStore.changeSetting({ key: "themeColor", value: color });
   document.documentElement.style.setProperty(
@@ -54,23 +41,46 @@ onMounted(() => {
     <h3 class="text-base font-bold">Project Configuration</h3>
     <el-divider>Theme</el-divider>
 
-    <div class="flex justify-center" @click.stop>
-      <el-switch
-        v-model="isDark"
-        @change="toggleDark"
-        inline-prompt
-        :active-icon="IconEpMoon"
-        :inactive-icon="IconEpSunny"
-        active-color="var(--el-fill-color-dark)"
-        inactive-color="var(--el-color-primary)"
-      />
+    <div class="flex justify-center items-center gap-3" @click.stop>
+      <el-tooltip
+        content="Light"
+        placement="top"
+      >
+        <button
+          class="theme-cycle-btn"
+          :class="{ active: theme === 'light' }"
+          @click="theme !== 'light' && cycleTheme()"
+        >
+          <i-ep-sunny />
+        </button>
+      </el-tooltip>
+      <el-tooltip
+        content="Dark"
+        placement="top"
+      >
+        <button
+          class="theme-cycle-btn"
+          :class="{ active: theme === 'dark' }"
+          @click="theme !== 'dark' && cycleTheme()"
+        >
+          <i-ep-moon />
+        </button>
+      </el-tooltip>
+      <el-tooltip
+        content="Ultra Dark"
+        placement="top"
+      >
+        <button
+          class="theme-cycle-btn"
+          :class="{ active: theme === 'ultra-dark' }"
+          @click="theme !== 'ultra-dark' && cycleTheme()"
+        >
+          <i-ep-moon-filled />
+        </button>
+      </el-tooltip>
     </div>
 
     <el-divider>Interface Settings</el-divider>
-    <div class="py-[8px] flex justify-between">
-      <span class="text-xs">Enable Tags-View</span>
-      <el-switch v-model="settingsStore.tagsView" />
-    </div>
 
     <div class="py-[8px] flex justify-between">
       <span class="text-xs">Fixed Header</span>
@@ -100,65 +110,29 @@ onMounted(() => {
 .settings-container {
   padding: 16px;
 
-  .layout {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-around;
-    width: 100%;
-    height: 50px;
+  .theme-cycle-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: var(--el-fill-color-light);
+    color: var(--el-text-color-secondary);
+    font-size: 18px;
+    transition: all 0.2s ease;
 
-    &-item {
-      position: relative;
-      width: 18%;
-      height: 45px;
-      overflow: hidden;
-      cursor: pointer;
-      background: #f0f2f5;
-      border-radius: 4px;
+    &:hover {
+      background: var(--el-fill-color);
+      color: var(--el-color-primary);
     }
 
-    &-item.is-active {
-      border: 2px solid var(--el-color-primary);
-    }
-
-    &-mix div:nth-child(1) {
-      width: 100%;
-      height: 30%;
-      background: #1b2a47;
-      box-shadow: 0 0 1px #888;
-    }
-
-    &-mix div:nth-child(2) {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 30%;
-      height: 70%;
-      background: #1b2a47;
-      box-shadow: 0 0 1px #888;
-    }
-
-    &-top div:nth-child(1) {
-      width: 100%;
-      height: 30%;
-      background: #1b2a47;
-      box-shadow: 0 0 1px #888;
-    }
-
-    &-left div:nth-child(1) {
-      width: 30%;
-      height: 100%;
-      background: #1b2a47;
-    }
-
-    &-left div:nth-child(2) {
-      position: absolute;
-      top: 0;
-      right: 0;
-      width: 70%;
-      height: 30%;
-      background: #fff;
-      box-shadow: 0 0 1px #888;
+    &.active {
+      border-color: var(--el-color-primary);
+      color: var(--el-color-primary);
+      background: color-mix(in srgb, var(--el-color-primary) 15%, transparent);
     }
   }
 }

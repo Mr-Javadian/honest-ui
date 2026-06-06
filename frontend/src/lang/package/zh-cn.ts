@@ -4,15 +4,16 @@ export default {
     overview: "概览",
     clients: "客户端",
     clientsList: "客户端",
+    panelSettings: "面板设置",
     hysteria: "Hysteria",
-    hysteriaList: "Hysteria 管理",
+    hysteriaList: "Hysteria 配置",
     config: "系统",
-    configList: "系统设置",
+    configList: "通用",
     log: "日志",
-    logSystem: "系统日志",
-    logHysteria: "Hysteria 日志",
+    logSystem: "系统",
+    logHysteria: "Hysteria",
     telegram: "Telegram",
-    telegramList: "Telegram 管理",
+    telegramList: "Telegram 机器人",
   },
   // 登录页面国际化
   login: {
@@ -24,6 +25,7 @@ export default {
   // 导航栏国际化
   navbar: {
     logout: "注销",
+    theme: "主题",
   },
   common: {
     id: "编号",

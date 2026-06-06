@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, watchEffect } from "vue";
 import { useWindowSize } from "@vueuse/core";
-import { AppMain, Navbar, Settings, TagsView } from "./components/index";
+import { AppMain, Navbar, Settings } from "./components/index";
 import Sidebar from "./components/Sidebar/index.vue";
 import RightPanel from "@/components/RightPanel/index.vue";
 
@@ -10,20 +10,12 @@ import { useSettingsStore } from "@/store/modules/settings";
 
 const { width } = useWindowSize();
 
-/**
- * Responsive layout breakpoint
- *
- * Large screen (>=1200px)
- * Medium screen (>=992px)
- * Small screen (>=768px)
- */
 const WIDTH = 992;
 
 const appStore = useAppStore();
 const settingsStore = useSettingsStore();
 
 const fixedHeader = computed(() => settingsStore.fixedHeader);
-const showTagsView = computed(() => settingsStore.tagsView);
 const showSettings = computed(() => settingsStore.showSettings);
 
 const classObj = computed(() => ({
@@ -41,7 +33,6 @@ watchEffect(() => {
     appStore.toggleDevice("desktop");
 
     if (width.value >= 1200) {
-      // Large screen
       appStore.openSideBar(true);
     } else {
       appStore.closeSideBar(true);
@@ -56,7 +47,6 @@ function handleOutsideClick() {
 
 <template>
   <div :class="classObj" class="app-wrapper">
-    <!-- Mobile sidebar overlay -->
     <div
       v-if="classObj.mobile && classObj.openSidebar"
       class="drawer-bg"
@@ -65,16 +55,13 @@ function handleOutsideClick() {
 
     <Sidebar class="sidebar-container" />
 
-    <div :class="{ hasTagsView: showTagsView }" class="main-container">
+    <div class="main-container">
       <div :class="{ 'fixed-header': fixedHeader }">
         <navbar />
-        <tags-view v-if="showTagsView" />
       </div>
 
-      <!-- Main content -->
       <app-main />
 
-      <!-- Settings panel -->
       <RightPanel v-if="showSettings">
         <settings />
       </RightPanel>
@@ -105,7 +92,7 @@ function handleOutsideClick() {
   top: 0;
   right: 0;
   z-index: 9;
-  width: calc(100% - 260px);
+  width: calc(100% - 220px);
   transition: width 0.28s;
 }
 

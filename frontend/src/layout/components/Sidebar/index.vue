@@ -1,31 +1,78 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from "vue-router";
-import SidebarItem from "./SidebarItem.vue";
 import Logo from "./Logo.vue";
-import { useSettingsStore } from "@/store/modules/settings";
-import { usePermissionStore } from "@/store/modules/permission";
 import { useAppStore } from "@/store/modules/app";
 import { useAccountStore } from "@/store/modules/account";
 import { useTagsViewStore } from "@/store/modules/tagsView";
-import { storeToRefs } from "pinia";
 import variables from "@/styles/variables.module.scss";
 import { APP_VERSION_PREFIXED } from "@/settings";
+import { useAppTheme } from "@/hooks/useTheme";
 
-import IconEpMoon from "~icons/ep/moon";
-import IconEpSunny from "~icons/ep/sunny";
-
-const settingsStore = useSettingsStore();
-const permissionStore = usePermissionStore();
 const appStore = useAppStore();
 const accountStore = useAccountStore();
 const tagsViewStore = useTagsViewStore();
-const { sidebarLogo } = storeToRefs(settingsStore);
 const route = useRoute();
 const router = useRouter();
+
 const isCollapsed = computed(() => !appStore.sidebar.opened);
 
-const isDark = useDark();
-const toggleDark = () => useToggle(isDark);
+const { theme, cycleTheme } = useAppTheme();
+
+const openKeys = ref<string[]>([]);
+
+watch(() => route.path, (path) => {
+  if (path.startsWith("/config/") || path.startsWith("/telegram/")) {
+    openKeys.value = ["panel-settings"];
+  } else if (path.startsWith("/log/")) {
+    openKeys.value = ["logs"];
+  } else {
+    openKeys.value = [];
+  }
+}, { immediate: true });
+
+const menuItems = [
+  {
+    title: "overview",
+    icon: "data-analysis",
+    path: "/overview/index",
+  },
+  {
+    title: "clientsList",
+    icon: "user",
+    path: "/clients/list",
+  },
+  {
+    title: "panelSettings",
+    icon: "setting",
+    key: "panel-settings",
+    children: [
+      { title: "configList", icon: "tools", path: "/config/list" },
+      { title: "telegramList", icon: "chat-dot-square", path: "/telegram/list" },
+    ],
+  },
+  {
+    title: "hysteriaList",
+    icon: "connection",
+    path: "/hysteria/list",
+  },
+  {
+    title: "log",
+    icon: "document-copy",
+    key: "logs",
+    children: [
+      { title: "logSystem", icon: "document", path: "/log/system" },
+      { title: "logHysteria", icon: "tickets", path: "/log/hysteria" },
+    ],
+  },
+];
+
+function handleSelect(index: string) {
+  router.push(index);
+}
+
+function toggleSidebar() {
+  appStore.toggleSidebar(true);
+}
 
 function logout() {
   ElMessageBox.confirm("Are you sure you want to log out?", "Prompt", {
@@ -43,26 +90,12 @@ function logout() {
       });
   });
 }
+
 </script>
 
 <template>
-  <div :class="{ 'has-logo': sidebarLogo }" class="sidebar-flex">
-    <logo v-if="sidebarLogo" :collapse="isCollapsed" />
-
-    <!-- Theme toggle -->
-    <div v-if="!isCollapsed" class="sidebar-theme-row">
-      <span class="sidebar-theme-label">Theme</span>
-      <el-switch
-        v-model="isDark"
-        @change="toggleDark"
-        inline-prompt
-        :active-icon="IconEpMoon"
-        :inactive-icon="IconEpSunny"
-        active-color="var(--el-fill-color-dark)"
-        inactive-color="var(--el-color-primary)"
-        size="small"
-      />
-    </div>
+  <div class="sidebar-flex">
+    <Logo :collapse="isCollapsed" />
 
     <el-scrollbar class="sidebar-scrollbar">
       <el-menu
@@ -71,38 +104,74 @@ function logout() {
         :background-color="variables.menuBg"
         :text-color="variables.menuText"
         :active-text-color="variables.menuActiveText"
-        :unique-opened="false"
         :collapse-transition="false"
+        :unique-opened="true"
+        :open-keys="isCollapsed ? [] : openKeys"
         mode="vertical"
+        @select="handleSelect"
       >
-        <sidebar-item
-          v-for="routeItem in permissionStore.routes"
-          :item="routeItem"
-          :key="routeItem.path"
-          :base-path="routeItem.path"
-          :is-collapse="isCollapsed"
-        />
+        <template v-for="item in menuItems" :key="item.key || item.path">
+          <el-sub-menu v-if="item.children" :index="item.key!">
+            <template #title>
+              <el-icon><component :is="`i-ep-${item.icon}`" /></el-icon>
+              <span>{{ $t(`route.${item.title}`) }}</span>
+            </template>
+            <el-menu-item
+              v-for="child in item.children"
+              :key="child.path"
+              :index="child.path"
+            >
+              <el-icon><component :is="`i-ep-${child.icon}`" /></el-icon>
+              <template #title>{{ $t(`route.${child.title}`) }}</template>
+            </el-menu-item>
+          </el-sub-menu>
+          <el-menu-item v-else :index="item.path">
+            <el-icon><component :is="`i-ep-${item.icon}`" /></el-icon>
+            <template #title>{{ $t(`route.${item.title}`) }}</template>
+          </el-menu-item>
+        </template>
       </el-menu>
     </el-scrollbar>
 
-    <!-- Utility section: Logout -->
-    <div class="sidebar-utility">
-      <el-menu
-        :collapse="isCollapsed"
-        :background-color="variables.menuBg"
-        :text-color="variables.menuText"
-        :active-text-color="variables.menuActiveText"
-        :collapse-transition="false"
-        mode="vertical"
-      >
-        <el-menu-item @click="logout">
-          <el-icon><i-ep-close /></el-icon>
-          <template #title>{{ $t("navbar.logout") }}</template>
-        </el-menu-item>
-      </el-menu>
+    <div class="sidebar-bottom">
+      <div class="sidebar-bottom-item" @click="cycleTheme">
+        <el-tooltip
+          :content="theme === 'light' ? 'Light' : theme === 'dark' ? 'Dark' : 'Ultra Dark'"
+          :placement="isCollapsed ? 'right' : 'top'"
+        >
+          <el-icon :size="18">
+            <i-ep-sunny v-if="theme === 'light'" />
+            <i-ep-moon v-else-if="theme === 'dark'" />
+            <i-ep-moon-filled v-else />
+          </el-icon>
+        </el-tooltip>
+        <span v-if="!isCollapsed" class="sidebar-bottom-label">{{ $t("navbar.theme") || "Theme" }}</span>
+      </div>
+
+      <div class="sidebar-bottom-item" @click="toggleSidebar">
+        <el-tooltip
+          :content="isCollapsed ? 'Expand' : 'Collapse'"
+          :placement="isCollapsed ? 'right' : 'top'"
+        >
+          <el-icon :size="18">
+            <i-ep-expand v-if="isCollapsed" />
+            <i-ep-fold v-else />
+          </el-icon>
+        </el-tooltip>
+        <span v-if="!isCollapsed" class="sidebar-bottom-label">{{ isCollapsed ? "Expand" : "Collapse" }}</span>
+      </div>
+
+      <div class="sidebar-bottom-item" @click="logout">
+        <el-tooltip
+          content="Logout"
+          :placement="isCollapsed ? 'right' : 'top'"
+        >
+          <el-icon :size="18"><i-ep-switch-button /></el-icon>
+        </el-tooltip>
+        <span v-if="!isCollapsed" class="sidebar-bottom-label">{{ $t("navbar.logout") }}</span>
+      </div>
     </div>
 
-    <!-- Version footer -->
     <div class="sidebar-footer">
       <a
         v-if="!isCollapsed"
@@ -110,12 +179,11 @@ function logout() {
         target="_blank"
         class="sidebar-version-link"
       >
-        <el-icon><i-ep-share /></el-icon>
+        <el-icon><i-ep-link /></el-icon>
         <span>{{ APP_VERSION_PREFIXED }}</span>
       </a>
+      <div v-else class="sidebar-version-collapsed">{{ APP_VERSION_PREFIXED }}</div>
     </div>
-
-    <div v-if="isCollapsed" class="sidebar-version-collapsed">{{ APP_VERSION_PREFIXED }}</div>
   </div>
 </template>
 
@@ -126,53 +194,69 @@ function logout() {
   height: 100%;
 }
 
-.sidebar-theme-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.sidebar-theme-label {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.45);
-  letter-spacing: 0.3px;
-}
-
 .sidebar-scrollbar {
   flex: 1 1 auto;
   overflow-y: auto;
   min-height: 0;
 }
 
-.has-logo .sidebar-scrollbar {
-  height: auto !important;
-}
-
-.sidebar-utility {
+.sidebar-bottom {
   flex: 0 0 auto;
   border-top: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.sidebar-utility .el-menu {
   padding: 4px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.sidebar-utility .el-menu-item {
-  margin: 2px 12px;
-  border-radius: 10px;
+.sidebar-bottom-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 2px 8px;
+  padding: 6px 12px;
+  height: 36px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--menuText, #cdd6f4);
+  transition: all 0.2s ease;
+  user-select: none;
+
+  &:hover {
+    background-color: var(--menuHover, #313244);
+    color: var(--el-color-primary);
+  }
+
+  .el-icon {
+    flex-shrink: 0;
+  }
+}
+
+.sidebar-bottom-label {
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hideSidebar {
+  .sidebar-bottom-item {
+    margin: 2px 6px;
+    padding: 6px 0;
+    justify-content: center;
+  }
 }
 
 .sidebar-footer {
   flex: 0 0 auto;
-  padding: 8px 16px 12px;
+  padding: 8px 12px 12px;
   border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .sidebar-version-link {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   font-size: 12px;
   color: rgba(255, 255, 255, 0.3);
@@ -181,6 +265,10 @@ function logout() {
 
   &:hover {
     color: rgba(255, 255, 255, 0.6);
+  }
+
+  .el-icon {
+    font-size: 14px;
   }
 }
 

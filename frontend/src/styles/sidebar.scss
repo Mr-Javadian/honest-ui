@@ -52,17 +52,18 @@
 
     .el-menu {
       width: 100% !important;
-      height: 100%;
       border: none;
       background: transparent !important;
-      padding: 8px 0;
+      padding: 4px 0;
     }
 
     .el-menu-item {
       position: relative;
-      margin: 2px 12px;
-      padding-left: 16px !important;
-      border-radius: 10px;
+      margin: 2px 8px;
+      padding-left: 12px !important;
+      height: 40px;
+      line-height: 40px;
+      border-radius: 8px;
       transition: all 0.2s ease;
       overflow: visible;
 
@@ -70,8 +71,7 @@
         background-color: $menuHover !important;
       }
 
-      &.is-active,
-      &.is-active-sidebar {
+      &.is-active {
         background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
         color: #fff !important;
         box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
@@ -79,11 +79,11 @@
         &::before {
           content: '';
           position: absolute;
-          left: -12px;
+          left: -8px;
           top: 50%;
           transform: translateY(-50%);
-          width: 4px;
-          height: 20px;
+          width: 3px;
+          height: 16px;
           background: #818cf8;
           border-radius: 0 3px 3px 0;
         }
@@ -93,14 +93,27 @@
           fill: #fff !important;
         }
       }
+
+      .el-icon {
+        font-size: 18px;
+        margin-right: 10px;
+      }
     }
 
     .el-sub-menu__title {
-      margin: 2px 12px;
-      border-radius: 10px;
+      margin: 2px 8px;
+      height: 40px;
+      line-height: 40px;
+      border-radius: 8px;
+      padding-left: 12px !important;
 
       &:hover {
         background-color: $menuHover !important;
+      }
+
+      .el-icon {
+        font-size: 18px;
+        margin-right: 10px;
       }
     }
 
@@ -112,12 +125,26 @@
     & .el-sub-menu .el-menu-item {
       min-width: $sideBarWidth !important;
       background-color: $subMenuBg !important;
-      margin: 2px 16px 2px 12px;
-      border-radius: 8px;
+      margin: 2px 12px 2px 8px;
+      height: 36px;
+      line-height: 36px;
+      border-radius: 6px;
+      padding-left: 42px !important;
+
+      .el-icon {
+        font-size: 16px;
+        margin-right: 8px;
+      }
 
       &:hover {
         background-color: $subMenuHover !important;
       }
+    }
+
+    .el-sub-menu .el-menu-item.is-active {
+      background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
+      color: #fff !important;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
     }
   }
 
@@ -127,6 +154,26 @@
 
       .svg-icon {
         margin-right: 0;
+      }
+
+      .el-menu-item {
+        margin: 2px 6px;
+        padding-left: 0 !important;
+        justify-content: center;
+
+        .el-icon {
+          margin-right: 0;
+        }
+      }
+
+      .el-sub-menu__title {
+        margin: 2px 6px;
+        padding-left: 0 !important;
+        justify-content: center;
+
+        .el-icon {
+          margin-right: 0;
+        }
       }
     }
 

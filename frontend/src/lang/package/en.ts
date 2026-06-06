@@ -4,15 +4,16 @@ export default {
     overview: "Overview",
     clients: "Clients",
     clientsList: "Clients",
+    panelSettings: "Panel Settings",
     hysteria: "Hysteria",
-    hysteriaList: "Hysteria Manage",
+    hysteriaList: "Hysteria Configs",
     config: "System",
-    configList: "System Config",
-    log: "Log",
-    logSystem: "System Log",
-    logHysteria: "Hysteria Log",
+    configList: "General",
+    log: "Logs",
+    logSystem: "System",
+    logHysteria: "Hysteria",
     telegram: "Telegram",
-    telegramList: "Telegram Manage",
+    telegramList: "Telegram Bot",
   },
   // 登录页面国际化
   login: {
@@ -24,6 +25,7 @@ export default {
   // 导航栏国际化
   navbar: {
     logout: "Logout",
+    theme: "Theme",
   },
   common: {
     id: "ID",

@@ -4,15 +4,16 @@ export default {
     overview: "Обзор",
     clients: "Клиенты",
     clientsList: "Клиенты",
+    panelSettings: "Настройки панели",
     hysteria: "Hysteria",
-    hysteriaList: "Управление Hysteria",
+    hysteriaList: "Конфиги Hysteria",
     config: "Система",
-    configList: "Системные настройки",
+    configList: "Общие",
     log: "Логи",
-    logSystem: "Системные логи",
-    logHysteria: "Логи Hysteria",
+    logSystem: "Система",
+    logHysteria: "Hysteria",
     telegram: "Telegram",
-    telegramList: "Управление Telegram",
+    telegramList: "Telegram Бот",
   },
   // 登录页面国际化
   login: {
@@ -24,6 +25,7 @@ export default {
   // 导航栏国际化
   navbar: {
     logout: "Выйти",
+    theme: "Тема",
   },
   common: {
     id: "ID",

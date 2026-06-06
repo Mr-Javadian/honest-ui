@@ -14,9 +14,7 @@ const logo = ref(new URL(`../../../assets/logo.png`, import.meta.url).href);
   <div class="sidebar-logo" :class="{ collapsed }">
     <router-link to="/" class="sidebar-logo-link">
       <img v-if="settingsStore.sidebarLogo" :src="logo" class="sidebar-logo-img" />
-      <div v-if="!collapse" class="sidebar-logo-text-wrap">
-        <span class="sidebar-logo-text">Honest-UI</span>
-      </div>
+      <span v-if="!collapse" class="sidebar-logo-text">Honest-UI</span>
     </router-link>
   </div>
 </template>
@@ -24,15 +22,12 @@ const logo = ref(new URL(`../../../assets/logo.png`, import.meta.url).href);
 <style lang="scss" scoped>
 .sidebar-logo {
   width: 100%;
-  height: 64px;
+  height: 56px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-
-  &.collapsed {
-    .sidebar-logo-link { padding: 0; justify-content: center; }
-  }
+  flex-shrink: 0;
 }
 
 .sidebar-logo-link {
@@ -40,31 +35,31 @@ const logo = ref(new URL(`../../../assets/logo.png`, import.meta.url).href);
   width: 100%;
   display: flex;
   align-items: center;
-  padding: 0 16px;
+  justify-content: center;
+  gap: 10px;
   text-decoration: none;
-  gap: 12px;
 }
 
 .sidebar-logo-img {
-  width: 40px;
-  height: 40px;
+  width: 34px;
+  height: 34px;
   flex-shrink: 0;
-  border-radius: 10px;
-}
-
-.sidebar-logo-text-wrap {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.2;
+  border-radius: 8px;
 }
 
 .sidebar-logo-text {
-  font-size: 20px;
-  font-weight: 800;
-  letter-spacing: 0.5px;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
   background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+.collapsed {
+  .sidebar-logo-link {
+    gap: 0;
+  }
 }
 </style>
