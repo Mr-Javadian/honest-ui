@@ -1,16 +1,8 @@
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
-import { useRoute, useRouter } from "vue-router";
 import { useAppStore } from "@/store/modules/app";
-import { useTagsViewStore } from "@/store/modules/tagsView";
-import { useAccountStore } from "@/store/modules/account";
 
 const appStore = useAppStore();
-const tagsViewStore = useTagsViewStore();
-const accountStore = useAccountStore();
-
-const route = useRoute();
-const router = useRouter();
 
 const { device } = storeToRefs(appStore);
 
@@ -19,23 +11,6 @@ function toggleSideBar() {
 }
 
 const { isFullscreen, toggle } = useFullscreen();
-
-function logout() {
-  ElMessageBox.confirm("Are you sure you want to log out?", "Prompt", {
-    confirmButtonText: "Confirm",
-    cancelButtonText: "Cancel",
-    type: "warning",
-  }).then(() => {
-    accountStore
-      .logout()
-      .then(() => {
-        tagsViewStore.delAllViews();
-      })
-      .then(() => {
-        router.push(`/login?redirect=${route.fullPath}`);
-      });
-  });
-}
 </script>
 
 <template>
@@ -60,20 +35,6 @@ function logout() {
         </el-tooltip>
         <lang-select class="setting-item" />
       </div>
-
-      <el-dropdown trigger="click">
-        <div class="avatar-container">
-          <img src="/src/assets/logo.png" />
-          <i-ep-caret-bottom class="w-3 h-3" />
-        </div>
-        <template #dropdown>
-          <el-dropdown-menu>
-            <el-dropdown-item @click="logout">
-              {{ $t("navbar.logout") }}
-            </el-dropdown-item>
-          </el-dropdown-menu>
-        </template>
-      </el-dropdown>
     </div>
   </div>
 </template>
