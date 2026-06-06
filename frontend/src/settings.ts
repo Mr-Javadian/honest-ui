@@ -1,6 +1,6 @@
 // Honest-UI version
-export const APP_VERSION = "0.4.7";
-export const APP_VERSION_PREFIXED = "v0.4.7";
+export const APP_VERSION = "0.4.8";
+export const APP_VERSION_PREFIXED = "v0.4.8";
 
 // System settings
 interface DefaultSettings {
@@ -65,7 +65,7 @@ const defaultSettings: DefaultSettings = {
    */
   theme: "dark",
   size: "default", // default |large |small
-  language: "en", // zh-cn| en
+  language: "en", // zh-cn | en | ru | fa
 };
 
 export default defaultSettings;

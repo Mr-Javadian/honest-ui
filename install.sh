@@ -5,7 +5,7 @@ export PATH
 
 hui_systemd_version="${1:-latest}"
 hui_docker_version=":${hui_systemd_version#v}"
-hui_script_version="v0.4.7"
+hui_script_version="v0.4.8"
 
 # ────────────────────────────────────────────── Color ─────────────────────────────────────────────────────
 ECHO_TYPE="echo -e"
@@ -607,39 +607,91 @@ change_web_port() {
   read -r -p "  Press Enter to continue..."
 }
 
-reset_sysadmin() {
-  local found_reset=false
-
-  if systemctl list-units --type=service --all 2>/dev/null | grep -q 'honest-ui.service'; then
-    found_reset=true
-  fi
-  if command -v docker &>/dev/null && docker ps -a -q -f "name=^honest-ui$" 2>/dev/null | grep -q .; then
-    found_reset=true
-  fi
-
-  ${found_reset} || { echo_content red "  [!] Honest-UI not installed"; read -r -p "  Press Enter to continue..."; return; }
-
-  echo_content yellow "  ───────────────────────────────────────────────"
-  echo_content yellow "  [!] This will reset the admin password:"
-  echo "      • A new random password will be generated"
-  echo "      • The current password will stop working"
-  echo "      • All other data remains intact"
-  echo_content yellow "  ───────────────────────────────────────────────"
-  echo
-  read -r -p "  Are you sure? [y/N]: " confirm_reset
-  [[ "${confirm_reset}" != "y" && "${confirm_reset}" != "Y" ]] && { echo "  [i] Reset cancelled."; read -r -p "  Press Enter to continue..."; return; }
-
+_do_reset_credentials() {
+  local new_user="$1" new_pass="$2" new_con="$3"
   if systemctl list-units --type=service --all 2>/dev/null | grep -q 'honest-ui.service'; then
     export HUI_DATA="${HUI_DATA_SYSTEMD}"
-    echo "  [*] Resetting (systemd)..."
-    /usr/local/honest-ui/honest-ui reset
+    local db_path="${HUI_DATA_SYSTEMD}data/h_ui.db"
+    if [[ -f "${db_path}" ]] && command -v sqlite3 &>/dev/null && command -v openssl &>/dev/null; then
+      local pass_hash
+      pass_hash=$(echo -n "${new_pass}" | openssl dgst -sha224 2>/dev/null | awk '{print $NF}')
+      [[ -n "${pass_hash}" ]] && sqlite3 "${db_path}" "UPDATE account SET username='${new_user}', pass='${pass_hash}', con_pass='${new_con}' WHERE id=1" 2>/dev/null || true
+    fi
     systemctl restart honest-ui
+    echo -e "  [\xE2\x9C\x93] Credentials updated for systemd"
   fi
   if command -v docker &>/dev/null && docker ps -a -q -f "name=^honest-ui$" 2>/dev/null | grep -q .; then
-    echo "  [*] Resetting (Docker)..."
-    docker exec honest-ui ./honest-ui reset
+    local docker_db="/honest-ui/data/h_ui.db"
+    local pass_hash
+    pass_hash=$(echo -n "${new_pass}" | openssl dgst -sha224 2>/dev/null | awk '{print $NF}')
+    [[ -n "${pass_hash}" ]] && docker exec honest-ui sqlite3 "${docker_db}" "UPDATE account SET username='${new_user}', pass='${pass_hash}', con_pass='${new_con}' WHERE id=1" 2>/dev/null || true
     docker restart honest-ui 2>/dev/null || true
+    echo -e "  [\xE2\x9C\x93] Credentials updated for Docker"
   fi
+}
+
+reset_sysadmin() {
+  local found_reset=false
+  if systemctl list-units --type=service --all 2>/dev/null | grep -q 'honest-ui.service'; then found_reset=true; fi
+  if command -v docker &>/dev/null && docker ps -a -q -f "name=^honest-ui$" 2>/dev/null | grep -q .; then found_reset=true; fi
+  ${found_reset} || { echo_content red "  [!] Honest-UI not installed"; read -r -p "  Press Enter to continue..."; return; }
+
+  echo
+  echo "  [1] Auto Reset (recommended)"
+  echo "  [2] Manual Reset"
+  echo
+  read -r -p "  Choose reset mode [1/2] (default: 1): " reset_mode
+  [[ -z "${reset_mode}" ]] && reset_mode="1"
+
+  if [[ "${reset_mode}" == "1" ]]; then
+    echo_content yellow "  ───────────────────────────────────────────────"
+    echo_content yellow "  [!] This will reset the admin credentials:"
+    echo "      • A new random username & password will be generated"
+    echo "      • The current credentials will stop working"
+    echo "      • All other data remains intact"
+    echo_content yellow "  ───────────────────────────────────────────────"
+    echo
+    read -r -p "  Are you sure? [y/N]: " confirm_reset
+    [[ "${confirm_reset}" != "y" && "${confirm_reset}" != "Y" ]] && { echo "  [i] Reset cancelled."; read -r -p "  Press Enter to continue..."; return; }
+
+    local admin_user admin_pass con_pass
+    admin_user=$(generate_strong_password 12)
+    admin_pass=$(generate_strong_password 20)
+    con_pass="${admin_user}.${admin_pass}"
+    _do_reset_credentials "${admin_user}" "${admin_pass}" "${con_pass}"
+
+    echo
+    echo_content green "  ───────────────────────────────────────────────"
+    echo_content green "  New Login Credentials"
+    echo_content green "  ───────────────────────────────────────────────"
+    echo_content green "  Username: ${admin_user}"
+    echo_content green "  Password: ${admin_pass}"
+    echo_content green "  ConPass:  ${con_pass}"
+    echo_content green "  ───────────────────────────────────────────────"
+    echo
+  elif [[ "${reset_mode}" == "2" ]]; then
+    echo
+    read -r -p "  Enter new username: " manual_user
+    [[ -z "${manual_user}" ]] && { echo "  [i] Reset cancelled."; read -r -p "  Press Enter to continue..."; return; }
+    read -r -s -p "  Enter new password: " manual_pass
+    echo
+    [[ -z "${manual_pass}" ]] && { echo "  [i] Reset cancelled."; read -r -p "  Press Enter to continue..."; return; }
+    local manual_con="${manual_user}.${manual_pass}"
+    echo
+    echo_content yellow "  ───────────────────────────────────────────────"
+    echo_content yellow "  [!] This will reset the admin credentials:"
+    echo "      • Username: ${manual_user}"
+    echo "      • Password: ${manual_pass}"
+    echo "      • The current credentials will stop working"
+    echo_content yellow "  ───────────────────────────────────────────────"
+    echo
+    read -r -p "  Apply these credentials? [y/N]: " confirm_manual
+    [[ "${confirm_manual}" != "y" && "${confirm_manual}" != "Y" ]] && { echo "  [i] Reset cancelled."; read -r -p "  Press Enter to continue..."; return; }
+    _do_reset_credentials "${manual_user}" "${manual_pass}" "${manual_con}"
+  else
+    echo_content red "  [!] Invalid option"; read -r -p "  Press Enter to continue..."; return
+  fi
+
   read -r -p "  Press Enter to continue..."
 }
 
@@ -720,6 +772,103 @@ view_status() {
   read -r -p "  Press Enter to continue..."
 }
 
+_detect_db_path() {
+  if systemctl list-units --type=service --all 2>/dev/null | grep -q 'honest-ui.service'; then
+    echo "${HUI_DATA_SYSTEMD}data/h_ui.db"
+  elif command -v docker &>/dev/null && docker ps -a -q -f "name=^honest-ui$" 2>/dev/null | grep -q .; then
+    echo "${HUI_DATA_DOCKER}data/h_ui.db"
+  fi
+}
+
+reset_web_base_path() {
+  local db_path
+  db_path=$(_detect_db_path)
+  [[ -z "${db_path}" ]] && { echo_content red "  [!] Honest-UI not installed"; read -r -p "  Press Enter to continue..."; return; }
+
+  local new_ctx
+  new_ctx=$(generate_context_path)
+
+  echo_content yellow "  ───────────────────────────────────────────────"
+  echo_content yellow "  [!] This will reset the web base path:"
+  echo "      • Current path: $(db_get_config "${db_path}" "H_UI_WEB_CONTEXT" || echo "/")"
+  echo "      • New path:     /${new_ctx}"
+  echo "      • The panel URL will change"
+  echo_content yellow "  ───────────────────────────────────────────────"
+  echo
+  read -r -p "  Apply new base path? [y/N]: " confirm_path
+  [[ "${confirm_path}" != "y" && "${confirm_path}" != "Y" ]] && { echo "  [i] Reset cancelled."; read -r -p "  Press Enter to continue..."; return; }
+
+  if systemctl list-units --type=service --all 2>/dev/null | grep -q 'honest-ui.service'; then
+    db_set_config "${db_path}" "H_UI_WEB_CONTEXT" "/${new_ctx}"
+    systemctl restart honest-ui
+  fi
+  if command -v docker &>/dev/null && docker ps -a -q -f "name=^honest-ui$" 2>/dev/null | grep -q .; then
+    docker exec honest-ui ./honest-ui reset-context "/${new_ctx}" 2>/dev/null || \
+    docker exec honest-ui sqlite3 /honest-ui/data/h_ui.db "INSERT OR REPLACE INTO config (key, value) VALUES ('H_UI_WEB_CONTEXT', '/${new_ctx}')" 2>/dev/null || true
+    docker restart honest-ui 2>/dev/null || true
+  fi
+
+  local ip_val
+  ip_val=$(db_get_config "${db_path}" "H_UI_IP")
+  local port_val
+  port_val=$(db_get_config "${db_path}" "H_UI_WEB_PORT")
+  [[ -z "${ip_val}" ]] && ip_val="your-server-ip"
+  port_val="${port_val:-8081}"
+
+  echo -e "  [\xE2\x9C\x93] Web base path reset to /${new_ctx}"
+  echo_content green "  New access URL: http://${ip_val}:${port_val}/${new_ctx}"
+  read -r -p "  Press Enter to continue..."
+}
+
+reset_settings() {
+  local db_path
+  db_path=$(_detect_db_path)
+  [[ -z "${db_path}" ]] && { echo_content red "  [!] Honest-UI not installed"; read -r -p "  Press Enter to continue..."; return; }
+
+  echo_content yellow "  ───────────────────────────────────────────────"
+  echo_content yellow "  [!] This will reset ALL panel settings to defaults:"
+  echo "      • Web port will reset to 8081"
+  echo "      • Web context path will be regenerated"
+  echo "      • Traffic time settings will reset"
+  echo "      • HTTPS and other configs will clear"
+  echo "      • Admin credentials will NOT change"
+  echo_content yellow "  ───────────────────────────────────────────────"
+  echo
+  read -r -p "  Reset all settings to defaults? [y/N]: " confirm_settings
+  [[ "${confirm_settings}" != "y" && "${confirm_settings}" != "Y" ]] && { echo "  [i] Reset cancelled."; read -r -p "  Press Enter to continue..."; return; }
+
+  local new_ctx
+  new_ctx=$(generate_context_path)
+
+  if systemctl list-units --type=service --all 2>/dev/null | grep -q 'honest-ui.service'; then
+    db_set_config "${db_path}" "H_UI_WEB_PORT" "8081"
+    db_set_config "${db_path}" "H_UI_WEB_CONTEXT" "/${new_ctx}"
+    db_set_config "${db_path}" "H_UI_HTTPS" "0"
+    db_set_config "${db_path}" "H_UI_CRT_PATH" ""
+    db_set_config "${db_path}" "H_UI_KEY_PATH" ""
+    systemctl daemon-reload
+    systemctl restart honest-ui
+  fi
+  if command -v docker &>/dev/null && docker ps -a -q -f "name=^honest-ui$" 2>/dev/null | grep -q .; then
+    local docker_db="/honest-ui/data/h_ui.db"
+    local cmds=(
+      "INSERT OR REPLACE INTO config (key, value) VALUES ('H_UI_WEB_PORT', '8081')"
+      "INSERT OR REPLACE INTO config (key, value) VALUES ('H_UI_WEB_CONTEXT', '/${new_ctx}')"
+      "INSERT OR REPLACE INTO config (key, value) VALUES ('H_UI_HTTPS', '0')"
+      "INSERT OR REPLACE INTO config (key, value) VALUES ('H_UI_CRT_PATH', '')"
+      "INSERT OR REPLACE INTO config (key, value) VALUES ('H_UI_KEY_PATH', '')"
+    )
+    for cmd in "${cmds[@]}"; do
+      docker exec honest-ui sqlite3 "${docker_db}" "${cmd}" 2>/dev/null || true
+    done
+    docker restart honest-ui 2>/dev/null || true
+  fi
+
+  echo -e "  [\xE2\x9C\x93] Settings reset to defaults"
+  echo_content green "  Panel URL:  http://your-server-ip:8081/${new_ctx}"
+  read -r -p "  Press Enter to continue..."
+}
+
 ssh_local_port_forwarding() {
   read -r -p "  SSH forwarding port [default: 8082]: " fwd_port && [[ -z "${fwd_port}" ]] && fwd_port="8082"
   read -r -p "  Honest-UI port [default: 8081]: " ui_port && [[ -z "${ui_port}" ]] && ui_port="8081"
@@ -796,13 +945,16 @@ main() {
     echo "  [5]  Upgrade Panel - (Docker)"
     echo "  [6]  Uninstall - Remove completely (Docker)"
     echo "  ---------------------------------------------------"
-    echo "  [7]  Reset Panel admin password"
+    echo "  [7]  Reset Username & Password"
     echo "  [8]  Change Ports"
     echo "  [9]  View Details & Status"
     echo "  ---------------------------------------------------"
+    echo "  [10] Reset Web Base Path"
+    echo "  [11] Reset Settings"
+    echo "  ---------------------------------------------------"
     echo "  [0]  Exit"
     echo
-    read -r -p "  Enter your choice [0-9]: " input_option
+    read -r -p "  Enter your choice [0-11]: " input_option
     echo
 
     case ${input_option} in
@@ -815,8 +967,10 @@ main() {
       7) reset_sysadmin ;;
       8) change_web_port ;;
       9) view_status ;;
+      10) reset_web_base_path ;;
+      11) reset_settings ;;
       0) echo "  Goodbye!"; exit 0 ;;
-      *) echo_content red "  [!] Invalid option 0-9"; sleep 1.5 ;;
+      *) echo_content red "  [!] Invalid option 0-11"; sleep 1.5 ;;
     esac
   done
 }

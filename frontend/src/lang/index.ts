@@ -6,6 +6,7 @@ const appStore = useAppStore();
 import enLocale from "./package/en";
 import ruLocale from "./package/ru";
 import zhCnLocale from "./package/zh-cn";
+import faLocale from "./package/fa";
 
 const messages = {
   en: {
@@ -16,6 +17,9 @@ const messages = {
   },
   "zh-cn": {
     ...zhCnLocale,
+  },
+  fa: {
+    ...faLocale,
   },
 };
 

@@ -13,6 +13,8 @@ function handleLanguageChange(lang: string) {
     ElMessage.success("Switch Language Successful!");
   } else if (lang == "ru") {
     ElMessage.success("Смена языка прошла успешно!");
+  } else if (lang == "fa") {
+    ElMessage.success("زبان با موفقیت تغییر کرد!");
   } else {
     ElMessage.success("Language switched successfully!");
   }
@@ -37,6 +39,9 @@ function handleLanguageChange(lang: string) {
           command="zh-cn"
         >
           简体中文
+        </el-dropdown-item>
+        <el-dropdown-item :disabled="appStore.language === 'fa'" command="fa">
+          فارسی
         </el-dropdown-item>
       </el-dropdown-menu>
     </template>
