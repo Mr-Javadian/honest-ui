@@ -1,126 +1,76 @@
 <template>
-  <div class="login-container">
-    <div class="waves">
-      <svg class="waves-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 24 150 28" preserveAspectRatio="none">
-        <defs>
-          <path id="wave-path" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
-        </defs>
-        <g class="wave-group">
-          <use href="#wave-path" x="48" y="0" class="wave wave-1" />
-          <use href="#wave-path" x="48" y="3" class="wave wave-2" />
-          <use href="#wave-path" x="48" y="5" class="wave wave-3" />
-          <use href="#wave-path" x="48" y="7" class="wave wave-4" />
-        </g>
-      </svg>
+  <div class="login-page" :class="[isDark ? 'is-dark' : 'is-light']">
+    <div class="login-bg">
+      <div class="bg-blob blob-1"></div>
+      <div class="bg-blob blob-2"></div>
+      <div class="bg-grid"></div>
     </div>
 
     <div class="login-card">
-      <div class="card-header">
-        <div class="logo-area">
-          <svg-icon icon-class="honestui" class="logo-icon" />
+      <div class="login-card-inner">
+        <div class="login-header">
+          <div class="login-logo">
+            <svg-icon icon-class="honestui" size="2.4em" />
+          </div>
+          <h2 class="login-title">{{ $t("login.title") }}</h2>
+          <div class="login-headline">
+            <span v-for="(word, i) in headlineWords" :key="i" class="headline-word" :class="headlineClass(i)">{{ word }}</span>
+          </div>
+          <span class="login-version">v{{ appVersion }}</span>
         </div>
-        <h2 class="panel-title">{{ $t("login.title") }}</h2>
-        <div class="headline">
-          <span class="headline-word is-visible">Hysteria 2</span>
-          <span class="headline-word is-hidden">Management Panel</span>
-          <span class="headline-word is-hidden">Secure & Fast</span>
-        </div>
-        <span class="version-text">v{{ appVersion }}</span>
-      </div>
 
-      <el-form ref="loginFormRef" :model="loginForm" :rules="loginRules" class="login-form">
-        <el-form-item prop="username">
-          <el-input
-            ref="username"
-            v-model="loginForm.username"
-            :placeholder="$t('login.username')"
-            name="username"
-            size="large"
-            @keyup.enter="handleLogin"
-          >
-            <template #prefix>
-              <svg-icon icon-class="user" class="input-icon" />
-            </template>
-          </el-input>
-        </el-form-item>
-
-        <el-tooltip :disabled="isCapslock === false" content="Caps lock is On" placement="right">
-          <el-form-item prop="pass">
-            <el-input
-              v-model="loginForm.pass"
-              :placeholder="$t('login.password')"
-              :type="passVisible === false ? 'password' : 'input'"
-              size="large"
-              name="pass"
-              @keyup="checkCapslock"
-              @keyup.enter="handleLogin"
-            >
-              <template #prefix>
-                <svg-icon icon-class="password" class="input-icon" />
-              </template>
-              <template #suffix>
-                <span @click="passVisible = !passVisible" class="eye-toggle">
-                  <svg-icon :icon-class="passVisible === false ? 'eye' : 'eye-open'" />
-                </span>
-              </template>
+        <el-form ref="loginFormRef" :model="loginForm" :rules="loginRules" class="login-form">
+          <el-form-item prop="username">
+            <el-input ref="username" v-model="loginForm.username" :placeholder="$t('login.username')" name="username" size="large" @keyup.enter="handleLogin">
+              <template #prefix><svg-icon icon-class="user" class="input-icon" /></template>
             </el-input>
           </el-form-item>
-        </el-tooltip>
 
-        <el-form-item prop="captcha">
-          <div class="captcha-row">
-            <div class="captcha-code">
-              <span
-                v-for="(d, i) in captchaDigits"
-                :key="i"
-                class="captcha-digit"
-                :style="captchaStyle(i)"
-              >{{ d }}</span>
-              <button class="captcha-refresh" type="button" @click="refreshCaptcha" title="Refresh">
-                <svg-icon icon-class="refresh" class="refresh-icon" />
-              </button>
+          <el-tooltip :disabled="!isCapslock" content="Caps lock is On" placement="right">
+            <el-form-item prop="pass">
+              <el-input v-model="loginForm.pass" :placeholder="$t('login.password')" :type="passVisible ? 'input' : 'password'" size="large" name="pass" @keyup="checkCapslock" @keyup.enter="handleLogin">
+                <template #prefix><svg-icon icon-class="password" class="input-icon" /></template>
+                <template #suffix>
+                  <span class="eye-toggle" @click="passVisible = !passVisible">
+                    <svg-icon :icon-class="passVisible ? 'eye-open' : 'eye'" />
+                  </span>
+                </template>
+              </el-input>
+            </el-form-item>
+          </el-tooltip>
+
+          <el-form-item prop="captcha">
+            <div class="captcha-row">
+              <div class="captcha-code">
+                <span v-for="(d, i) in captchaDigits" :key="i" class="captcha-digit" :style="captchaStyle(i)">{{ d }}</span>
+                <button class="captcha-refresh" type="button" @click="refreshCaptcha" title="Refresh"><svg-icon icon-class="refresh" class="refresh-icon" /></button>
+              </div>
+              <el-input v-model="loginForm.captcha" placeholder="Captcha" size="large" maxlength="4" class="captcha-input" @keyup.enter="handleLogin">
+                <template #prefix><svg-icon icon-class="report" class="input-icon" /></template>
+              </el-input>
             </div>
-            <el-input
-              v-model="loginForm.captcha"
-              placeholder="Captcha"
-              size="large"
-              maxlength="4"
-              class="captcha-input"
-              @keyup.enter="handleLogin"
-            >
-              <template #prefix>
-                <svg-icon icon-class="report" class="input-icon" />
-              </template>
-            </el-input>
-          </div>
-        </el-form-item>
+          </el-form-item>
 
-        <el-form-item class="login-btn-item">
-          <div class="btn-wave-bg">
-            <el-button
-              size="large"
-              :loading="loading"
-              type="primary"
-              class="login-btn"
-              @click.prevent="handleLogin"
-            >
+          <el-form-item>
+            <el-button size="large" :loading="loading" type="primary" class="login-btn" @click.prevent="handleLogin">
               <span v-if="!loading">{{ $t("login.login") }}</span>
             </el-button>
-          </div>
-        </el-form-item>
-      </el-form>
+          </el-form-item>
+        </el-form>
 
-      <div class="card-footer">
-        <lang-select class="lang-select" />
+        <div class="login-footer">
+          <button class="theme-toggle" @click="toggleTheme" :title="isDark ? 'Light mode' : 'Dark mode'">
+            <svg-icon :icon-class="isDark ? 'sunny' : 'moon'" size="1.2em" />
+          </button>
+          <lang-select class="login-lang" />
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-export default {
-  name: "Login",
-};
+export default { name: "Login" }
 </script>
 
 <script setup lang="ts">
@@ -135,7 +85,7 @@ import { AccountLoginDto } from "@/api/account/types";
 const accountStore = useAccountStore();
 const route = useRoute();
 
-const appVersion = "0.4.2";
+const appVersion = "0.4.6";
 const loading = ref(false);
 const isCapslock = ref(false);
 const passVisible = ref(false);
@@ -143,16 +93,24 @@ const captchaValue = ref("");
 const captchaDigits = ref<string[]>([]);
 const loginFormRef = ref(ElForm);
 let animationTimer: ReturnType<typeof setInterval> | null = null;
+let headlineCurrent = 0;
+
+const isDark = useDark();
+const toggleDark = useToggle(isDark);
+const toggleTheme = () => toggleDark();
+
+const headlineWords = ["Hysteria 2", "Management Panel", "Secure & Fast"];
+
+const headlineClass = (i: number) => ({
+  "is-visible": i === headlineCurrent,
+  "is-hidden": i !== headlineCurrent,
+});
 
 interface LoginForm extends AccountLoginDto {
   captcha: string;
 }
 
-const loginForm = ref<LoginForm>({
-  username: "",
-  pass: "",
-  captcha: "",
-});
+const loginForm = ref<LoginForm>({ username: "", pass: "", captcha: "" });
 
 const captchaStyle = (i: number) => ({
   transform: `rotate(${(i - 1.5) * 8}deg) translateY(${i % 2 === 0 ? -2 : 2}px)`,
@@ -167,21 +125,12 @@ const generateCaptcha = () => {
   loginForm.value.captcha = "";
 };
 
-const refreshCaptcha = () => { generateCaptcha(); };
+const refreshCaptcha = () => generateCaptcha();
 
 const loginRules = {
-  username: [
-    { required: true, message: "Required", trigger: ["change", "blur"] },
-    { pattern: /^[a-zA-Z0-9!@#$%^&*()_+=-]{6,32}$/, message: "Username format is incorrect", trigger: ["change", "blur"] },
-  ],
-  pass: [
-    { required: true, message: "Required", trigger: ["change", "blur"] },
-    { pattern: /^[a-zA-Z0-9!@#$%^&*()_+=-]{6,32}$/, message: "Password format is incorrect", trigger: ["change", "blur"] },
-  ],
-  captcha: [
-    { required: true, message: "Enter captcha", trigger: ["change", "blur"] },
-    { pattern: /^\d{4}$/, message: "4 digits required", trigger: ["change", "blur"] },
-  ],
+  username: [{ required: true, message: "Required", trigger: ["change", "blur"] }, { pattern: /^[a-zA-Z0-9!@#$%^&*()_+=-]{6,32}$/, message: "Username format is incorrect", trigger: ["change", "blur"] }],
+  pass: [{ required: true, message: "Required", trigger: ["change", "blur"] }, { pattern: /^[a-zA-Z0-9!@#$%^&*()_+=-]{6,32}$/, message: "Password format is incorrect", trigger: ["change", "blur"] }],
+  captcha: [{ required: true, message: "Enter captcha", trigger: ["change", "blur"] }, { pattern: /^\d{4}$/, message: "4 digits required", trigger: ["change", "blur"] }],
 };
 
 const checkCapslock = (e: any) => {
@@ -199,39 +148,25 @@ const handleLogin = () => {
     }
     loading.value = true;
     const { captcha: _, ...creds } = loginForm.value;
-    accountStore
-      .login(creds)
-      .then(() => {
-        const query: LocationQuery = route.query;
-        const redirect = (query.redirect as LocationQueryValue) ?? "/";
-        const otherQueryParams = Object.keys(query).reduce((acc: any, cur: string) => {
-          if (cur !== "redirect") acc[cur] = query[cur];
-          return acc;
-        }, {});
-        router.push({ path: redirect, query: otherQueryParams });
-      })
-      .catch(() => { refreshCaptcha(); })
-      .finally(() => { loading.value = false; });
+    accountStore.login(creds).then(() => {
+      const query: LocationQuery = route.query;
+      const redirect = (query.redirect as LocationQueryValue) ?? "/";
+      const otherQueryParams = Object.keys(query).reduce((acc: any, cur: string) => {
+        if (cur !== "redirect") acc[cur] = query[cur];
+        return acc;
+      }, {});
+      router.push({ path: redirect, query: otherQueryParams });
+    }).catch(() => refreshCaptcha()).finally(() => { loading.value = false; });
   });
 };
 
-const initHeadline = () => {
-  const headlines = document.querySelectorAll(".headline-word");
-  if (!headlines.length) return;
-  let current = 0;
-  animationTimer = setInterval(() => {
-    headlines.forEach((el, i) => {
-      el.classList.remove("is-visible", "is-hidden");
-      if (i === current) el.classList.add("is-visible");
-      else el.classList.add("is-hidden");
-    });
-    current = (current + 1) % headlines.length;
-  }, 2500);
+const advanceHeadline = () => {
+  headlineCurrent = (headlineCurrent + 1) % headlineWords.length;
 };
 
 onMounted(() => {
   generateCaptcha();
-  setTimeout(initHeadline, 1000);
+  animationTimer = setInterval(advanceHeadline, 2500);
 });
 
 onBeforeUnmount(() => {
@@ -240,131 +175,153 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="scss" scoped>
-.login-container {
+.login-page {
   position: relative;
   width: 100%;
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #0a0e1a 0%, #131b2e 40%, #1a1f35 100%);
   overflow: hidden;
-}
+  transition: background 0.4s ease;
 
-/* ── SVG Waves ── */
-.waves {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 120px;
-  z-index: 1;
-}
+  &.is-dark {
+    background: linear-gradient(135deg, #0a0e1a 0%, #131b2e 40%, #1a1f35 100%);
+    --card-bg: rgba(22, 28, 50, 0.75);
+    --card-border: rgba(99, 102, 241, 0.12);
+    --input-bg: rgba(255, 255, 255, 0.04);
+    --input-border: rgba(255, 255, 255, 0.08);
+    --input-hover-border: rgba(99, 102, 241, 0.35);
+    --input-focus-bg: rgba(99, 102, 241, 0.08);
+    --input-color: #e2e8f0;
+    --input-placeholder: rgba(148, 163, 184, 0.5);
+    --title-color: #fff;
+    --text-secondary: rgba(165, 180, 252, 0.7);
+    --version-color: rgba(148, 163, 184, 0.45);
+    --icon-color: rgba(148, 163, 184, 0.5);
+    --blob-1: rgba(99, 102, 241, 0.08);
+    --blob-2: rgba(139, 92, 246, 0.06);
+    --grid-color: rgba(99, 102, 241, 0.04);
+  }
 
-.waves-svg {
-  width: 100%;
-  height: 100%;
-}
-
-.wave-group {
-  animation: wave-drift 7s ease-in-out infinite alternate;
-}
-
-.wave {
-  fill: rgba(99, 102, 241, 0.07);
-  animation: wave-move 4s ease-in-out infinite alternate;
-}
-
-.wave-2 {
-  fill: rgba(99, 102, 241, 0.05);
-  animation-duration: 5s;
-  animation-delay: -0.5s;
-}
-
-.wave-3 {
-  fill: rgba(99, 102, 241, 0.03);
-  animation-duration: 6s;
-  animation-delay: -1s;
-}
-
-.wave-4 {
-  fill: rgba(99, 102, 241, 0.02);
-  animation-duration: 7s;
-  animation-delay: -1.5s;
-}
-
-@keyframes wave-drift {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-20px); }
-}
-
-@keyframes wave-move {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(-8px); }
-}
-
-/* ── Login Card ── */
-.login-card {
-  position: relative;
-  z-index: 2;
-  width: 420px;
-  max-width: 92%;
-  background: rgba(22, 28, 50, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(99, 102, 241, 0.15);
-  border-radius: 16px;
-  padding: 36px 36px 28px;
-  box-shadow:
-    0 0 60px rgba(99, 102, 241, 0.06),
-    0 8px 32px rgba(0, 0, 0, 0.4);
-  transition: box-shadow 0.3s ease;
-
-  &:hover {
-    box-shadow:
-      0 0 80px rgba(99, 102, 241, 0.1),
-      0 8px 40px rgba(0, 0, 0, 0.5);
+  &.is-light {
+    background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 40%, #c7d2fe 100%);
+    --card-bg: rgba(255, 255, 255, 0.75);
+    --card-border: rgba(99, 102, 241, 0.15);
+    --input-bg: rgba(255, 255, 255, 0.7);
+    --input-border: rgba(0, 0, 0, 0.08);
+    --input-hover-border: rgba(99, 102, 241, 0.4);
+    --input-focus-bg: rgba(99, 102, 241, 0.05);
+    --input-color: #1e293b;
+    --input-placeholder: rgba(100, 116, 139, 0.5);
+    --title-color: #1e293b;
+    --text-secondary: rgba(100, 116, 139, 0.8);
+    --version-color: rgba(100, 116, 139, 0.45);
+    --icon-color: rgba(100, 116, 139, 0.5);
+    --blob-1: rgba(99, 102, 241, 0.06);
+    --blob-2: rgba(139, 92, 246, 0.04);
+    --grid-color: rgba(99, 102, 241, 0.06);
   }
 }
 
-.card-header {
-  text-align: center;
-  margin-bottom: 24px;
+.login-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
 }
 
-.logo-area {
+.bg-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  animation: blob-float 20s ease-in-out infinite alternate;
+}
+
+.blob-1 {
+  width: 500px;
+  height: 500px;
+  top: -150px;
+  right: -100px;
+  background: var(--blob-1);
+}
+
+.blob-2 {
+  width: 400px;
+  height: 400px;
+  bottom: -100px;
+  left: -100px;
+  background: var(--blob-2);
+  animation-delay: -10s;
+}
+
+.bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(var(--grid-color) 1px, transparent 1px), linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 30%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 30%, transparent 70%);
+}
+
+@keyframes blob-float {
+  0% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -30px) scale(1.05); }
+  66% { transform: translate(-20px, 20px) scale(0.95); }
+  100% { transform: translate(20px, -10px) scale(1.02); }
+}
+
+.login-card {
+  position: relative;
+  z-index: 2;
+  width: 400px;
+  max-width: 92%;
+}
+
+.login-card-inner {
+  background: var(--card-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  padding: 36px 32px 28px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.2);
+  transition: all 0.4s ease;
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.login-logo {
   display: flex;
   justify-content: center;
-  margin-bottom: 0;
-}
-
-.logo-icon {
-  width: 72px;
-  height: 72px;
+  margin-bottom: 4px;
+  color: #818cf8;
   filter: drop-shadow(0 0 12px rgba(99, 102, 241, 0.3));
 }
 
-.panel-title {
-  margin: 16px 0 8px;
-  font-size: 26px;
+.login-title {
+  margin: 12px 0 6px;
+  font-size: 24px;
   font-weight: 700;
-  color: #fff;
+  color: var(--title-color);
   letter-spacing: 0.5px;
 }
 
-.version-text {
+.login-version {
   display: inline-block;
   margin-top: 6px;
   font-size: 11px;
   font-weight: 500;
-  color: rgba(148, 163, 184, 0.45);
+  color: var(--version-color);
   letter-spacing: 0.3px;
 }
 
-/* ── Animated Headline ── */
-.headline {
+.login-headline {
   position: relative;
-  height: 24px;
+  height: 20px;
   overflow: hidden;
 }
 
@@ -372,118 +329,69 @@ onBeforeUnmount(() => {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 400;
-  color: rgba(165, 180, 252, 0.7);
+  color: var(--text-secondary);
   white-space: nowrap;
   opacity: 0;
   transition: all 0.5s ease;
+  &.is-visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+  &.is-hidden { opacity: 0; transform: translateX(-50%) translateY(-12px); }
 }
 
-.headline-word.is-visible {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
-.headline-word.is-hidden {
-  opacity: 0;
-  transform: translateX(-50%) translateY(-12px);
-}
-
-/* ── Form ── */
-.login-form {
-  margin-bottom: 8px;
-}
+.login-form { margin-bottom: 4px; }
 
 :deep(.el-form-item) {
-  margin-bottom: 20px;
+  margin-bottom: 18px;
   border: none;
   background: transparent;
 }
 
 :deep(.el-input__wrapper) {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
   border-radius: 10px;
   box-shadow: none;
   padding: 0 12px;
   transition: all 0.25s ease;
-
-  &:hover {
-    border-color: rgba(99, 102, 241, 0.35);
-    background: rgba(255, 255, 255, 0.06);
-  }
-
-  &.is-focus {
-    border-color: #6366f1;
-    background: rgba(99, 102, 241, 0.08);
-    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.12);
-  }
+  &:hover { border-color: var(--input-hover-border); background: var(--input-bg); }
+  &.is-focus { border-color: #6366f1; background: var(--input-focus-bg); box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.12); }
 }
 
 :deep(.el-input__inner) {
-  color: #e2e8f0;
+  color: var(--input-color);
   background: transparent;
   border: none;
   height: 44px;
   font-size: 14px;
   caret-color: #818cf8;
-
-  &::placeholder {
-    color: rgba(148, 163, 184, 0.5);
-  }
-
+  &::placeholder { color: var(--input-placeholder); }
   &:-webkit-autofill {
     box-shadow: 0 0 0 1000px rgba(22, 28, 50, 0.95) inset !important;
-    -webkit-text-fill-color: #e2e8f0 !important;
+    -webkit-text-fill-color: var(--input-color) !important;
     border-radius: 8px;
   }
-
-  &:-webkit-autofill:hover,
-  &:-webkit-autofill:focus,
-  &:-webkit-autofill:active {
-    transition: color 99999s ease-out, background-color 99999s ease-out;
-    transition-delay: 99999s;
-  }
 }
 
-.input-icon {
-  width: 18px;
-  height: 18px;
-  color: rgba(148, 163, 184, 0.5);
-}
+.input-icon { width: 18px; height: 18px; color: var(--icon-color); }
 
 .eye-toggle {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  color: rgba(148, 163, 184, 0.5);
-  transition: color 0.2s;
-
-  &:hover {
-    color: rgba(148, 163, 184, 0.8);
-  }
+  display: flex; align-items: center; cursor: pointer;
+  color: var(--icon-color); transition: color 0.2s;
+  &:hover { color: var(--text-secondary); }
 }
 
-/* ── Captcha ── */
 .captcha-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
+  display: flex; align-items: center; gap: 10px; width: 100%;
 }
 
 .captcha-code {
-  display: flex;
-  align-items: center;
-  gap: 3px;
-  padding: 0 14px;
-  height: 44px;
+  display: flex; align-items: center; gap: 3px;
+  padding: 0 14px; height: 44px;
   background: rgba(99, 102, 241, 0.08);
   border: 1px solid rgba(99, 102, 241, 0.15);
   border-radius: 10px;
-  user-select: none;
-  flex-shrink: 0;
+  user-select: none; flex-shrink: 0;
 }
 
 .captcha-digit {
@@ -493,54 +401,20 @@ onBeforeUnmount(() => {
 }
 
 .captcha-refresh {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-left: 6px;
-  padding: 0;
-  border: none;
-  background: transparent;
-  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  margin-left: 6px; padding: 0; border: none;
+  background: transparent; cursor: pointer;
   color: rgba(148, 163, 184, 0.4);
   transition: color 0.2s;
-
-  &:hover {
-    color: rgba(99, 102, 241, 0.7);
-  }
+  &:hover { color: rgba(99, 102, 241, 0.7); }
 }
 
-.refresh-icon {
-  width: 16px;
-  height: 16px;
-}
+.refresh-icon { width: 16px; height: 16px; }
 
 .captcha-input {
-  flex: 1;
-  min-width: 0;
-
-  :deep(.el-input__wrapper) {
-    padding: 0 10px;
-  }
-
-  :deep(.el-input__inner) {
-    text-align: center;
-    font-family: "Courier New", monospace;
-    font-size: 18px;
-    letter-spacing: 4px;
-  }
-}
-
-/* ── Login Button ── */
-.login-btn-item {
-  margin-top: 4px;
-}
-
-.btn-wave-bg {
-  position: relative;
-  width: 100%;
-  height: 46px;
-  overflow: hidden;
-  border-radius: 10px;
+  flex: 1; min-width: 0;
+  :deep(.el-input__wrapper) { padding: 0 10px; }
+  :deep(.el-input__inner) { text-align: center; font-family: "Courier New", monospace; font-size: 18px; letter-spacing: 4px; }
 }
 
 .login-btn {
@@ -553,76 +427,43 @@ onBeforeUnmount(() => {
   border-radius: 10px;
   background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
   transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 300%;
-    height: 100%;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba(255, 255, 255, 0.15),
-      transparent
-    );
-    transition: left 0.6s ease;
-  }
-
-  &:hover::before {
-    left: 100%;
-  }
-
-  &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 24px rgba(99, 102, 241, 0.35);
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
+  &:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(99, 102, 241, 0.35); }
+  &:active { transform: translateY(0); }
 }
 
-/* ── Footer ── */
-.card-footer {
+.login-footer {
   display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
   justify-content: center;
-  margin-top: 8px;
-}
-
-.lang-select {
-  :deep(.el-input__wrapper) {
-    background: transparent;
-    border: none;
-    padding: 0;
-  }
-
-  :deep(.el-input__inner) {
-    color: rgba(148, 163, 184, 0.6);
-    font-size: 13px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--icon-color);
+  transition: all 0.2s ease;
+  &:hover {
+    background: var(--input-bg);
+    color: var(--text-secondary);
   }
 }
 
-/* ── Responsive ── */
+.login-lang {
+  :deep(.el-input__wrapper) { background: transparent; border: none; padding: 0; }
+  :deep(.el-input__inner) { color: var(--icon-color); font-size: 13px; }
+}
+
 @media (max-width: 480px) {
-  .login-card {
-    padding: 24px 20px 20px;
-  }
-
-  .logo-icon {
-    width: 60px;
-    height: 60px;
-  }
-
-  .panel-title {
-    font-size: 20px;
-  }
-
-  .waves {
-    height: 80px;
-  }
+  .login-card-inner { padding: 24px 20px 20px; }
+  .login-title { font-size: 20px; }
+  .login-logo { font-size: 2em; }
 }
 </style>

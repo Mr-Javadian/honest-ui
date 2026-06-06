@@ -5,7 +5,7 @@ export PATH
 
 hui_systemd_version="${1:-latest}"
 hui_docker_version=":${hui_systemd_version#v}"
-hui_script_version="v0.4.5"
+hui_script_version="v0.4.6"
 
 # ────────────────────────────────────────────── Color ─────────────────────────────────────────────────────
 ECHO_TYPE="echo -e"
@@ -741,15 +741,16 @@ main() {
   cd "$HOME" || exit 0
   init_var
 
-  # Ensure honest-ui command is always available
-  if [[ ! -L /usr/local/bin/honest-ui ]] || [[ ! -f /usr/local/honest-ui/honest-ui-menu.sh ]]; then
-    mkdir -p /usr/local/honest-ui
-    if [[ -f "$0" ]]; then
-      cp "$0" /usr/local/honest-ui/honest-ui-menu.sh 2>/dev/null
-    fi
-    chmod +x /usr/local/honest-ui/honest-ui-menu.sh 2>/dev/null || true
-    ln -sf /usr/local/honest-ui/honest-ui-menu.sh /usr/local/bin/honest-ui 2>/dev/null || true
+  set +e
+  mkdir -p /usr/local/honest-ui
+  if [[ -f "$0" ]] && [[ "$0" != */bash ]] && [[ "$0" != */sh ]]; then
+    cp "$0" /usr/local/honest-ui/honest-ui-menu.sh
+  else
+    curl -fsSL "https://raw.githubusercontent.com/Mr-Javadian/honest-ui/main/install.sh" -o /usr/local/honest-ui/honest-ui-menu.sh
   fi
+  chmod +x /usr/local/honest-ui/honest-ui-menu.sh
+  ln -sf /usr/local/honest-ui/honest-ui-menu.sh /usr/local/bin/honest-ui
+  set -e
 
   while :; do
     clear
@@ -770,8 +771,8 @@ main() {
     echo '  ║   ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝╚══════╝╚══════╝   ╚═╝   '
     echo '  ║                                                   ║'
     echo '  ║        Hysteria 2 Management Panel                ║'
-    printf "  ║  Script v%-42s║\n" "${hui_script_version}"
-    [[ -n "${panel_ver}" ]] && printf "  ║  Panel %-42s║\n" "${panel_ver}"
+    printf "  ║  %-55s║\n" "Script ${hui_script_version}"
+    [[ -n "${panel_ver}" ]] && printf "  ║  %-55s║\n" "Panel ${panel_ver}"
     echo '  ╚═══════════════════════════════════════════════════╝'
     echo -e "${reset}"
     echo

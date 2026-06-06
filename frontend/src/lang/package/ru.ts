@@ -1,19 +1,16 @@
 export default {
   // 路由国际化
   route: {
-    account: "Аккаунт",
-    accountList: "Управление аккаунтами",
+    overview: "Обзор",
+    clients: "Клиенты",
+    clientsList: "Клиенты",
     hysteria: "Hysteria",
     hysteriaList: "Управление Hysteria",
     config: "Система",
     configList: "Системные настройки",
-    monitor: "Мониторинг",
-    monitorSystem: "Мониторинг системы",
     log: "Логи",
     logSystem: "Системные логи",
     logHysteria: "Логи Hysteria",
-    info: "Информация",
-    infoAccount: "Информация об аккаунте",
     telegram: "Telegram",
     telegramList: "Управление Telegram",
   },
@@ -62,7 +59,7 @@ export default {
     yes: "Да",
     no: "Нет",
     securityRisk: "Риски безопасности",
-    defaultPassTip: `Пожалуйста, как можно скорее смените пароль входа по умолчанию. Рекомендуется установить сложный пароль для защиты вашей учетной записи. <a href="/#/account/list?focus=change-pass" style="color: #00BFFF">Нажмите здесь</a>, чтобы изменить`,
+    defaultPassTip: `Пожалуйста, как можно скорее смените пароль входа по умолчанию. Рекомендуется установить сложный пароль для защиты вашей учетной записи. <a href="/#/clients/list?focus=change-pass" style="color: #00BFFF">Нажмите здесь</a>, чтобы изменить`,
     noHttpsTip: `Ваш сайт не использует HTTPS, из-за чего передача данных небезопасна. Пожалуйста, как можно скорее включите HTTPS для защиты пользовательских данных. <a href="/#/config/list?focus=huiHttps" style="color: #00BFFF">Нажмите здесь</a>, чтобы включить`,
   },
   info: {

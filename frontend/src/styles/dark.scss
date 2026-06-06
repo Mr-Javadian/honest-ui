@@ -11,10 +11,7 @@ html.dark {
     color: var(--el-text-color-regular);
     background-color: var(--el-bg-color);
     border-bottom: 1px solid var(--el-border-color-light);
-
-    .setting-container .setting-item:hover {
-      background: var(--el-fill-color-light);
-    }
+    .setting-container .setting-item:hover { background: var(--el-fill-color-light); }
   }
 
   .right-panel-btn {
@@ -23,9 +20,6 @@ html.dark {
 
   .sidebar-container {
     border-right: 1px solid rgba(255, 255, 255, 0.03);
-    
-    .el-menu-item.is-active .svg-icon {
-      fill: var(--el-color-primary);
-    }
+    .el-menu-item.is-active .svg-icon { fill: var(--el-color-primary); }
   }
 }

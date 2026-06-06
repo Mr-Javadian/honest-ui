@@ -1,19 +1,16 @@
 export default {
   // 路由国际化
   route: {
-    account: "Account",
-    accountList: "Account Manage",
+    overview: "Overview",
+    clients: "Clients",
+    clientsList: "Clients",
     hysteria: "Hysteria",
     hysteriaList: "Hysteria Manage",
     config: "System",
     configList: "System Config",
-    monitor: "Monitor",
-    monitorSystem: "System Monitor",
     log: "Log",
     logSystem: "System Log",
     logHysteria: "Hysteria Log",
-    info: "Info",
-    infoAccount: "Account Info",
     telegram: "Telegram",
     telegramList: "Telegram Manage",
   },
@@ -62,7 +59,7 @@ export default {
     yes: "Yes",
     no: "No",
     securityRisk: "Security Risks",
-    defaultPassTip: `Please change the default login password as soon as possible, It is recommended to set a strong password to protect your account security. <a href="/#/account/list?focus=change-pass" style="color: #00BFFF">Click here</a> to change`,
+    defaultPassTip: `Please change the default login password as soon as possible, It is recommended to set a strong password to protect your account security. <a href="/#/clients/list?focus=change-pass" style="color: #00BFFF">Click here</a> to change`,
     noHttpsTip: `Your website is not using HTTPS, making data transmission insecure, Please enable HTTPS as soon as possible to protect user information. <a href="/#/config/list?focus=huiHttps" style="color: #00BFFF">Click here</a> to enable`,
   },
   info: {

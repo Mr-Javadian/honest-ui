@@ -29,7 +29,7 @@ export const constantRoutes: RouteRecordRaw[] = [
   {
     path: "/",
     component: Layout,
-    redirect: "/info/account",
+    redirect: "/overview",
     children: [
       {
         path: "401",
@@ -47,41 +47,41 @@ export const constantRoutes: RouteRecordRaw[] = [
 
 export const asyncRoutes: any[] = [
   {
-    path: "/info",
+    path: "/overview",
     component: "Layout",
-    redirect: "/account",
-    name: "Info",
+    redirect: "/overview",
+    name: "Overview",
     meta: {
-      title: "info",
-      icon: "user",
+      title: "overview",
+      icon: "report",
       roles: ["user", "admin"],
     },
     children: [
       {
-        path: "account",
-        component: "info/account/index",
-        name: "AccountInfo",
+        path: "index",
+        component: "overview/index",
+        name: "OverviewIndex",
         meta: {
-          title: "infoAccount",
-          icon: "user",
+          title: "overview",
+          icon: "report",
           roles: ["user", "admin"],
         },
       },
     ],
   },
   {
-    path: "/account",
+    path: "/clients",
     component: "Layout",
     redirect: "/list",
-    name: "Account",
-    meta: { title: "account", icon: "users", roles: ["admin"] },
+    name: "Clients",
+    meta: { title: "clients", icon: "users", roles: ["admin"] },
     children: [
       {
         path: "list",
         component: "account/list/index",
-        name: "AccountList",
+        name: "ClientsList",
         meta: {
-          title: "accountList",
+          title: "clientsList",
           icon: "users",
           roles: ["admin"],
         },
@@ -148,25 +148,6 @@ export const asyncRoutes: any[] = [
         props: (route: RouteLocationNormalized) => ({
           focus: route.query.focus,
         }),
-      },
-    ],
-  },
-  {
-    path: "/monitor",
-    component: "Layout",
-    redirect: "/monitor",
-    name: "Monitor",
-    meta: { title: "monitor", icon: "report", roles: ["admin"] },
-    children: [
-      {
-        path: "system",
-        component: "monitor/system/index",
-        name: "MonitorSystem",
-        meta: {
-          title: "monitorSystem",
-          icon: "report",
-          roles: ["admin"],
-        },
       },
     ],
   },

@@ -1,19 +1,16 @@
 export default {
   // 路由国际化
   route: {
-    account: "账户",
-    accountList: "账户管理",
+    overview: "概览",
+    clients: "客户端",
+    clientsList: "客户端",
     hysteria: "Hysteria",
     hysteriaList: "Hysteria 管理",
     config: "系统",
     configList: "系统设置",
-    monitor: "监控",
-    monitorSystem: "系统监控",
     log: "日志",
     logSystem: "系统日志",
     logHysteria: "Hysteria 日志",
-    info: "信息",
-    infoAccount: "账户信息",
     telegram: "Telegram",
     telegramList: "Telegram 管理",
   },
@@ -62,7 +59,7 @@ export default {
     yes: "是",
     no: "否",
     securityRisk: `安全隐患`,
-    defaultPassTip: `请尽快修改默认登录密码，建议设置强密码以保护您的账户安全。<a href="/#/account/list?focus=change-pass" style="color: #00BFFF">点击这里</a>修改`,
+    defaultPassTip: `请尽快修改默认登录密码，建议设置强密码以保护您的账户安全。<a href="/#/clients/list?focus=change-pass" style="color: #00BFFF">点击这里</a>修改`,
     noHttpsTip: `您的网站未启用 HTTPS，数据传输不安全，请尽快开启 HTTPS 以保护用户信息。<a href="/#/config/list?focus=huiHttps" style="color: #00BFFF">点击这里</a>开启`,
   },
   info: {
