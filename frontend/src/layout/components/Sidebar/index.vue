@@ -7,6 +7,7 @@ import { usePermissionStore } from "@/store/modules/permission";
 import { useAppStore } from "@/store/modules/app";
 import { storeToRefs } from "pinia";
 import variables from "@/styles/variables.module.scss";
+import { APP_VERSION_PREFIXED } from "@/settings";
 
 const settingsStore = useSettingsStore();
 const permissionStore = usePermissionStore();
@@ -39,7 +40,7 @@ const isCollapsed = computed(() => !appStore.sidebar.opened);
         />
       </el-menu>
     </el-scrollbar>
-    <div v-if="isCollapsed" class="sidebar-version-collapsed">v0.4.6</div>
+    <div v-if="isCollapsed" class="sidebar-version-collapsed">{{ APP_VERSION_PREFIXED }}</div>
   </div>
 </template>
 

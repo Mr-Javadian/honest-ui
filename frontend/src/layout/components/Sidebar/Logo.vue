@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { useSettingsStore } from "@/store/modules/settings";
+import { APP_VERSION_PREFIXED } from "@/settings";
 
 const settingsStore = useSettingsStore();
 
@@ -16,7 +17,7 @@ const logo = ref(new URL(`../../../assets/logo.png`, import.meta.url).href);
       <img v-if="settingsStore.sidebarLogo" :src="logo" class="sidebar-logo-img" />
       <div v-if="!collapse" class="sidebar-logo-text-wrap">
         <span class="sidebar-logo-text">Honest-UI</span>
-        <span class="sidebar-logo-version">v0.4.6</span>
+        <span class="sidebar-logo-version">{{ APP_VERSION_PREFIXED }}</span>
       </div>
     </router-link>
   </div>

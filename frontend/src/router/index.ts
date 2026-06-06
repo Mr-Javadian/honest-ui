@@ -49,7 +49,7 @@ export const asyncRoutes: any[] = [
   {
     path: "/overview",
     component: "Layout",
-    redirect: "/overview",
+    redirect: { path: "/overview/index" },
     name: "Overview",
     meta: {
       title: "overview",

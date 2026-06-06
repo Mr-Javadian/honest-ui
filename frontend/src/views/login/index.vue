@@ -81,10 +81,12 @@ import { useAccountStore } from "@/store/modules/account";
 import { LocationQuery, LocationQueryValue, useRoute } from "vue-router";
 import { AccountLoginDto } from "@/api/account/types";
 
+import { APP_VERSION } from "@/settings";
+
 const accountStore = useAccountStore();
 const route = useRoute();
 
-const appVersion = "0.4.6";
+const appVersion = APP_VERSION;
 const loading = ref(false);
 const isCapslock = ref(false);
 const passVisible = ref(false);
@@ -98,7 +100,7 @@ const isDark = useDark();
 const toggleDark = useToggle(isDark);
 const toggleTheme = () => toggleDark();
 
-const headlineWords = ["Hysteria 2", "Management Panel", "Secure & Fast"];
+const headlineWords = ["Hysteria", "Management Panel", "Secure & Fast"];
 
 const headlineClass = (i: number) => ({
   "is-visible": i === headlineCurrent,
