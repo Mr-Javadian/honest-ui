@@ -3,7 +3,6 @@
     <div class="login-bg">
       <div class="bg-blob blob-1"></div>
       <div class="bg-blob blob-2"></div>
-      <div class="bg-grid"></div>
     </div>
 
     <div class="login-card">
@@ -183,12 +182,11 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  transition: background 0.4s ease;
 
   &.is-dark {
     background: linear-gradient(135deg, #0a0e1a 0%, #131b2e 40%, #1a1f35 100%);
-    --card-bg: rgba(22, 28, 50, 0.75);
-    --card-border: rgba(99, 102, 241, 0.12);
+    --card-bg: rgba(20, 26, 48, 0.92);
+    --card-border: rgba(99, 102, 241, 0.15);
     --input-bg: rgba(255, 255, 255, 0.04);
     --input-border: rgba(255, 255, 255, 0.08);
     --input-hover-border: rgba(99, 102, 241, 0.35);
@@ -199,15 +197,14 @@ onBeforeUnmount(() => {
     --text-secondary: rgba(165, 180, 252, 0.7);
     --version-color: rgba(148, 163, 184, 0.45);
     --icon-color: rgba(148, 163, 184, 0.5);
-    --blob-1: rgba(99, 102, 241, 0.08);
-    --blob-2: rgba(139, 92, 246, 0.06);
-    --grid-color: rgba(99, 102, 241, 0.04);
+    --blob-1: rgba(99, 102, 241, 0.06);
+    --blob-2: rgba(139, 92, 246, 0.04);
   }
 
   &.is-light {
     background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 40%, #c7d2fe 100%);
-    --card-bg: rgba(255, 255, 255, 0.75);
-    --card-border: rgba(99, 102, 241, 0.15);
+    --card-bg: rgba(255, 255, 255, 0.92);
+    --card-border: rgba(99, 102, 241, 0.18);
     --input-bg: rgba(255, 255, 255, 0.7);
     --input-border: rgba(0, 0, 0, 0.08);
     --input-hover-border: rgba(99, 102, 241, 0.4);
@@ -218,9 +215,8 @@ onBeforeUnmount(() => {
     --text-secondary: rgba(100, 116, 139, 0.8);
     --version-color: rgba(100, 116, 139, 0.45);
     --icon-color: rgba(100, 116, 139, 0.5);
-    --blob-1: rgba(99, 102, 241, 0.06);
-    --blob-2: rgba(139, 92, 246, 0.04);
-    --grid-color: rgba(99, 102, 241, 0.06);
+    --blob-1: rgba(99, 102, 241, 0.05);
+    --blob-2: rgba(139, 92, 246, 0.03);
   }
 }
 
@@ -234,41 +230,23 @@ onBeforeUnmount(() => {
 .bg-blob {
   position: absolute;
   border-radius: 50%;
-  filter: blur(80px);
-  animation: blob-float 20s ease-in-out infinite alternate;
+  opacity: 0.6;
 }
 
 .blob-1 {
-  width: 500px;
-  height: 500px;
-  top: -150px;
-  right: -100px;
-  background: var(--blob-1);
+  width: 300px;
+  height: 300px;
+  top: -80px;
+  right: -60px;
+  background: linear-gradient(135deg, #6366f1, #818cf8);
 }
 
 .blob-2 {
-  width: 400px;
-  height: 400px;
-  bottom: -100px;
-  left: -100px;
-  background: var(--blob-2);
-  animation-delay: -10s;
-}
-
-.bg-grid {
-  position: absolute;
-  inset: 0;
-  background-image: linear-gradient(var(--grid-color) 1px, transparent 1px), linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
-  background-size: 64px 64px;
-  mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 30%, transparent 70%);
-  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 30%, transparent 70%);
-}
-
-@keyframes blob-float {
-  0% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(30px, -30px) scale(1.05); }
-  66% { transform: translate(-20px, 20px) scale(0.95); }
-  100% { transform: translate(20px, -10px) scale(1.02); }
+  width: 250px;
+  height: 250px;
+  bottom: -60px;
+  left: -60px;
+  background: linear-gradient(135deg, #a78bfa, #7c3aed);
 }
 
 .login-card {
@@ -280,13 +258,10 @@ onBeforeUnmount(() => {
 
 .login-card-inner {
   background: var(--card-bg);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
   border: 1px solid var(--card-border);
   border-radius: 20px;
   padding: 36px 32px 28px;
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.2);
-  transition: all 0.4s ease;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.15);
 }
 
 .login-header {
