@@ -5,6 +5,7 @@ export PATH
 
 hui_systemd_version="${1:-latest}"
 hui_docker_version=":${hui_systemd_version#v}"
+hui_script_version="v0.4.5"
 
 # ────────────────────────────────────────────── Color ─────────────────────────────────────────────────────
 ECHO_TYPE="echo -e"
@@ -382,17 +383,34 @@ uninstall_h_ui_systemd() {
     return
   fi
 
+  echo_content yellow "  ───────────────────────────────────────────────"
+  echo_content yellow "  [!] This will COMPLETELY remove Honest-UI:"
+  echo "      • Panel binary & systemd service"
+  echo "      • Database & all configuration"
+  echo "      • All user data & traffic logs"
+  echo "      • Port forwarding rules"
+  echo_content red "  [!] This action CANNOT be undone!"
+  echo_content yellow "  ───────────────────────────────────────────────"
+  echo
+  read -r -p "  Are you sure? [y/N]: " confirm_uninstall
+  [[ "${confirm_uninstall}" != "y" && "${confirm_uninstall}" != "Y" ]] && { echo "  [i] Uninstall cancelled."; read -r -p "  Press Enter to continue..."; return; }
+
   echo "  [*] Stopping service..." && systemctl stop honest-ui 2>/dev/null || true
   echo "  [*] Disabling & removing service..."
   systemctl disable honest-ui.service 2>/dev/null || true
   rm -f /etc/systemd/system/honest-ui.service
   systemctl daemon-reload && systemctl reset-failed 2>/dev/null || true
   echo "  [*] Removing data..."
-  rm -rf /usr/local/honest-ui/
-  rm -f /usr/local/bin/honest-ui
+  rm -f /usr/local/honest-ui/honest-ui
+  rm -rf /usr/local/honest-ui/data
+  rm -rf /usr/local/honest-ui/bin
+  rm -rf /usr/local/honest-ui/export
+  rm -rf /usr/local/honest-ui/logs
   sed -i '/^HUI_DATA=/d' /etc/environment 2>/dev/null || true
   remove_forward
   echo -e "  [\xE2\x9C\x93] Honest-UI uninstalled"
+  echo_content yellow "  [!] The 'honest-ui' menu command is still available."
+  echo "      To reinstall the panel, run: honest-ui"
   read -r -p "  Press Enter to continue..."
 }
 
@@ -507,6 +525,18 @@ uninstall_h_ui_docker() {
   command -v docker &>/dev/null || { echo_content red "  [!] Docker not installed"; read -r -p "  Press Enter to continue..."; return; }
   docker ps -a -q -f "name=^honest-ui$" 2>/dev/null | grep -q . || { echo_content red "  [!] Honest-UI not installed"; read -r -p "  Press Enter to continue..."; return; }
 
+  echo_content yellow "  ───────────────────────────────────────────────"
+  echo_content yellow "  [!] This will COMPLETELY remove Honest-UI:"
+  echo "      • Docker container & image"
+  echo "      • Database & all configuration"
+  echo "      • All user data & traffic logs"
+  echo "      • Port forwarding rules"
+  echo_content red "  [!] This action CANNOT be undone!"
+  echo_content yellow "  ───────────────────────────────────────────────"
+  echo
+  read -r -p "  Are you sure? [y/N]: " confirm_uninstall
+  [[ "${confirm_uninstall}" != "y" && "${confirm_uninstall}" != "Y" ]] && { echo "  [i] Uninstall cancelled."; read -r -p "  Press Enter to continue..."; return; }
+
   echo "  [*] Removing container..." && docker rm -f honest-ui
   echo "  [*] Removing image..." && docker images mr-javadian/honest-ui -q | xargs -r docker rmi -f
   echo "  [*] Removing data..." && rm -rf /honest-ui/
@@ -578,6 +608,27 @@ change_web_port() {
 }
 
 reset_sysadmin() {
+  local found_reset=false
+
+  if systemctl list-units --type=service --all 2>/dev/null | grep -q 'honest-ui.service'; then
+    found_reset=true
+  fi
+  if command -v docker &>/dev/null && docker ps -a -q -f "name=^honest-ui$" 2>/dev/null | grep -q .; then
+    found_reset=true
+  fi
+
+  ${found_reset} || { echo_content red "  [!] Honest-UI not installed"; read -r -p "  Press Enter to continue..."; return; }
+
+  echo_content yellow "  ───────────────────────────────────────────────"
+  echo_content yellow "  [!] This will reset the admin password:"
+  echo "      • A new random password will be generated"
+  echo "      • The current password will stop working"
+  echo "      • All other data remains intact"
+  echo_content yellow "  ───────────────────────────────────────────────"
+  echo
+  read -r -p "  Are you sure? [y/N]: " confirm_reset
+  [[ "${confirm_reset}" != "y" && "${confirm_reset}" != "Y" ]] && { echo "  [i] Reset cancelled."; read -r -p "  Press Enter to continue..."; return; }
+
   if systemctl list-units --type=service --all 2>/dev/null | grep -q 'honest-ui.service'; then
     export HUI_DATA="${HUI_DATA_SYSTEMD}"
     echo "  [*] Resetting (systemd)..."
@@ -690,11 +741,20 @@ main() {
   cd "$HOME" || exit 0
   init_var
 
+  # Ensure honest-ui command is always available
+  if [[ ! -L /usr/local/bin/honest-ui ]] || [[ ! -f /usr/local/honest-ui/honest-ui-menu.sh ]]; then
+    mkdir -p /usr/local/honest-ui
+    if [[ -f "$0" ]]; then
+      cp "$0" /usr/local/honest-ui/honest-ui-menu.sh 2>/dev/null
+    fi
+    chmod +x /usr/local/honest-ui/honest-ui-menu.sh 2>/dev/null || true
+    ln -sf /usr/local/honest-ui/honest-ui-menu.sh /usr/local/bin/honest-ui 2>/dev/null || true
+  fi
+
   while :; do
     clear
-    local installed_ver
-    installed_ver=$(get_installed_version)
-    [[ -z "${installed_ver}" ]] && installed_ver="${hui_systemd_version}"
+    local panel_ver
+    panel_ver=$(get_installed_version)
 
     # Banner
     local cyan="\033[36m"
@@ -710,7 +770,8 @@ main() {
     echo '  ║   ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝╚══════╝╚══════╝   ╚═╝   '
     echo '  ║                                                   ║'
     echo '  ║        Hysteria 2 Management Panel                ║'
-    printf "  ║  Version %-41s║\n" "${installed_ver}"
+    printf "  ║  Script v%-42s║\n" "${hui_script_version}"
+    [[ -n "${panel_ver}" ]] && printf "  ║  Panel %-42s║\n" "${panel_ver}"
     echo '  ╚═══════════════════════════════════════════════════╝'
     echo -e "${reset}"
     echo

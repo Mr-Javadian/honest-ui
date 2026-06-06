@@ -23,6 +23,8 @@
     <a href="./README_zh-CN.md">简体中文</a>
     <span> · </span>
     <a href="./README_RU.md">Русский</a>
+    <span> · </span>
+    <a href="./README_FA.md">فارسی</a>
   </p>
 
   <pre style="background:#1a1a2e;color:#a5b4fc;padding:16px;border-radius:12px;font-family:'SF Mono','Fira Code','Consolas',monospace;line-height:1.5;text-align:left;max-width:640px;margin:16px auto;">
