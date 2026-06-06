@@ -75,7 +75,7 @@ onMounted(() => {
           :class="{ active: theme === 'ultra-dark' }"
           @click="theme !== 'ultra-dark' && cycleTheme()"
         >
-          <i-ep-moon-filled />
+          <i-ep-star-filled />
         </button>
       </el-tooltip>
     </div>

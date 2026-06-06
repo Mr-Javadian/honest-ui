@@ -8,6 +8,28 @@ import variables from "@/styles/variables.module.scss";
 import { APP_VERSION_PREFIXED } from "@/settings";
 import { useAppTheme } from "@/hooks/useTheme";
 
+import IEpDataAnalysis from "~icons/ep/data-analysis";
+import IEpUser from "~icons/ep/user";
+import IEpSetting from "~icons/ep/setting";
+import IEpTools from "~icons/ep/tools";
+import IEpChatDotSquare from "~icons/ep/chat-dot-square";
+import IEpConnection from "~icons/ep/connection";
+import IEpDocumentCopy from "~icons/ep/document-copy";
+import IEpDocument from "~icons/ep/document";
+import IEpTickets from "~icons/ep/tickets";
+
+const iconMap: Record<string, any> = {
+  "data-analysis": IEpDataAnalysis,
+  user: IEpUser,
+  setting: IEpSetting,
+  tools: IEpTools,
+  "chat-dot-square": IEpChatDotSquare,
+  connection: IEpConnection,
+  "document-copy": IEpDocumentCopy,
+  document: IEpDocument,
+  tickets: IEpTickets,
+};
+
 const appStore = useAppStore();
 const accountStore = useAccountStore();
 const tagsViewStore = useTagsViewStore();
@@ -90,7 +112,6 @@ function logout() {
       });
   });
 }
-
 </script>
 
 <template>
@@ -113,7 +134,7 @@ function logout() {
         <template v-for="item in menuItems" :key="item.key || item.path">
           <el-sub-menu v-if="item.children" :index="item.key!">
             <template #title>
-              <el-icon><component :is="`i-ep-${item.icon}`" /></el-icon>
+              <el-icon><component :is="iconMap[item.icon]" /></el-icon>
               <span>{{ $t(`route.${item.title}`) }}</span>
             </template>
             <el-menu-item
@@ -121,12 +142,12 @@ function logout() {
               :key="child.path"
               :index="child.path"
             >
-              <el-icon><component :is="`i-ep-${child.icon}`" /></el-icon>
+              <el-icon><component :is="iconMap[child.icon]" /></el-icon>
               <template #title>{{ $t(`route.${child.title}`) }}</template>
             </el-menu-item>
           </el-sub-menu>
           <el-menu-item v-else :index="item.path">
-            <el-icon><component :is="`i-ep-${item.icon}`" /></el-icon>
+            <el-icon><component :is="iconMap[item.icon]" /></el-icon>
             <template #title>{{ $t(`route.${item.title}`) }}</template>
           </el-menu-item>
         </template>
@@ -142,10 +163,10 @@ function logout() {
           <el-icon :size="18">
             <i-ep-sunny v-if="theme === 'light'" />
             <i-ep-moon v-else-if="theme === 'dark'" />
-            <i-ep-moon-filled v-else />
+            <i-ep-star-filled v-else />
           </el-icon>
         </el-tooltip>
-        <span v-if="!isCollapsed" class="sidebar-bottom-label">{{ $t("navbar.theme") || "Theme" }}</span>
+        <span v-if="!isCollapsed" class="sidebar-bottom-label">{{ $t("navbar.theme") }}</span>
       </div>
 
       <div class="sidebar-bottom-item" @click="toggleSidebar">
