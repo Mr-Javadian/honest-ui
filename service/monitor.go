@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"fmt"
+	"github.com/Mr-Javadian/honest-ui/dao"
 	"github.com/Mr-Javadian/honest-ui/model/constant"
 	"github.com/Mr-Javadian/honest-ui/model/vo"
 	"github.com/Mr-Javadian/honest-ui/util"
@@ -61,4 +62,34 @@ func MonitorHysteria2() (vo.Hysteria2MonitorVo, error) {
 	running := Hysteria2IsRunning()
 	hysteria2MonitorVo.Running = running
 	return hysteria2MonitorVo, nil
+}
+
+func MonitorDashboard() (vo.DashboardVo, error) {
+	var dashboardVo vo.DashboardVo
+	systemVo, err := MonitorSystem()
+	if err != nil {
+		return dashboardVo, err
+	}
+	hotsVo, err := MonitorHysteria2()
+	if err != nil {
+		return dashboardVo, err
+	}
+	totalDownload, totalUpload, totalUsers, err := dao.AggregateAccountStats()
+	if err != nil {
+		return dashboardVo, err
+	}
+	dashboardVo = vo.DashboardVo{
+		HUIVersion:    systemVo.HUIVersion,
+		CpuPercent:    systemVo.CpuPercent,
+		MemPercent:    systemVo.MemPercent,
+		DiskPercent:   systemVo.DiskPercent,
+		UserTotal:     hotsVo.UserTotal,
+		DeviceTotal:   hotsVo.DeviceTotal,
+		Version:       hotsVo.Version,
+		Running:       hotsVo.Running,
+		TotalDownload: totalDownload,
+		TotalUpload:   totalUpload,
+		TotalUsers:    totalUsers,
+	}
+	return dashboardVo, nil
 }

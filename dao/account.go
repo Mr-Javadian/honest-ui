@@ -3,12 +3,12 @@ package dao
 import (
 	"errors"
 	"fmt"
-	"github.com/sirupsen/logrus"
-	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 	"github.com/Mr-Javadian/honest-ui/model/constant"
 	"github.com/Mr-Javadian/honest-ui/model/dto"
 	"github.com/Mr-Javadian/honest-ui/model/entity"
+	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 	"time"
 )
 
@@ -88,7 +88,7 @@ func GetAccount(query interface{}, args ...interface{}) (entity.Account, error) 
 func PageAccount(accountPageDto dto.AccountPageDto) ([]entity.Account, int64, error) {
 	var accounts []entity.Account
 	var total int64
-	tx := sqliteDB.Model(&entity.Account{})
+	tx := sqliteDB.Model(&entity.Account{}).Where("role != ?", "admin")
 	if accountPageDto.Username != nil && *accountPageDto.Username != "" {
 		tx.Where("username like ?", fmt.Sprintf("%%%s%%", *accountPageDto.Username))
 	}
@@ -106,6 +106,23 @@ func PageAccount(accountPageDto dto.AccountPageDto) ([]entity.Account, int64, er
 		return accounts, 0, errors.New(constant.SysError)
 	}
 	return accounts, total, nil
+}
+
+func AggregateAccountStats() (totalDownload, totalUpload, totalUsers int64, err error) {
+	row := sqliteDB.Model(&entity.Account{}).
+		Select("COALESCE(SUM(download),0) as download, COALESCE(SUM(upload),0) as upload, COUNT(*) as count").
+		Where("role != ? AND deleted = ?", "admin", 0).
+		Row()
+	if row.Err() != nil {
+		logrus.Errorf("%v", row.Err())
+		return 0, 0, 0, errors.New(constant.SysError)
+	}
+	err = row.Scan(&totalDownload, &totalUpload, &totalUsers)
+	if err != nil {
+		logrus.Errorf("%v", err)
+		return 0, 0, 0, errors.New(constant.SysError)
+	}
+	return
 }
 
 func ListAccount(query interface{}, args ...interface{}) ([]entity.Account, error) {

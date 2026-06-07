@@ -173,6 +173,40 @@
             </el-form-item>
           </div>
         </div>
+
+        <el-divider />
+
+        <div class="form-section">
+          <h3 class="section-title">Interface Settings</h3>
+          <div class="interface-row">
+            <div class="interface-item">
+              <span class="interface-label">Language</span>
+              <lang-select class="interface-control" />
+            </div>
+            <div class="interface-item">
+              <span class="interface-label">Layout Size</span>
+              <size-select class="interface-control" />
+            </div>
+            <div class="interface-item">
+              <span class="interface-label">Theme</span>
+              <div class="theme-group">
+                <button class="theme-btn" :class="{ active: theme === 'light' }" @click="theme !== 'light' && cycleTheme()"><i-ep-sunny /></button>
+                <button class="theme-btn" :class="{ active: theme === 'dark' }" @click="theme !== 'dark' && cycleTheme()"><i-ep-moon /></button>
+                <button class="theme-btn" :class="{ active: theme === 'ultra-dark' }" @click="theme !== 'ultra-dark' && cycleTheme()"><i-ep-star-filled /></button>
+              </div>
+            </div>
+            <div class="interface-item">
+              <span class="interface-label">Sidebar Logo</span>
+              <el-switch v-model="settingsStore.sidebarLogo" />
+            </div>
+            <div class="interface-item">
+              <span class="interface-label">Theme Color</span>
+              <div class="color-group">
+                <span v-for="color in themeColors" :key="color" class="color-swatch" :style="{ background: color }" @click="changeThemeColor(color)" />
+              </div>
+            </div>
+          </div>
+        </div>
       </el-form>
     </el-card>
   </div>
@@ -181,10 +215,15 @@
 <script lang="ts">
 export default {
   name: "index",
+  components: { LangSelect, SizeSelect },
 };
 </script>
 
 <script setup lang="ts">
+import LangSelect from "@/components/LangSelect/index.vue";
+import SizeSelect from "@/components/SizeSelect/index.vue";
+import { useSettingsStore } from "@/store/modules/settings";
+import { useAppTheme } from "@/hooks/useTheme";
 import { Select } from "@element-plus/icons-vue";
 import {
   exportConfigApi,
@@ -204,6 +243,16 @@ import {
 import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
 import { UploadUserFile } from "element-plus";
+
+const settingsStore = useSettingsStore();
+const { theme, cycleTheme } = useAppTheme();
+
+const themeColors = ref<string[]>(["#409EFF", "#304156", "#11a983", "#13c2c2", "#6959CD", "#f5222d"]);
+
+function changeThemeColor(color: string) {
+  settingsStore.changeSetting({ key: "themeColor", value: color });
+  document.documentElement.style.setProperty("--el-color-primary", settingsStore.themeColor);
+}
 
 const { t } = useI18n();
 const route = useRoute();
@@ -569,6 +618,86 @@ onMounted(() => {
 
   .form-row {
     grid-template-columns: 1fr;
+  }
+}
+
+.interface-row {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.interface-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+
+.interface-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+}
+
+.interface-control {
+  :deep(.el-input__wrapper) {
+    background: transparent;
+    border: none;
+    padding: 0;
+  }
+  :deep(.el-input__inner) {
+    font-size: 13px;
+  }
+}
+
+.theme-group {
+  display: flex;
+  gap: 6px;
+}
+
+.theme-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--el-border-color-light);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: var(--el-fill-color-light);
+  color: var(--el-text-color-secondary);
+  font-size: 16px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: var(--el-fill-color);
+    color: var(--el-color-primary);
+  }
+
+  &.active {
+    border-color: var(--el-color-primary);
+    color: var(--el-color-primary);
+    background: color-mix(in srgb, var(--el-color-primary) 15%, transparent);
+  }
+}
+
+.color-group {
+  display: flex;
+  gap: 6px;
+}
+
+.color-swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: scale(1.15);
+    border-color: var(--el-color-primary);
   }
 }
 </style>

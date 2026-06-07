@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"github.com/gin-gonic/gin"
 	"github.com/Mr-Javadian/honest-ui/model/vo"
 	"github.com/Mr-Javadian/honest-ui/service"
+	"github.com/gin-gonic/gin"
 )
 
 func MonitorSystem(c *gin.Context) {
@@ -22,4 +22,13 @@ func MonitorHysteria2(c *gin.Context) {
 		return
 	}
 	vo.Success(hysteria2MonitorVo, c)
+}
+
+func MonitorDashboard(c *gin.Context) {
+	dashboardVo, err := service.MonitorDashboard()
+	if err != nil {
+		vo.Fail(err.Error(), c)
+		return
+	}
+	vo.Success(dashboardVo, c)
 }

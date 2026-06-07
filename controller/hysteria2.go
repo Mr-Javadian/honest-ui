@@ -3,14 +3,14 @@ package controller
 import (
 	"encoding/base64"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/skip2/go-qrcode"
 	"github.com/Mr-Javadian/honest-ui/model/constant"
 	"github.com/Mr-Javadian/honest-ui/model/dto"
 	"github.com/Mr-Javadian/honest-ui/model/entity"
 	"github.com/Mr-Javadian/honest-ui/model/vo"
 	"github.com/Mr-Javadian/honest-ui/service"
 	"github.com/Mr-Javadian/honest-ui/util"
+	"github.com/gin-gonic/gin"
+	"github.com/skip2/go-qrcode"
 	"net/url"
 	"os"
 	"strings"
@@ -77,6 +77,15 @@ func Hysteria2ChangeVersion(c *gin.Context) {
 		return
 	}
 
+	vo.Success(nil, c)
+}
+
+func Hysteria2Restart(c *gin.Context) {
+	err := service.RestartHysteria2()
+	if err != nil {
+		vo.Fail(err.Error(), c)
+		return
+	}
 	vo.Success(nil, c)
 }
 

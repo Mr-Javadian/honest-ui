@@ -9,7 +9,7 @@
       <div class="login-card-inner">
         <div class="login-header">
           <div class="login-logo">
-            <svg-icon icon-class="honestui" size="2.4em" />
+            <img :src="loginLogo" class="login-logo-img" />
           </div>
           <h2 class="login-title">{{ $t("login.title") }}</h2>
           <div class="login-headline">
@@ -81,6 +81,7 @@ import { useAccountStore } from "@/store/modules/account";
 import { LocationQuery, LocationQueryValue, useRoute } from "vue-router";
 import { AccountLoginDto } from "@/api/account/types";
 
+import loginLogo from "@/assets/logo.png";
 import { APP_VERSION } from "@/settings";
 
 const accountStore = useAccountStore();
@@ -275,7 +276,12 @@ onBeforeUnmount(() => {
   display: flex;
   justify-content: center;
   margin-bottom: 4px;
-  color: #818cf8;
+}
+
+.login-logo-img {
+  width: 72px;
+  height: 72px;
+  border-radius: 18px;
   filter: drop-shadow(0 0 12px rgba(99, 102, 241, 0.3));
 }
 

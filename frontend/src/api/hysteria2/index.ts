@@ -30,6 +30,13 @@ export function hysteria2ChangeVersionApi(
   });
 }
 
+export function restartHysteria2Api(): AxiosPromise {
+  return request({
+    url: "/hysteria2/hysteria2Restart",
+    method: "post",
+  });
+}
+
 export function listReleaseApi(): AxiosPromise<string[]> {
   return request({
     url: "/hysteria2/listRelease",

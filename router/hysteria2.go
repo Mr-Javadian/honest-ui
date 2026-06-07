@@ -1,8 +1,8 @@
 package router
 
 import (
-	"github.com/gin-gonic/gin"
 	"github.com/Mr-Javadian/honest-ui/controller"
+	"github.com/gin-gonic/gin"
 )
 
 func initHysteria2AuthRouter(hysteria2Api *gin.RouterGroup) {
@@ -19,6 +19,7 @@ func initHysteria2Router(hysteria2Api *gin.RouterGroup) {
 	{
 		hysteria2.POST("/hysteria2Kick", controller.Hysteria2Kick)
 		hysteria2.POST("/hysteria2ChangeVersion", controller.Hysteria2ChangeVersion)
+		hysteria2.POST("/hysteria2Restart", controller.Hysteria2Restart)
 		hysteria2.GET("/listRelease", controller.ListRelease)
 		hysteria2.GET("/hysteria2SubscribeUrl", controller.Hysteria2SubscribeUrl)
 		hysteria2.GET("/hysteria2Url", controller.Hysteria2Url)

@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { computed, watchEffect } from "vue";
 import { useWindowSize } from "@vueuse/core";
-import { AppMain, Navbar, Settings } from "./components/index";
+import { AppMain, Navbar } from "./components/index";
 import Sidebar from "./components/Sidebar/index.vue";
-import RightPanel from "@/components/RightPanel/index.vue";
 
 import { useAppStore } from "@/store/modules/app";
 import { useSettingsStore } from "@/store/modules/settings";
@@ -16,7 +15,6 @@ const appStore = useAppStore();
 const settingsStore = useSettingsStore();
 
 const fixedHeader = computed(() => settingsStore.fixedHeader);
-const showSettings = computed(() => settingsStore.showSettings);
 
 const classObj = computed(() => ({
   hideSidebar: !appStore.sidebar.opened,
@@ -61,10 +59,6 @@ function handleOutsideClick() {
       </div>
 
       <app-main />
-
-      <RightPanel v-if="showSettings">
-        <settings />
-      </RightPanel>
     </div>
   </div>
 </template>

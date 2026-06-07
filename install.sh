@@ -5,7 +5,7 @@ export PATH
 
 hui_systemd_version="${1:-latest}"
 hui_docker_version=":${hui_systemd_version#v}"
-hui_script_version="v0.5.0"
+hui_script_version="v0.5.1"
 
 # ────────────────────────────────────────────── Color ─────────────────────────────────────────────────────
 ECHO_TYPE="echo -e"
