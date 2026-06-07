@@ -125,8 +125,12 @@ func MonitorOnlineUsers() ([]vo.OnlineUserVo, error) {
 		devices := deviceCount
 		var download, upload int64
 		if acc, ok := trafficMap[u]; ok {
-			download = acc.Download
-			upload = acc.Upload
+			if acc.Download != nil {
+				download = *acc.Download
+			}
+			if acc.Upload != nil {
+				upload = *acc.Upload
+			}
 		}
 		result = append(result, vo.OnlineUserVo{
 			Username:    u,
