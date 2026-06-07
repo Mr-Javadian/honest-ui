@@ -6,6 +6,13 @@
   --sidebar-hover: var(--el-fill-color-light);
   --sidebar-sub-bg: rgba(0, 0, 0, 0.02);
   --sidebar-sub-hover: rgba(0, 0, 0, 0.04);
+  --menuBg: #fff;
+  --menuText: var(--el-text-color-regular);
+  --menuActiveText: var(--el-color-primary);
+  --menuHover: var(--el-fill-color-light);
+  --subMenuBg: transparent;
+  --subMenuActiveText: var(--el-color-primary);
+  --subMenuHover: var(--el-fill-color-lighter);
 }
 
 @import "./sidebar";

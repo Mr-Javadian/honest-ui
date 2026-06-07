@@ -223,7 +223,7 @@ function logout() {
 
 .sidebar-bottom {
   flex: 0 0 auto;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 1px solid var(--sidebar-border, var(--el-border-color-light));
   padding: 4px 0;
   display: flex;
   flex-direction: column;
@@ -239,17 +239,18 @@ function logout() {
   height: 36px;
   border-radius: 8px;
   cursor: pointer;
-  color: var(--menuText, #cdd6f4);
+  color: var(--sidebar-text, var(--el-text-color-secondary));
   transition: all 0.2s ease;
   user-select: none;
 
   &:hover {
-    background-color: var(--menuHover, #313244);
+    background-color: var(--sidebar-hover, var(--el-fill-color-light));
     color: var(--el-color-primary);
   }
 
   .el-icon {
     flex-shrink: 0;
+    color: var(--sidebar-icon, var(--el-text-color-secondary));
   }
 }
 
@@ -271,7 +272,7 @@ function logout() {
 .sidebar-footer {
   flex: 0 0 auto;
   padding: 8px 12px 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 1px solid var(--sidebar-border, var(--el-border-color-light));
 }
 
 .sidebar-version-link {
@@ -280,12 +281,12 @@ function logout() {
   justify-content: center;
   gap: 8px;
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--sidebar-text, var(--el-text-color-placeholder));
   text-decoration: none;
   transition: color 0.2s;
 
   &:hover {
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--el-color-primary);
   }
 
   .el-icon {
@@ -299,7 +300,7 @@ function logout() {
   left: 50%;
   transform: translateX(-50%);
   font-size: 9px;
-  color: rgba(255, 255, 255, 0.2);
+  color: var(--sidebar-text, var(--el-text-color-placeholder));
   letter-spacing: 0.3px;
   white-space: nowrap;
 }

@@ -65,7 +65,7 @@
                 />
               </el-form-item>
               <el-form-item :label="$t('config.timezone') || 'System Timezone'" prop="timeZone">
-                <el-select v-model="dataForm.timeZone" filterable allow-create clearable :placeholder="$t('config.selectTimezone') || 'Select timezone'">
+                <el-select v-model="dataForm.timeZone" filterable clearable :placeholder="$t('config.selectTimezone') || 'Select timezone'">
                   <el-option v-for="tz in timezoneList" :key="tz" :label="tz" :value="tz" />
                 </el-select>
               </el-form-item>
@@ -100,11 +100,10 @@
                 <el-tooltip
                   :content="$t('config.resetTrafficCronTip') || 'Select schedule: Daily, Weekly, Monthly, or Never'"
                   placement="bottom"
+                  :teleported="false"
                 >
                   <el-select
                     v-model="dataForm.resetTrafficCron"
-                    filterable
-                    allow-create
                     clearable
                     :placeholder="$t('config.resetTrafficCron') || 'Select schedule: Daily, Weekly, Monthly, or Never'"
                   >
@@ -314,7 +313,7 @@ import { UploadUserFile } from "element-plus";
 const settingsStore = useSettingsStore();
 const { theme, cycleTheme } = useAppTheme();
 
-const themeColors = ref<string[]>(["#409EFF", "#304156", "#11a983", "#13c2c2", "#6959CD", "#f5222d"]);
+const themeColors = ["#409EFF", "#304156", "#11a983", "#13c2c2", "#6959CD", "#f5222d"];
 
 function changeThemeColor(color: string) {
   settingsStore.changeSetting({ key: "themeColor", value: color });
@@ -344,13 +343,13 @@ const timezoneList = [
 ];
 
 const huiHttpsList = [
-  { key: t("common.yes"), value: 1 },
-  { key: t("common.no"), value: 0 },
+  { key: "Yes", value: 1 },
+  { key: "No", value: 0 },
 ];
 
 const cronResetTraffic = [
-  { key: t("config.resetTrafficMonth"), value: "@monthly" },
-  { key: t("config.resetTrafficWeek"), value: "@weekly" },
+  { key: "Monthly", value: "@monthly" },
+  { key: "Weekly", value: "@weekly" },
 ];
 
 const dataFormRules = {
