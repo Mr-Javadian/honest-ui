@@ -8,6 +8,9 @@ import (
 	"github.com/Mr-Javadian/honest-ui/model/entity"
 	"github.com/Mr-Javadian/honest-ui/model/vo"
 	"github.com/Mr-Javadian/honest-ui/util"
+	"io"
+	"net"
+	"net/http"
 	"regexp"
 	"strings"
 	"time"
@@ -100,6 +103,32 @@ func MonitorDashboard() (vo.DashboardVo, error) {
 		TotalUsers:    totalUsers,
 	}
 	return dashboardVo, nil
+}
+
+func MonitorNetwork() vo.NetworkInfoVo {
+	var info vo.NetworkInfoVo
+
+	conn, err := net.Dial("udp", "8.8.8.8:80")
+	if err == nil {
+		info.LocalIPv4 = conn.LocalAddr().(*net.UDPAddr).IP.String()
+		conn.Close()
+	}
+
+	resp, err := http.Get("https://api.ipify.org?format=text")
+	if err == nil {
+		body, _ := io.ReadAll(resp.Body)
+		info.PublicIPv4 = strings.TrimSpace(string(body))
+		resp.Body.Close()
+	}
+
+	resp, err = http.Get("https://api6.ipify.org?format=text")
+	if err == nil {
+		body, _ := io.ReadAll(resp.Body)
+		info.PublicIPv6 = strings.TrimSpace(string(body))
+		resp.Body.Close()
+	}
+
+	return info
 }
 
 func MonitorOnlineUsers() ([]vo.OnlineUserVo, error) {

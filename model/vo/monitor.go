@@ -36,3 +36,9 @@ type OnlineUserVo struct {
 	Download    int64  `json:"download"`
 	Upload      int64  `json:"upload"`
 }
+
+type NetworkInfoVo struct {
+	LocalIPv4  string `json:"localIPv4"`
+	PublicIPv4 string `json:"publicIPv4"`
+	PublicIPv6 string `json:"publicIPv6"`
+}

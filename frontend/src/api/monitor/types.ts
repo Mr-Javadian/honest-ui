@@ -34,3 +34,9 @@ export interface OnlineUserVo {
   download: number;
   upload: number;
 }
+
+export interface NetworkInfoVo {
+  localIPv4: string;
+  publicIPv4: string;
+  publicIPv6: string;
+}

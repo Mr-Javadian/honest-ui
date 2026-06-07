@@ -5,7 +5,7 @@ export PATH
 
 hui_systemd_version="${1:-latest}"
 hui_docker_version=":${hui_systemd_version#v}"
-hui_script_version="v0.5.6"
+hui_script_version="v0.5.7"
 
 # ────────────────────────────────────────────── Color ─────────────────────────────────────────────────────
 ECHO_TYPE="echo -e"
@@ -370,8 +370,8 @@ upgrade_h_ui_systemd() {
   echo "      • Downtime: ~10-20 seconds"
   echo_content yellow "  ───────────────────────────────────────────────"
   echo
-  read -r -p "  Are you sure you want to proceed with the upgrade? [y/N]: " confirm_upgrade
-  [[ "${confirm_upgrade}" != "y" && "${confirm_upgrade}" != "Y" ]] && { echo "  [i] Upgrade cancelled."; read -r -p "  Press Enter to continue..."; return; }
+  read -r -p "  Are you sure you want to proceed with the upgrade? [Y/n]: " confirm_upgrade
+  [[ "${confirm_upgrade}" == "n" || "${confirm_upgrade}" == "N" ]] && { echo "  [i] Upgrade cancelled."; read -r -p "  Press Enter to continue..."; return; }
 
   echo "  [*] Stopping service..."
   systemctl stop honest-ui 2>/dev/null || true
@@ -529,8 +529,8 @@ upgrade_h_ui_docker() {
   echo "      • Downtime: ~30-60 seconds"
   echo_content yellow "  ───────────────────────────────────────────────"
   echo
-  read -r -p "  Are you sure you want to proceed with the upgrade? [y/N]: " confirm_upgrade
-  [[ "${confirm_upgrade}" != "y" && "${confirm_upgrade}" != "Y" ]] && { echo "  [i] Upgrade cancelled."; read -r -p "  Press Enter to continue..."; return; }
+  read -r -p "  Are you sure you want to proceed with the upgrade? [Y/n]: " confirm_upgrade
+  [[ "${confirm_upgrade}" == "n" || "${confirm_upgrade}" == "N" ]] && { echo "  [i] Upgrade cancelled."; read -r -p "  Press Enter to continue..."; return; }
 
   echo "  [*] Removing old container..." && docker rm -f honest-ui && docker rmi mr-javadian/honest-ui 2>/dev/null || true
   echo "  [*] Deploying new version..."

@@ -41,3 +41,8 @@ func MonitorOnlineUsers(c *gin.Context) {
 	}
 	vo.Success(onlineUsers, c)
 }
+
+func MonitorNetwork(c *gin.Context) {
+	networkInfo := service.MonitorNetwork()
+	vo.Success(networkInfo, c)
+}

@@ -5,13 +5,6 @@
         <h2 class="header-title">{{ $t("route.overview") }}</h2>
         <p class="header-subtitle">Server monitoring & statistics</p>
       </div>
-      <div class="header-right">
-        <span class="badge badge-version">{{ dash.huiVersion || "-" }}</span>
-        <span class="badge" :class="dash.running ? 'badge-on' : 'badge-off'">
-          <span class="dot" :class="dash.running ? 'dot-green' : 'dot-red'"></span>
-          {{ dash.running ? "Running" : "Stopped" }}
-        </span>
-      </div>
     </div>
 
     <div class="grid-3">
@@ -27,7 +20,6 @@
         <div class="gauge-label">{{ g.label }}</div>
         <div class="gauge-sub">{{ g.sub }}</div>
       </div>
-
     </div>
 
     <div class="grid-4">
@@ -115,21 +107,21 @@
           </div>
         </div>
         <div class="info-body">
-          <div class="info-row"><span class="info-key">Version</span><span class="info-val">{{ dash.huiVersion || "-" }}</span></div>
-          <div class="info-row"><span class="info-key">Status</span><span class="info-val" style="color:#34d399">Running</span></div>
+          <div class="info-row"><span class="info-key">Version</span><span class="info-val info-val-lg">{{ dash.huiVersion || "-" }}</span></div>
+          <div class="info-row"><span class="info-key">Status</span><span class="info-val info-val-lg" style="color:#34d399">Running</span></div>
           <div class="info-divider"></div>
           <div class="info-row update-row">
             <span class="info-key">Update</span>
             <span v-if="updateStatus === 'checking'" class="info-val update-checking">Checking...</span>
             <span v-else-if="updateStatus === 'latest'" class="info-val update-latest">
-              <svg-icon icon-class="refresh" size="0.9em" style="margin-right:4px" />Latest
+              <svg-icon icon-class="refresh" size="1em" style="margin-right:4px" />Latest
             </span>
             <span v-else-if="updateStatus === 'available'" class="info-val update-available" @click="checkUpdate">
-              <svg-icon icon-class="error" size="0.9em" style="margin-right:4px;color:#f59e0b" />Update Required
+              <svg-icon icon-class="error" size="1em" style="margin-right:4px;color:#f59e0b" />Update Required
             </span>
             <span v-else class="info-val">
               <el-tooltip content="Check for updates" placement="top">
-                <el-button text size="small" @click="checkUpdate" style="padding:0;height:auto;font-size:12px">
+                <el-button text size="small" @click="checkUpdate" style="padding:0;height:auto;font-size:13px;font-weight:600">
                   Check Update
                 </el-button>
               </el-tooltip>
@@ -145,8 +137,8 @@
           </div>
         </div>
         <div class="info-body">
-          <div class="info-row"><span class="info-key">Version</span><span class="info-val">{{ dash.version || "-" }}</span></div>
-          <div class="info-row"><span class="info-key">Online</span><span class="info-val">{{ dash.userTotal }} users / {{ dash.deviceTotal }} devices</span></div>
+          <div class="info-row"><span class="info-key">Version</span><span class="info-val info-val-lg">{{ dash.version || "-" }}</span></div>
+          <div class="info-row"><span class="info-key">Online</span><span class="info-val info-val-lg">{{ dash.userTotal }} users / {{ dash.deviceTotal }} devices</span></div>
         </div>
       </div>
       <div class="card info-card">
@@ -157,13 +149,14 @@
           </div>
           <el-tooltip :content="ipsVisible ? 'Hide IP addresses' : 'Show IP addresses'" placement="top">
             <el-button text size="small" @click="toggleIps" class="eye-btn">
-              <svg-icon :icon-class="ipsVisible ? 'eye-open' : 'eye'" size="1.1em" />
+              <svg-icon :icon-class="ipsVisible ? 'eye-open' : 'eye'" size="1.2em" />
             </el-button>
           </el-tooltip>
         </div>
         <div class="info-body">
-          <div class="info-row"><span class="info-key">IPv4</span><span class="info-val ip-val" :class="{ masked: !ipsVisible }">{{ ipsVisible ? ipv4 : maskIp(ipv4) }}</span></div>
-          <div class="info-row"><span class="info-key">IPv6</span><span class="info-val ip-val" :class="{ masked: !ipsVisible }">{{ ipsVisible ? ipv6 : maskIp(ipv6) }}</span></div>
+          <div class="info-row"><span class="info-key">Local IPv4</span><span class="info-val ip-val" :class="{ masked: !ipsVisible }">{{ ipsVisible ? localIpv4 : maskIp(localIpv4) }}</span></div>
+          <div class="info-row"><span class="info-key">Public IPv4</span><span class="info-val ip-val" :class="{ masked: !ipsVisible }">{{ ipsVisible ? publicIpv4 : maskIp(publicIpv4) }}</span></div>
+          <div class="info-row"><span class="info-key">Public IPv6</span><span class="info-val ip-val" :class="{ masked: !ipsVisible }">{{ ipsVisible ? publicIpv6 : maskIp(publicIpv6) }}</span></div>
         </div>
       </div>
     </div>
@@ -175,7 +168,7 @@ export default { name: "OverviewIndex" }
 </script>
 
 <script setup lang="ts">
-import { monitorDashboardApi, monitorOnlineUsersApi } from "@/api/monitor";
+import { monitorDashboardApi, monitorNetworkApi, monitorOnlineUsersApi } from "@/api/monitor";
 import { OnlineUserVo } from "@/api/monitor/types";
 import { formatBytes } from "@/utils/byte";
 
@@ -191,8 +184,9 @@ const trafficRate = reactive({ download: 0, upload: 0 });
 const rateHistory = reactive<{ dl: number; ul: number }[]>([]);
 const prevTraffic = reactive({ download: 0, upload: 0 });
 
-const ipv4 = ref("");
-const ipv6 = ref("");
+const localIpv4 = ref("");
+const publicIpv4 = ref("");
+const publicIpv6 = ref("");
 const ipsVisible = ref(false);
 
 const updateStatus = ref<"idle" | "checking" | "latest" | "available">("idle");
@@ -211,14 +205,12 @@ function toggleIps() {
   ipsVisible.value = !ipsVisible.value;
 }
 
-async function fetchIps() {
+async function fetchNetwork() {
   try {
-    const v4 = await fetch("https://api.ipify.org?format=json").then(r => r.json());
-    ipv4.value = v4.ip;
-  } catch {}
-  try {
-    const v6 = await fetch("https://api6.ipify.org?format=json").then(r => r.json());
-    ipv6.value = v6.ip;
+    const { data } = await monitorNetworkApi();
+    localIpv4.value = data.localIPv4 || "";
+    publicIpv4.value = data.publicIPv4 || "";
+    publicIpv6.value = data.publicIPv6 || "";
   } catch {}
 }
 
@@ -228,7 +220,8 @@ async function checkUpdate() {
     const res = await fetch("https://api.github.com/repos/Mr-Javadian/honest-ui/releases/latest");
     const data = await res.json();
     const latestTag = data.tag_name || "";
-    const curTag = "v" + dash.huiVersion;
+    const curVer = dash.huiVersion || "";
+    const curTag = curVer.startsWith("v") ? curVer : "v" + curVer;
     if (latestTag === curTag || !latestTag) {
       updateStatus.value = "latest";
     } else {
@@ -288,7 +281,7 @@ const fetchOnlineUsers = () => {
 onMounted(() => {
   fetchDashboard();
   fetchOnlineUsers();
-  fetchIps();
+  fetchNetwork();
   dlTimer = setInterval(fetchDashboard, 2000);
   ulTimer = setInterval(calcRate, 2000);
   setInterval(fetchOnlineUsers, 5000);
@@ -304,17 +297,8 @@ onBeforeUnmount(() => {
 .dashboard { padding: 24px; }
 
 .dashboard-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
-.header-title { margin: 0 0 2px; font-size: 22px; font-weight: 700; color: var(--el-text-color-primary); }
-.header-subtitle { margin: 0; font-size: 13px; color: var(--el-text-color-secondary); }
-.header-right { display: flex; gap: 8px; }
-
-.badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-.badge-version { background: rgba(99,102,241,0.1); color: #818cf8; }
-.badge-on { background: rgba(52,211,153,0.1); color: #34d399; }
-.badge-off { background: rgba(239,68,68,0.1); color: #ef4444; }
-.dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
-.dot-green { background: #34d399; box-shadow: 0 0 6px rgba(52,211,153,0.5); }
-.dot-red { background: #ef4444; box-shadow: 0 0 6px rgba(239,68,68,0.5); }
+.header-title { margin: 0 0 2px; font-size: 24px; font-weight: 700; color: var(--el-text-color-primary); }
+.header-subtitle { margin: 0; font-size: 14px; color: var(--el-text-color-secondary); }
 
 .grid-3, .grid-4 { display: grid; gap: 16px; margin-bottom: 24px; }
 .grid-3 { grid-template-columns: repeat(3, 1fr); }
@@ -327,9 +311,9 @@ onBeforeUnmount(() => {
 .card-icon-box { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .card-body { display: flex; flex-direction: column; min-width: 0; }
 .card-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--el-text-color-secondary); margin-bottom: 2px; }
-.card-value { font-size: 20px; font-weight: 700; color: var(--el-text-color-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.card-sub { font-size: 11px; color: var(--el-text-color-placeholder); margin-top: 2px; }
-.card-rate { font-size: 12px; font-weight: 600; margin-top: 2px; }
+.card-value { font-size: 22px; font-weight: 700; color: var(--el-text-color-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card-sub { font-size: 12px; color: var(--el-text-color-placeholder); margin-top: 2px; }
+.card-rate { font-size: 13px; font-weight: 600; margin-top: 2px; }
 
 .gauge-card { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 24px 16px 20px; }
 .gauge-wrap { position: relative; width: 110px; height: 110px; margin-bottom: 10px; }
@@ -354,11 +338,12 @@ onBeforeUnmount(() => {
 .rate-legend { display: flex; gap: 16px; font-size: 11px; color: var(--el-text-color-secondary); }
 .legend-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 4px; vertical-align: middle; }
 
-.info-body { display: flex; flex-direction: column; gap: 10px; }
+.info-body { display: flex; flex-direction: column; gap: 12px; }
 .info-row { display: flex; justify-content: space-between; align-items: center; }
 .info-divider { height: 1px; background: var(--el-border-color-light); margin: 4px 0; }
-.info-key { font-size: 12px; color: var(--el-text-color-secondary); }
-.info-val { font-size: 13px; font-weight: 600; color: var(--el-text-color-primary); }
+.info-key { font-size: 13px; color: var(--el-text-color-secondary); }
+.info-val { font-size: 14px; font-weight: 600; color: var(--el-text-color-primary); }
+.info-val-lg { font-size: 14px; }
 
 .update-row .info-val { cursor: default; }
 .update-checking { color: var(--el-text-color-placeholder); font-weight: 400; }
@@ -367,11 +352,12 @@ onBeforeUnmount(() => {
 
 .ip-val {
   font-family: var(--el-font-family-mono, "SF Mono", "Fira Code", monospace);
-  font-size: 12px;
+  font-size: 13px;
   letter-spacing: 0.3px;
   &.masked {
     color: var(--el-text-color-placeholder);
     letter-spacing: 2px;
+    font-size: 13px;
   }
 }
 
