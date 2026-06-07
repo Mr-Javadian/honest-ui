@@ -56,6 +56,11 @@
                 clearable
               />
             </el-form-item>
+            <el-form-item label="Timezone" prop="timeZone">
+              <el-select v-model="dataForm.timeZone" filterable allow-create clearable placeholder="Select timezone">
+                <el-option v-for="tz in timezoneList" :key="tz" :label="tz" :value="tz" />
+              </el-select>
+            </el-form-item>
           </div>
         </div>
 
@@ -266,6 +271,15 @@ const hysteria2TrafficTimeKey = "HYSTERIA2_TRAFFIC_TIME";
 const huiCrtPathKey = "H_UI_CRT_PATH";
 const huiKeyPathKey = "H_UI_KEY_PATH";
 const resetTrafficCronKey = "RESET_TRAFFIC_CRON";
+const timeZoneKey = "TIME_ZONE";
+
+const timezoneList = [
+  "UTC", "UTC+1", "UTC+2", "UTC+3", "UTC+3:30", "UTC+4", "UTC+4:30", "UTC+5",
+  "UTC+5:30", "UTC+5:45", "UTC+6", "UTC+6:30", "UTC+7", "UTC+8", "UTC+8:45",
+  "UTC+9", "UTC+9:30", "UTC+10", "UTC+10:30", "UTC+11", "UTC+12", "UTC+12:45",
+  "UTC+13", "UTC+14", "UTC-1", "UTC-2", "UTC-3", "UTC-3:30", "UTC-4",
+  "UTC-5", "UTC-6", "UTC-7", "UTC-8", "UTC-9", "UTC-9:30", "UTC-10", "UTC-11", "UTC-12",
+];
 
 const huiHttpsList = [
   { key: t("common.yes"), value: 1 },
@@ -324,6 +338,7 @@ const state = reactive({
     huiCrtPath: "",
     huiKeyPath: "",
     resetTrafficCron: "",
+    timeZone: "",
   },
   huiHttps: 0,
   fileList: [] as UploadUserFile[],
@@ -374,6 +389,10 @@ const submitForm = () => {
           key: resetTrafficCronKey,
           value: state.dataForm.resetTrafficCron,
         },
+        {
+          key: timeZoneKey,
+          value: state.dataForm.timeZone,
+        },
       ];
 
       updateConfigsApi({ configUpdateDtos: configs }).then(() => {
@@ -392,6 +411,7 @@ const setConfig = async () => {
       huiWebPortKey,
       hysteria2TrafficTimeKey,
       resetTrafficCronKey,
+      timeZoneKey,
     ],
   });
 
@@ -408,6 +428,8 @@ const setConfig = async () => {
       state.dataForm.huiKeyPath = configVo.value;
     } else if (configVo.key === resetTrafficCronKey) {
       state.dataForm.resetTrafficCron = configVo.value;
+    } else if (configVo.key === timeZoneKey) {
+      state.dataForm.timeZone = configVo.value;
     }
   });
 

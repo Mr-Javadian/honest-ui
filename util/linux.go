@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/disk"
+	"github.com/shirou/gopsutil/host"
 	"github.com/shirou/gopsutil/mem"
 	"github.com/sirupsen/logrus"
 	"net"
@@ -79,6 +80,14 @@ func GetDiskPercent() (float64, error) {
 	diskInfo, err := disk.Usage(parts[0].Mountpoint)
 	value, err := strconv.ParseFloat(fmt.Sprintf("%.1f", diskInfo.UsedPercent), 64)
 	return value, err
+}
+
+func GetUptime() (uint64, error) {
+	hostInfo, err := host.Info()
+	if err != nil {
+		return 0, err
+	}
+	return hostInfo.Uptime, nil
 }
 
 func VerifyPort(port string) error {

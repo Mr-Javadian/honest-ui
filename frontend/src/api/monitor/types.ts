@@ -17,6 +17,7 @@ export interface DashboardVo {
   cpuPercent: number;
   memPercent: number;
   diskPercent: number;
+  uptime: number;
   userTotal: number;
   deviceTotal: number;
   version: string;
@@ -24,4 +25,11 @@ export interface DashboardVo {
   totalDownload: number;
   totalUpload: number;
   totalUsers: number;
+}
+
+export interface OnlineUserVo {
+  username: string;
+  deviceCount: number;
+  download: number;
+  upload: number;
 }

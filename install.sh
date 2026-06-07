@@ -5,7 +5,7 @@ export PATH
 
 hui_systemd_version="${1:-latest}"
 hui_docker_version=":${hui_systemd_version#v}"
-hui_script_version="v0.5.1"
+hui_script_version="v0.5.2"
 
 # ────────────────────────────────────────────── Color ─────────────────────────────────────────────────────
 ECHO_TYPE="echo -e"
@@ -608,14 +608,14 @@ change_web_port() {
 }
 
 _do_reset_credentials() {
-  local new_user="$1" new_pass="$2" new_con="$3"
+  local new_user="$1" new_pass="$2"
   if systemctl list-units --type=service --all 2>/dev/null | grep -q 'honest-ui.service'; then
     export HUI_DATA="${HUI_DATA_SYSTEMD}"
     local db_path="${HUI_DATA_SYSTEMD}data/h_ui.db"
     if [[ -f "${db_path}" ]] && command -v sqlite3 &>/dev/null && command -v openssl &>/dev/null; then
       local pass_hash
       pass_hash=$(echo -n "${new_pass}" | openssl dgst -sha224 2>/dev/null | awk '{print $NF}')
-      [[ -n "${pass_hash}" ]] && sqlite3 "${db_path}" "UPDATE account SET username='${new_user}', pass='${pass_hash}', con_pass='${new_con}' WHERE id=1" 2>/dev/null || true
+      [[ -n "${pass_hash}" ]] && sqlite3 "${db_path}" "UPDATE account SET username='${new_user}', pass='${pass_hash}', con_pass='' WHERE id=1" 2>/dev/null || true
     fi
     systemctl restart honest-ui
     echo -e "  [\xE2\x9C\x93] Credentials updated for systemd"
@@ -624,7 +624,7 @@ _do_reset_credentials() {
     local docker_db="/honest-ui/data/h_ui.db"
     local pass_hash
     pass_hash=$(echo -n "${new_pass}" | openssl dgst -sha224 2>/dev/null | awk '{print $NF}')
-    [[ -n "${pass_hash}" ]] && docker exec honest-ui sqlite3 "${docker_db}" "UPDATE account SET username='${new_user}', pass='${pass_hash}', con_pass='${new_con}' WHERE id=1" 2>/dev/null || true
+    [[ -n "${pass_hash}" ]] && docker exec honest-ui sqlite3 "${docker_db}" "UPDATE account SET username='${new_user}', pass='${pass_hash}', con_pass='' WHERE id=1" 2>/dev/null || true
     docker restart honest-ui 2>/dev/null || true
     echo -e "  [\xE2\x9C\x93] Credentials updated for Docker"
   fi
@@ -654,11 +654,10 @@ reset_sysadmin() {
     read -r -p "  Are you sure? [y/N]: " confirm_reset
     [[ "${confirm_reset}" != "y" && "${confirm_reset}" != "Y" ]] && { echo "  [i] Reset cancelled."; read -r -p "  Press Enter to continue..."; return; }
 
-    local admin_user admin_pass con_pass
+    local admin_user admin_pass
     admin_user=$(generate_strong_password 12)
     admin_pass=$(generate_strong_password 20)
-    con_pass="${admin_user}.${admin_pass}"
-    _do_reset_credentials "${admin_user}" "${admin_pass}" "${con_pass}"
+    _do_reset_credentials "${admin_user}" "${admin_pass}"
 
     echo
     echo_content green "  ───────────────────────────────────────────────"
@@ -666,7 +665,6 @@ reset_sysadmin() {
     echo_content green "  ───────────────────────────────────────────────"
     echo_content green "  Username: ${admin_user}"
     echo_content green "  Password: ${admin_pass}"
-    echo_content green "  ConPass:  ${con_pass}"
     echo_content green "  ───────────────────────────────────────────────"
     echo
   elif [[ "${reset_mode}" == "2" ]]; then
@@ -676,7 +674,6 @@ reset_sysadmin() {
     read -r -s -p "  Enter new password: " manual_pass
     echo
     [[ -z "${manual_pass}" ]] && { echo "  [i] Reset cancelled."; read -r -p "  Press Enter to continue..."; return; }
-    local manual_con="${manual_user}.${manual_pass}"
     echo
     echo_content yellow "  ───────────────────────────────────────────────"
     echo_content yellow "  [!] This will reset the admin credentials:"
@@ -687,7 +684,7 @@ reset_sysadmin() {
     echo
     read -r -p "  Apply these credentials? [y/N]: " confirm_manual
     [[ "${confirm_manual}" != "y" && "${confirm_manual}" != "Y" ]] && { echo "  [i] Reset cancelled."; read -r -p "  Press Enter to continue..."; return; }
-    _do_reset_credentials "${manual_user}" "${manual_pass}" "${manual_con}"
+    _do_reset_credentials "${manual_user}" "${manual_pass}"
   else
     echo_content red "  [!] Invalid option"; read -r -p "  Press Enter to continue..."; return
   fi

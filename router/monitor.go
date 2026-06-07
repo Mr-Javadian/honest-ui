@@ -11,5 +11,6 @@ func initMonitorRouter(accountApi *gin.RouterGroup) {
 		account.GET("/monitorSystem", controller.MonitorSystem)
 		account.GET("/monitorHysteria2", controller.MonitorHysteria2)
 		account.GET("/monitorDashboard", controller.MonitorDashboard)
+		account.GET("/monitorOnlineUsers", controller.MonitorOnlineUsers)
 	}
 }

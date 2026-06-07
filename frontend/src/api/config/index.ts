@@ -102,6 +102,13 @@ export function restartServerApi(): AxiosPromise {
   });
 }
 
+export function rebootServerApi(): AxiosPromise {
+  return request({
+    url: "/config/rebootServer",
+    method: "post",
+  });
+}
+
 export function uploadCertFileApi(data: FormData): AxiosPromise<string> {
   return request({
     url: "/config/uploadCertFile",

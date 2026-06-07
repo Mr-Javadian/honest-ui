@@ -1,6 +1,6 @@
 import { AxiosPromise } from "axios";
 import request from "@/utils/request";
-import { DashboardVo, Hysteria2MonitorVo, SystemMonitorVo } from "@/api/monitor/types";
+import { DashboardVo, Hysteria2MonitorVo, OnlineUserVo, SystemMonitorVo } from "@/api/monitor/types";
 
 export function monitorSystemApi(): AxiosPromise<SystemMonitorVo> {
   return request({
@@ -19,6 +19,13 @@ export function monitorHysteria2Api(): AxiosPromise<Hysteria2MonitorVo> {
 export function monitorDashboardApi(): AxiosPromise<DashboardVo> {
   return request({
     url: "/monitor/monitorDashboard",
+    method: "get",
+  });
+}
+
+export function monitorOnlineUsersApi(): AxiosPromise<OnlineUserVo[]> {
+  return request({
+    url: "/monitor/monitorOnlineUsers",
     method: "get",
   });
 }

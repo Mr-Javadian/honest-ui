@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
-import { restartServerApi } from "@/api/config";
+import { restartServerApi, rebootServerApi } from "@/api/config";
 import { restartHysteria2Api } from "@/api/hysteria2";
 
 const { t } = useI18n();
@@ -10,33 +10,21 @@ const actions = [
     label: "Restart Panel",
     icon: "refreshRight",
     desc: "This will restart the Honest-UI panel service. Active connections will be temporarily interrupted. The panel will come back online within a few seconds.",
-    action: () => restartPanel(),
+    action: restartServerApi,
   },
   {
     label: "Restart Hysteria2",
     icon: "connection",
     desc: "This will restart the Hysteria2 proxy service. All current VPN connections will be disconnected. Users will need to reconnect.",
-    action: () => restartHysteria(),
+    action: restartHysteria2Api,
   },
   {
     label: "Restart Server",
     icon: "monitor",
-    desc: "This will restart the entire server. All services including the panel and Hysteria2 will be stopped and the machine will reboot. This may take a minute or two.",
-    action: () => restartServer(),
+    desc: "This will reboot the entire machine. All services including the panel and Hysteria2 will be stopped. Your SSH connection will be lost and the server will come back online after reboot.",
+    action: rebootServerApi,
   },
 ];
-
-function restartPanel() {
-  return restartServerApi();
-}
-
-function restartHysteria() {
-  return restartHysteria2Api();
-}
-
-function restartServer() {
-  return restartServerApi();
-}
 
 function confirmAction(act: typeof actions[0]) {
   ElMessageBox.confirm(act.desc, act.label, {
@@ -65,6 +53,7 @@ function confirmAction(act: typeof actions[0]) {
         v-for="act in actions"
         :key="act.label"
         class="restart-btn"
+        :class="act.icon"
         @click="confirmAction(act)"
       >
         <el-icon :size="16">
@@ -110,21 +99,25 @@ function confirmAction(act: typeof actions[0]) {
   border: 1px solid var(--el-border-color-light);
   border-radius: 8px;
   background: var(--el-fill-color-blank);
-  color: var(--el-text-color-secondary);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
 
-  &:hover {
-    border-color: var(--el-color-primary);
-    color: var(--el-color-primary);
-    background: color-mix(in srgb, var(--el-color-primary) 8%, transparent);
+  &.refreshRight {
+    color: #f59e0b;
+    &:hover { border-color: #f59e0b; background: rgba(245,158,11,0.08); }
+  }
+  &.connection {
+    color: #3b82f6;
+    &:hover { border-color: #3b82f6; background: rgba(59,130,246,0.08); }
+  }
+  &.monitor {
+    color: #ef4444;
+    &:hover { border-color: #ef4444; background: rgba(239,68,68,0.08); }
   }
 
-  &:active {
-    transform: scale(0.97);
-  }
+  &:active { transform: scale(0.97); }
 }
 </style>

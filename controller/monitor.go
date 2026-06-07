@@ -32,3 +32,12 @@ func MonitorDashboard(c *gin.Context) {
 	}
 	vo.Success(dashboardVo, c)
 }
+
+func MonitorOnlineUsers(c *gin.Context) {
+	onlineUsers, err := service.MonitorOnlineUsers()
+	if err != nil {
+		vo.Fail(err.Error(), c)
+		return
+	}
+	vo.Success(onlineUsers, c)
+}

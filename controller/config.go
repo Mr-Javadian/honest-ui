@@ -3,9 +3,6 @@ package controller
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
-	"gopkg.in/yaml.v3"
 	"github.com/Mr-Javadian/honest-ui/dao"
 	"github.com/Mr-Javadian/honest-ui/model/bo"
 	"github.com/Mr-Javadian/honest-ui/model/constant"
@@ -14,6 +11,9 @@ import (
 	"github.com/Mr-Javadian/honest-ui/model/vo"
 	"github.com/Mr-Javadian/honest-ui/service"
 	"github.com/Mr-Javadian/honest-ui/util"
+	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
+	"gopkg.in/yaml.v3"
 	"io"
 	"os"
 	"path/filepath"
@@ -461,6 +461,14 @@ func Hysteria2AcmePath(c *gin.Context) {
 func RestartServer(c *gin.Context) {
 	go func() {
 		_ = service.StopServer()
+	}()
+	vo.Success(nil, c)
+}
+
+func RebootServer(c *gin.Context) {
+	go func() {
+		_ = service.StopServer()
+		_ = util.Exec("shutdown -r now")
 	}()
 	vo.Success(nil, c)
 }

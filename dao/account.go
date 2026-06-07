@@ -125,6 +125,18 @@ func AggregateAccountStats() (totalDownload, totalUpload, totalUsers int64, err 
 	return
 }
 
+func ListAccountByUsernames(usernames []string) ([]entity.Account, error) {
+	var accounts []entity.Account
+	if tx := sqliteDB.Model(&entity.Account{}).
+		Where("username IN ? AND deleted = 0", usernames).
+		Order("download + upload desc").
+		Find(&accounts); tx.Error != nil {
+		logrus.Errorf("%v", tx.Error)
+		return accounts, errors.New(constant.SysError)
+	}
+	return accounts, nil
+}
+
 func ListAccount(query interface{}, args ...interface{}) ([]entity.Account, error) {
 	var accounts []entity.Account
 	if tx := sqliteDB.Model(&entity.Account{}).

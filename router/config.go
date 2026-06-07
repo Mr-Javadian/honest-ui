@@ -1,8 +1,8 @@
 package router
 
 import (
-	"github.com/gin-gonic/gin"
 	"github.com/Mr-Javadian/honest-ui/controller"
+	"github.com/gin-gonic/gin"
 )
 
 func initConfigRouter(configApi *gin.RouterGroup) {
@@ -19,6 +19,7 @@ func initConfigRouter(configApi *gin.RouterGroup) {
 		config.POST("/importConfig", controller.ImportConfig)
 		config.GET("/hysteria2AcmePath", controller.Hysteria2AcmePath)
 		config.POST("/restartServer", controller.RestartServer)
+		config.POST("/rebootServer", controller.RebootServer)
 		config.POST("/uploadCertFile", controller.UploadCertFile)
 	}
 }
