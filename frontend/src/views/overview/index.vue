@@ -1,12 +1,5 @@
 <template>
   <div class="dashboard">
-    <div class="dashboard-header">
-      <div class="header-left">
-        <h2 class="header-title">{{ $t("route.overview") }}</h2>
-        <p class="header-subtitle">Server monitoring & statistics</p>
-      </div>
-    </div>
-
     <div class="grid-3">
       <div class="card gauge-card" v-for="g in gauges" :key="g.label">
         <div class="gauge-wrap">
@@ -295,10 +288,6 @@ onBeforeUnmount(() => {
 
 <style lang="scss" scoped>
 .dashboard { padding: 24px; }
-
-.dashboard-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
-.header-title { margin: 0 0 2px; font-size: 24px; font-weight: 700; color: var(--el-text-color-primary); }
-.header-subtitle { margin: 0; font-size: 14px; color: var(--el-text-color-secondary); }
 
 .grid-3, .grid-4 { display: grid; gap: 16px; margin-bottom: 24px; }
 .grid-3 { grid-template-columns: repeat(3, 1fr); }

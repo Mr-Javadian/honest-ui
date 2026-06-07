@@ -26,7 +26,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	token, err := service.Login(*loginDto.Username, util.SHA224String(*loginDto.Pass))
+	token, err := service.Login(*loginDto.Username, *loginDto.Pass)
 	if err != nil {
 		vo.Fail(err.Error(), c)
 		return
@@ -334,5 +334,5 @@ func VerifyDefaultPass(c *gin.Context) {
 		vo.Fail(err.Error(), c)
 		return
 	}
-	vo.Success(account.Pass != nil && *account.Pass == "02f382b76ca1ab7aa06ab03345c7712fd5b971fb0c0f2aef98bac9cd", c)
+	vo.Success(account.Pass != nil && util.IsDefaultPassword(*account.Pass), c)
 }

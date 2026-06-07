@@ -7,6 +7,7 @@ import { useTagsViewStore } from "@/store/modules/tagsView";
 import variables from "@/styles/variables.module.scss";
 import { APP_VERSION_PREFIXED } from "@/settings";
 import { useAppTheme } from "@/hooks/useTheme";
+import { performUpdateApi } from "@/api/config";
 
 import IEpDataAnalysis from "~icons/ep/data-analysis";
 import IEpUser from "~icons/ep/user";
@@ -112,6 +113,33 @@ function logout() {
       });
   });
 }
+
+async function checkPanelUpdate() {
+  try {
+    const res = await fetch("https://api.github.com/repos/Mr-Javadian/honest-ui/releases/latest");
+    const data = await res.json();
+    const latestTag = data.tag_name || "";
+    const ver = APP_VERSION_PREFIXED;
+    if (latestTag === ver || !latestTag) {
+      ElMessage.info("You are already running the latest version");
+      return;
+    }
+    ElMessageBox.confirm(
+      `New version ${latestTag} is available (current: ${ver}). Update now? The panel will restart during the update.`,
+      "Update Available",
+      { confirmButtonText: "Update", cancelButtonText: "Cancel", type: "info" }
+    ).then(async () => {
+      try {
+        await performUpdateApi();
+        ElMessage.success("Update downloaded. Restarting panel...");
+      } catch {
+        ElMessage.error("Update failed. Try manual update via terminal.");
+      }
+    }).catch(() => {});
+  } catch {
+    ElMessage.error("Could not check for updates. Check internet connection.");
+  }
+}
 </script>
 
 <template>
@@ -202,6 +230,9 @@ function logout() {
       >
         <el-icon><i-ep-link /></el-icon>
         <span>{{ APP_VERSION_PREFIXED }}</span>
+        <el-tooltip content="Check for updates" placement="top">
+          <el-icon class="update-icon" @click.prevent="checkPanelUpdate"><i-ep-refreshRight /></el-icon>
+        </el-tooltip>
       </a>
       <div v-else class="sidebar-version-collapsed">{{ APP_VERSION_PREFIXED }}</div>
     </div>
@@ -291,6 +322,13 @@ function logout() {
 
   .el-icon {
     font-size: 14px;
+  }
+
+  .update-icon {
+    font-size: 16px;
+    cursor: pointer;
+    transition: color 0.2s;
+    &:hover { color: var(--el-color-primary); }
   }
 }
 

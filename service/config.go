@@ -9,8 +9,14 @@ import (
 	"github.com/Mr-Javadian/honest-ui/model/bo"
 	"github.com/Mr-Javadian/honest-ui/model/constant"
 	"github.com/Mr-Javadian/honest-ui/model/entity"
+	"github.com/Mr-Javadian/honest-ui/util"
+	"io"
+	"net/http"
+	"os"
+	"runtime"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func UpdateConfig(key string, value string) error {
@@ -183,4 +189,68 @@ func GetAuthHttpUrl() (string, error) {
 		webContext = *config.Value
 	}
 	return fmt.Sprintf("%s://127.0.0.1:%d%s/hui/hysteria2/auth", protocol, port, webContext), nil
+}
+
+func PerformUpdate() error {
+	exe, err := os.Executable()
+	if err != nil {
+		return fmt.Errorf("failed to get executable path: %v", err)
+	}
+
+	arch := runtime.GOARCH
+	binaryName := "honest-ui-linux-" + arch
+
+	releases, err := util.ListRelease("Mr-Javadian", "honest-ui")
+	if err != nil {
+		return fmt.Errorf("failed to list releases: %v", err)
+	}
+	if len(releases) == 0 {
+		return errors.New("no releases found")
+	}
+	latest := releases[0]
+	latestTag := latest.GetTagName()
+	currentTag := constant.Version
+	if latestTag == currentTag {
+		return errors.New("already up to date")
+	}
+
+	url, err := util.GetReleaseAssetURL("Mr-Javadian", "honest-ui", latestTag, binaryName)
+	if err != nil {
+		return fmt.Errorf("failed to get download URL: %v", err)
+	}
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return fmt.Errorf("failed to download update: %v", err)
+	}
+	defer resp.Body.Close()
+
+	tmpPath := exe + ".tmp"
+	f, err := os.Create(tmpPath)
+	if err != nil {
+		return fmt.Errorf("failed to create temp file: %v", err)
+	}
+	_, err = io.Copy(f, resp.Body)
+	f.Close()
+	if err != nil {
+		os.Remove(tmpPath)
+		return fmt.Errorf("failed to write update: %v", err)
+	}
+
+	if err := os.Chmod(tmpPath, 0755); err != nil {
+		os.Remove(tmpPath)
+		return fmt.Errorf("failed to set permissions: %v", err)
+	}
+
+	if err := os.Rename(tmpPath, exe); err != nil {
+		os.Remove(tmpPath)
+		return fmt.Errorf("failed to replace binary: %v", err)
+	}
+
+	go func() {
+		time.Sleep(1 * time.Second)
+		util.Exec("systemctl restart honest-ui")
+	}()
+
+	return nil
 }

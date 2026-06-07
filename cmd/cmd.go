@@ -6,6 +6,7 @@ import (
 	"github.com/Mr-Javadian/honest-ui/model/constant"
 	"github.com/Mr-Javadian/honest-ui/util"
 	"os"
+	"time"
 )
 
 var rootCmd = &cobra.Command{
@@ -40,7 +41,8 @@ func run(cmd *cobra.Command, args []string) {
 	for {
 		if err := runServer(port, contextPath); err != nil {
 			fmt.Println(err.Error())
-			os.Exit(1)
+			fmt.Println("Server stopped unexpectedly. Restarting in 5 seconds...")
+			time.Sleep(5 * time.Second)
 		}
 	}
 }

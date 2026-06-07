@@ -10,12 +10,16 @@ import (
 	"github.com/Mr-Javadian/honest-ui/model/dto"
 	"github.com/Mr-Javadian/honest-ui/model/entity"
 	"github.com/Mr-Javadian/honest-ui/model/vo"
+	"github.com/Mr-Javadian/honest-ui/util"
 )
 
 func Login(username string, pass string) (string, error) {
-	account, err := dao.GetAccount("username = ? and pass = ? and role = 'admin' and deleted = 0", username, pass)
+	account, err := dao.GetAccount("username = ? and role = 'admin' and deleted = 0", username)
 	if err != nil {
 		return "", err
+	}
+	if !util.CheckPassword(pass, *account.Pass) {
+		return "", errors.New("incorrect password")
 	}
 	accountBo := bo.AccountBo{
 		Id:       *account.Id,

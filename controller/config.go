@@ -465,6 +465,14 @@ func RestartServer(c *gin.Context) {
 	vo.Success(nil, c)
 }
 
+func PerformUpdate(c *gin.Context) {
+	if err := service.PerformUpdate(); err != nil {
+		vo.Fail(err.Error(), c)
+		return
+	}
+	vo.Success(nil, c)
+}
+
 func RebootServer(c *gin.Context) {
 	go func() {
 		_ = service.StopServer()

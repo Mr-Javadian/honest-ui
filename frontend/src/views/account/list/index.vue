@@ -48,18 +48,7 @@
                 <template #icon><i-ep-download /></template>
                 {{ $t("common.export") }}
               </el-button>
-              <el-dropdown trigger="click" placement="bottom-end">
-                <el-button>
-                  {{ $t("common.refresh") === "Refresh" ? "More" : $t("common.more") || "More" }}
-                  <el-icon class="el-icon--right"><i-ep-arrow-down /></el-icon>
-                </el-button>
-                <template #dropdown>
-                  <el-dropdown-menu>
-                    <el-dropdown-item @click="handleInfo(null)">{{ $t("common.subscribe") }} Bulk</el-dropdown-item>
-                    <el-dropdown-item divided @click="handleInfo(null)">{{ $t("account.kick") }} All</el-dropdown-item>
-                  </el-dropdown-menu>
-                </template>
-              </el-dropdown>
+
               <div style="margin-left: auto; display: flex; gap: 8px; align-items: center;">
                 <el-input
                   v-model="searchKey"
@@ -194,7 +183,6 @@
                           v-if="calculateTimeDifference(scope.row.kickUtilTime) !== '-'"
                           @click="confirmReleaseKick(scope.row)"
                         >{{ $t("account.releaseKick") }}</el-dropdown-item>
-                        <el-dropdown-item divided @click="handleDelete(scope.row)">{{ $t("common.delete") }}</el-dropdown-item>
                       </el-dropdown-menu>
                     </template>
                   </el-dropdown>

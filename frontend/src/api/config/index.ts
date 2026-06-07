@@ -102,6 +102,13 @@ export function restartServerApi(): AxiosPromise {
   });
 }
 
+export function performUpdateApi(): AxiosPromise {
+  return request({
+    url: "/config/performUpdate",
+    method: "post",
+  });
+}
+
 export function rebootServerApi(): AxiosPromise {
   return request({
     url: "/config/rebootServer",

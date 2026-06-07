@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/Mr-Javadian/honest-ui/model/constant"
+	"github.com/Mr-Javadian/honest-ui/util"
 	"github.com/glebarez/sqlite"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -69,6 +70,18 @@ func InitSql(port string) error {
 			}
 		}
 	}
+
+	var oldHash string
+	db, err := sqliteDB.DB()
+	if err == nil {
+		_ = db.QueryRow("SELECT pass FROM account WHERE id = 1").Scan(&oldHash)
+		if oldHash == "02f382b76ca1ab7aa06ab03345c7712fd5b971fb0c0f2aef98bac9cd" {
+			if _, err := db.Exec("UPDATE account SET pass = ? WHERE id = 1", util.DefaultPasswordHash); err != nil {
+				logrus.Errorf("failed to migrate default password: %v", err)
+			}
+		}
+	}
+
 	return nil
 }
 
