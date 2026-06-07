@@ -2,8 +2,56 @@
 import { useI18n } from "vue-i18n";
 import { restartServerApi, rebootServerApi } from "@/api/config";
 import { restartHysteria2Api } from "@/api/hysteria2";
+import { monitorDashboardApi } from "@/api/monitor";
 
 const { t } = useI18n();
+
+const now = ref(new Date());
+const uptime = ref(0);
+let uptimeInterval: ReturnType<typeof setInterval> | null = null;
+let clockInterval: ReturnType<typeof setInterval> | null = null;
+
+function formatUptime(seconds: number): string {
+  const d = Math.floor(seconds / 86400);
+  const h = Math.floor((seconds % 86400) / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  const parts: string[] = [];
+  if (d > 0) parts.push(`${d}d`);
+  if (h > 0) parts.push(`${h}h`);
+  if (m > 0) parts.push(`${m}m`);
+  parts.push(`${s}s`);
+  return parts.join(" ");
+}
+
+function formatDateTime(date: Date): { dateStr: string; timeStr: string } {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const mins = String(date.getMinutes()).padStart(2, "0");
+  const secs = String(date.getSeconds()).padStart(2, "0");
+  return {
+    dateStr: `${year}-${month}-${day}`,
+    timeStr: `${hours}:${mins}:${secs}`,
+  };
+}
+
+const dateTime = computed(() => formatDateTime(now.value));
+
+onMounted(async () => {
+  try {
+    const { data } = await monitorDashboardApi();
+    uptime.value = data.uptime || 0;
+  } catch {}
+  uptimeInterval = setInterval(() => { uptime.value++; }, 1000);
+  clockInterval = setInterval(() => { now.value = new Date(); }, 1000);
+});
+
+onUnmounted(() => {
+  if (uptimeInterval) clearInterval(uptimeInterval);
+  if (clockInterval) clearInterval(clockInterval);
+});
 
 const actions = [
   {
@@ -48,6 +96,18 @@ function confirmAction(act: typeof actions[0]) {
       <breadcrumb />
     </div>
 
+    <div class="navbar-center">
+      <div class="server-time">
+        <el-icon :size="14"><i-ep-clock /></el-icon>
+        <span class="time-value">{{ dateTime.timeStr }}</span>
+        <span class="date-value">{{ dateTime.dateStr }}</span>
+      </div>
+      <div class="server-uptime">
+        <el-icon :size="14"><i-ep-monitor /></el-icon>
+        <span class="uptime-value">{{ formatUptime(uptime) }}</span>
+      </div>
+    </div>
+
     <div class="navbar-right">
       <button
         v-for="act in actions"
@@ -82,12 +142,50 @@ function confirmAction(act: typeof actions[0]) {
 .navbar-left {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
+}
+
+.navbar-center {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 0 16px;
+}
+
+.server-time,
+.server-uptime {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--el-text-color-secondary);
+
+  .el-icon { color: var(--el-text-color-placeholder); }
+}
+
+.time-value {
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.5px;
+}
+
+.date-value {
+  color: var(--el-text-color-placeholder);
+  font-size: 12px;
+}
+
+.uptime-value {
+  font-weight: 500;
+  color: var(--el-color-success);
+  font-variant-numeric: tabular-nums;
 }
 
 .navbar-right {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 .restart-btn {

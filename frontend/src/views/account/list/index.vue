@@ -81,13 +81,13 @@
             style="width: 100%"
             @selection-change="handleSelectionChange"
           >
-            <el-table-column type="selection" width="40" />
+            <el-table-column type="selection" width="36" />
 
-            <el-table-column :label="$t('common.id')" align="center" prop="id" width="60" />
+            <el-table-column :label="$t('common.id')" align="center" prop="id" width="50" />
 
-            <el-table-column :label="$t('account.remark')" align="center" prop="remark" min-width="100" />
+            <el-table-column :label="$t('account.remark')" align="center" prop="remark" min-width="80" />
 
-            <el-table-column :label="$t('account.username')" align="center" prop="username" min-width="120">
+            <el-table-column :label="$t('account.username')" align="center" prop="username" min-width="100">
               <template #default="scope">
                 <div class="client-cell">
                   <span class="client-email">{{ scope.row.username }}</span>
@@ -95,7 +95,7 @@
               </template>
             </el-table-column>
 
-            <el-table-column :label="$t('common.deleted')" align="center" width="80">
+            <el-table-column :label="$t('common.deleted')" align="center" width="70">
               <template #default="scope">
                 <el-switch
                   v-model="scope.row.deleted"
@@ -107,64 +107,64 @@
               </template>
             </el-table-column>
 
-            <el-table-column :label="$t('account.onlineStatus')" align="center" width="90">
+            <el-table-column :label="$t('account.onlineStatus')" align="center" width="80">
               <template #default="scope">
                 <el-tag v-if="scope.row.online" type="success" size="small">{{ $t("account.online") }}</el-tag>
                 <el-tag v-else type="info" size="small">{{ $t("account.offline") }}</el-tag>
               </template>
             </el-table-column>
 
-            <el-table-column :label="$t('account.quota')" align="center" prop="quota" width="100">
+            <el-table-column :label="$t('account.quota')" align="center" prop="quota" width="85">
               <template #default="scope">
                 <el-tag>{{ formatBytes(scope.row.quota) }}</el-tag>
               </template>
             </el-table-column>
 
-            <el-table-column :label="$t('account.download')" align="center" width="90">
+            <el-table-column :label="$t('account.download')" align="center" width="80">
               <template #default="scope">
                 <span class="traffic-down">{{ formatBytes(scope.row.download) }}</span>
               </template>
             </el-table-column>
 
-            <el-table-column :label="$t('account.upload')" align="center" width="90">
+            <el-table-column :label="$t('account.upload')" align="center" width="80">
               <template #default="scope">
                 <span class="traffic-up">{{ formatBytes(scope.row.upload) }}</span>
               </template>
             </el-table-column>
 
-            <el-table-column :label="$t('account.remaining') || 'Remaining'" align="center" width="100">
+            <el-table-column :label="$t('account.remaining') || 'Remaining'" align="center" width="85">
               <template #default="scope">
                 <el-tag v-if="remainingBytes(scope.row) === '∞'" type="info" size="small">∞</el-tag>
                 <el-tag v-else :type="remainingColor(scope.row)" size="small">{{ remainingBytes(scope.row) }}</el-tag>
               </template>
             </el-table-column>
 
-            <el-table-column :label="$t('account.kickUtilTimeLast') || 'Remaining'" align="center" width="120">
+            <el-table-column :label="$t('account.kickUtilTimeLast') || 'Ban'" align="center" width="90">
               <template #default="scope">
                 {{ calculateTimeDifference(scope.row.kickUtilTime) }}
               </template>
             </el-table-column>
 
-            <el-table-column :label="$t('account.expireTime')" align="center" width="130">
+            <el-table-column :label="$t('account.expireTime')" align="center" width="120">
               <template #default="scope">
                 <el-tag v-if="!scope.row.expireTime" type="info" size="small">∞</el-tag>
                 <el-tag v-else :type="expiryColor(scope.row)" size="small">{{ timestampToDateTime(scope.row.expireTime) }}</el-tag>
               </template>
             </el-table-column>
 
-            <el-table-column :label="$t('account.loginAt')" align="center" width="130">
+            <el-table-column :label="$t('account.loginAt')" align="center" width="115">
               <template #default="scope">
                 {{ scope.row.loginAt ? timestampToDateTime(scope.row.loginAt) : "-" }}
               </template>
             </el-table-column>
 
-            <el-table-column :label="$t('common.createTime')" align="center" width="130">
+            <el-table-column :label="$t('common.createTime')" align="center" width="115">
               <template #default="scope">
                 {{ timestampToDateTime(scope.row.createTime) }}
               </template>
             </el-table-column>
 
-            <el-table-column :label="$t('common.operate')" align="center" width="240" fixed="right">
+            <el-table-column :label="$t('common.operate')" align="center" width="200">
               <template #default="scope">
                 <div class="action-buttons">
                   <el-tooltip :content="$t('common.nodeQrCode')" placement="top">
@@ -215,103 +215,119 @@
     <el-dialog
       :title="dialog.title"
       v-model="dialog.visible"
-      width="620px"
+      width="680px"
       append-to-body
+      :close-on-click-modal="false"
       @close="closeDialog"
     >
-      <el-form
-        ref="dataFormRef"
-        :rules="dialog.title === t('common.add') ? dataFormAddRules : dataFormUpdateRules"
-        :model="dataForm"
-        label-width="100px"
-      >
-        <el-row :gutter="16">
-          <el-col :span="12">
-            <el-form-item :label="$t('account.remark')" prop="remark">
-              <el-input v-model="dataForm.remark" :placeholder="$t('account.remark')" maxlength="50" clearable />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item :label="$t('account.username')" prop="username">
-              <el-input v-model="dataForm.username" :placeholder="$t('account.username')" maxlength="50" clearable />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row :gutter="16">
-          <el-col :span="12">
-            <el-form-item :label="$t('account.pass')" prop="pass">
-              <el-input
-                v-model="dataForm.pass"
-                :placeholder="$t('account.pass')"
-                maxlength="50"
-                clearable
-                type="password"
-                show-password
-                ref="dataFormPassRef"
-              />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item :label="$t('account.conPass')" prop="conPass">
-              <el-input
-                v-model="dataForm.conPass"
-                :placeholder="$t('account.conPass')"
-                maxlength="50"
-                clearable
-                type="password"
-                show-password
-                ref="dataFormConPassRef"
-              />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row :gutter="16">
-          <el-col :span="12">
-            <el-form-item :label="$t('account.quota')" prop="quota">
-              <unit-select :setValue="setQuota" :valueTmp="quotaTmp" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item :label="$t('account.deviceNo')" prop="deviceNo">
-              <el-input-number
-                v-model="dataForm.deviceNo"
-                :placeholder="$t('account.deviceNo')"
-                :min="1"
-                :controls="false"
-                :precision="0"
-                clearable
-                style="width: 100%"
-              />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row :gutter="16">
-          <el-col :span="12">
-            <el-form-item :label="$t('account.expireTime')" prop="expireTime">
-              <el-date-picker
-                v-model="dataForm.expireTime"
-                type="datetime"
-                :placeholder="$t('account.expireTime')"
-                value-format="x"
-                :shortcuts="shortcuts"
-                clearable
-                style="width: 100%"
-              />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item :label="$t('common.deleted')" prop="deleted">
-              <el-radio-group v-model="dataForm.deleted">
-                <el-radio :label="0">{{ $t("common.enable") }}</el-radio>
-                <el-radio :label="1">{{ $t("common.disable") }}</el-radio>
-              </el-radio-group>
-            </el-form-item>
-          </el-col>
-        </el-row>
-      </el-form>
+      <div class="dialog-body">
+        <el-form
+          ref="dataFormRef"
+          :rules="dialog.title === t('common.add') ? dataFormAddRules : dataFormUpdateRules"
+          :model="dataForm"
+          label-width="90px"
+        >
+          <div class="dialog-section">
+            <div class="section-title">{{ $t('common.basicInfo') || 'Basic Information' }}</div>
+            <el-row :gutter="24">
+              <el-col :span="12">
+                <el-form-item :label="$t('account.username')" prop="username">
+                  <el-input v-model="dataForm.username" :placeholder="$t('account.username')" maxlength="50" clearable />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item :label="$t('account.remark')" prop="remark">
+                  <el-input v-model="dataForm.remark" :placeholder="$t('account.remark')" maxlength="50" clearable />
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row :gutter="24">
+              <el-col :span="12">
+                <el-form-item :label="$t('account.pass')" prop="pass">
+                  <el-input
+                    v-model="dataForm.pass"
+                    :placeholder="$t('account.pass')"
+                    maxlength="50"
+                    clearable
+                    type="password"
+                    show-password
+                    ref="dataFormPassRef"
+                  />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item :label="$t('account.conPass')" prop="conPass">
+                  <el-input
+                    v-model="dataForm.conPass"
+                    :placeholder="$t('account.conPass')"
+                    maxlength="50"
+                    clearable
+                    type="password"
+                    show-password
+                    ref="dataFormConPassRef"
+                  />
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </div>
+
+          <div class="dialog-section">
+            <div class="section-title">{{ $t('common.limits') || 'Limits & Quotas' }}</div>
+            <el-row :gutter="24">
+              <el-col :span="12">
+                <el-form-item :label="$t('account.quota')" prop="quota">
+                  <unit-select :setValue="setQuota" :valueTmp="quotaTmp" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item :label="$t('account.deviceNo')" prop="deviceNo">
+                  <el-input-number
+                    v-model="dataForm.deviceNo"
+                    :placeholder="$t('account.deviceNo')"
+                    :min="1"
+                    :controls="false"
+                    :precision="0"
+                    clearable
+                    style="width: 100%"
+                  />
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row :gutter="24">
+              <el-col :span="12">
+                <el-form-item :label="$t('account.expireTime')" prop="expireTime">
+                  <el-date-picker
+                    v-model="dataForm.expireTime"
+                    type="datetime"
+                    :placeholder="$t('account.expireTime')"
+                    value-format="x"
+                    :shortcuts="shortcuts"
+                    clearable
+                    style="width: 100%"
+                  />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item :label="$t('common.status') || 'Status'" prop="deleted">
+                  <el-radio-group v-model="dataForm.deleted">
+                    <el-radio :label="0">
+                      <el-tag size="small" type="success" style="margin-right:4px">{{ $t("common.enable") }}</el-tag>
+                    </el-radio>
+                    <el-radio :label="1">
+                      <el-tag size="small" type="danger">{{ $t("common.disable") }}</el-tag>
+                    </el-radio>
+                  </el-radio-group>
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </div>
+        </el-form>
+      </div>
       <template #footer>
-        <el-button type="primary" @click="submitForm">{{ $t("common.confirm") }}</el-button>
-        <el-button @click="closeDialog">{{ $t("common.cancel") }}</el-button>
+        <div class="dialog-footer">
+          <el-button @click="closeDialog">{{ $t("common.cancel") }}</el-button>
+          <el-button type="primary" @click="submitForm" :icon="Plus">{{ $t("common.confirm") }}</el-button>
+        </div>
       </template>
     </el-dialog>
 
@@ -923,9 +939,7 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .clients-page {
-  padding: 24px;
-  max-width: 1600px;
-  margin: 0 auto;
+  padding: 20px;
 }
 
 .summary-card {
@@ -1066,6 +1080,68 @@ onMounted(() => {
 :deep(.el-table__body-wrapper) {
   &::-webkit-scrollbar { height: 6px; width: 6px; }
   &::-webkit-scrollbar-thumb { background: var(--el-border-color); border-radius: 3px; }
+}
+
+.dialog-body {
+  padding: 4px 0;
+}
+
+.dialog-section {
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--el-border-color-light);
+
+  &:last-child {
+    padding-bottom: 0;
+    margin-bottom: 0;
+    border-bottom: none;
+  }
+}
+
+.section-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--el-color-primary);
+  display: inline-block;
+}
+
+.dialog-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+:deep(.el-dialog__header) {
+  padding: 16px 20px;
+  margin: 0;
+  border-bottom: 1px solid var(--el-border-color-light);
+}
+
+:deep(.el-dialog__title) {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+:deep(.el-dialog__body) {
+  padding: 20px;
+}
+
+:deep(.el-dialog__footer) {
+  padding: 12px 20px;
+  border-top: 1px solid var(--el-border-color-light);
+}
+
+:deep(.el-form-item) {
+  margin-bottom: 18px;
+}
+
+:deep(.el-form-item__label) {
+  font-weight: 500;
+  font-size: 13px;
 }
 
 @media (max-width: 768px) {
