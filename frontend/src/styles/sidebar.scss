@@ -338,7 +338,6 @@
         color: var(--el-color-primary);
       }
     }
-    }
   }
 
   .el-menu--collapse .el-menu .el-sub-menu {
@@ -372,7 +371,7 @@
 
   .nest-menu .el-sub-menu > .el-sub-menu__title,
   .el-menu-item {
-    &:hover { background-color: $menuHover !important; }
+    &:hover { background-color: var(--sidebar-hover, var(--el-fill-color-light)) !important; }
   }
 
   > .el-menu--popup {
