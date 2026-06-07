@@ -6,21 +6,25 @@ html.dark {
   --subMenuBg: #11111b;
   --subMenuActiveText: #b4befe;
   --subMenuHover: #181825;
+  --sidebar-bg: linear-gradient(180deg, #1e1e2e 0%, #181825 100%);
+  --sidebar-border: rgba(255, 255, 255, 0.06);
+  --sidebar-text: rgba(255, 255, 255, 0.78);
+  --sidebar-icon: rgba(255, 255, 255, 0.45);
+  --sidebar-hover: rgba(255, 255, 255, 0.08);
+  --sidebar-sub-bg: rgba(255, 255, 255, 0.03);
+  --sidebar-sub-hover: rgba(255, 255, 255, 0.06);
 
   .navbar {
     color: var(--el-text-color-regular);
-    background-color: var(--el-bg-color);
-    border-bottom: 1px solid var(--el-border-color-light);
-    .setting-container .setting-item:hover { background: var(--el-fill-color-light); }
-  }
-
-  .right-panel-btn {
-    background-color: var(--el-color-primary);
+    background-color: #1e1e2e;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    .setting-container .setting-item:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
   }
 
   .sidebar-container {
-    border-right: 1px solid rgba(255, 255, 255, 0.03);
-    .el-menu-item.is-active .svg-icon { fill: var(--el-color-primary); }
+    .el-menu-item.is-active .svg-icon { fill: #fff; }
   }
 }
 
@@ -32,18 +36,16 @@ html[data-theme="ultra-dark"] {
   --subMenuBg: #050507;
   --subMenuActiveText: #b4befe;
   --subMenuHover: #0a0a0f;
-
-  .sidebar-container {
-    background: linear-gradient(180deg, #050507 0%, #000 100%) !important;
-    border-right: 1px solid rgba(255, 255, 255, 0.02);
-  }
+  --sidebar-bg: linear-gradient(180deg, #050507 0%, #000 100%);
+  --sidebar-border: rgba(255, 255, 255, 0.03);
+  --sidebar-text: rgba(200, 200, 215, 0.75);
+  --sidebar-icon: rgba(200, 200, 215, 0.4);
+  --sidebar-hover: rgba(255, 255, 255, 0.06);
+  --sidebar-sub-bg: rgba(255, 255, 255, 0.02);
+  --sidebar-sub-hover: rgba(255, 255, 255, 0.04);
 
   .navbar {
-    background-color: #0a0a0f !important;
+    background-color: #050507;
     border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-  }
-
-  .right-panel-btn {
-    background-color: var(--el-color-primary);
   }
 }

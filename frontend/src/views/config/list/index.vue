@@ -44,27 +44,27 @@
           <div class="card-header">
             <div class="card-icon"><i-ep-monitor /></div>
             <div>
-              <h3 class="card-title">{{ $t("config.webSettings") || "Web Server" }}</h3>
-              <p class="card-desc">{{ $t("config.webSettingsDesc") || "Panel web interface configuration" }}</p>
+              <h3 class="card-title">{{ $t("config.webSettings") || "Web Server Configuration" }}</h3>
+              <p class="card-desc">{{ $t("config.webSettingsDesc") || "Configure the port and context path for the Honest-UI web panel." }}</p>
             </div>
           </div>
           <div class="card-body">
             <div class="form-row three-col">
-              <el-form-item :label="$t('config.huiWebPort')" prop="huiWebPort">
+              <el-form-item :label="$t('config.huiWebPort') || 'Web Panel Port'" prop="huiWebPort">
                 <el-input
                   v-model="dataForm.huiWebPort"
-                  :placeholder="$t('config.huiWebPort')"
+                  placeholder="e.g., 8081"
                   clearable
                 />
               </el-form-item>
-              <el-form-item :label="$t('config.huiWebContext')" prop="huiWebContext">
+              <el-form-item :label="$t('config.huiWebContext') || 'Web Root Context Path'" prop="huiWebContext">
                 <el-input
                   v-model="dataForm.huiWebContext"
-                  :placeholder="$t('config.huiWebContext')"
+                  placeholder="e.g., /hui or /admin"
                   clearable
                 />
               </el-form-item>
-              <el-form-item :label="$t('config.timezone') || 'Timezone'" prop="timeZone">
+              <el-form-item :label="$t('config.timezone') || 'System Timezone'" prop="timeZone">
                 <el-select v-model="dataForm.timeZone" filterable allow-create clearable :placeholder="$t('config.selectTimezone') || 'Select timezone'">
                   <el-option v-for="tz in timezoneList" :key="tz" :label="tz" :value="tz" />
                 </el-select>
@@ -77,28 +77,28 @@
           <div class="card-header">
             <div class="card-icon"><i-ep-connection /></div>
             <div>
-              <h3 class="card-title">{{ $t("config.hysteria2Settings") || "Hysteria2 Proxy" }}</h3>
-              <p class="card-desc">{{ $t("config.hysteria2SettingsDesc") || "Traffic accounting and reset schedule" }}</p>
+              <h3 class="card-title">{{ $t("config.hysteria2Settings") || "Hysteria2 Protocol Settings" }}</h3>
+              <p class="card-desc">{{ $t("config.hysteria2SettingsDesc") || "Configure traffic synchronization intervals and auto-reset rules for Hysteria2." }}</p>
             </div>
           </div>
           <div class="card-body">
             <div class="form-row two-col">
               <el-form-item
-                :label="$t('config.hysteria2TrafficTime')"
+                :label="$t('config.hysteria2TrafficTime') || 'Traffic Sync Interval (seconds)'"
                 prop="hysteria2TrafficTime"
               >
                 <el-input
                   v-model="dataForm.hysteria2TrafficTime"
-                  :placeholder="$t('config.hysteria2TrafficTime')"
+                  placeholder="e.g., 1"
                   clearable
                 />
               </el-form-item>
               <el-form-item
-                :label="$t('config.resetTrafficCron')"
+                :label="$t('config.resetTrafficCron') || 'Traffic Auto-Reset Schedule'"
                 prop="resetTrafficCron"
               >
                 <el-tooltip
-                  :content="$t('config.resetTrafficCronTip')"
+                  :content="$t('config.resetTrafficCronTip') || 'Select schedule: Daily, Weekly, Monthly, or Never'"
                   placement="bottom"
                 >
                   <el-select
@@ -106,7 +106,7 @@
                     filterable
                     allow-create
                     clearable
-                    :placeholder="$t('config.resetTrafficCron')"
+                    :placeholder="$t('config.resetTrafficCron') || 'Select schedule: Daily, Weekly, Monthly, or Never'"
                   >
                     <el-option
                       v-for="item in cronResetTraffic"
@@ -125,13 +125,13 @@
           <div class="card-header">
             <div class="card-icon"><i-ep-link /></div>
             <div>
-              <h3 class="card-title">{{ $t("config.httpsSettings") || "HTTPS / TLS" }}</h3>
-              <p class="card-desc">{{ $t("config.httpsSettingsDesc") || "Secure panel access with TLS certificate" }}</p>
+              <h3 class="card-title">{{ $t("config.httpsSettings") || "HTTPS & SSL/TLS Configuration" }}</h3>
+              <p class="card-desc">{{ $t("config.httpsSettingsDesc") || "Enable HTTPS and manage SSL certificates for the web panel." }}</p>
             </div>
           </div>
           <div class="card-body">
             <div class="form-row single-col">
-              <el-form-item :label="$t('config.huiHttps')" prop="huiHttps">
+              <el-form-item :label="$t('config.huiHttps') || 'Enable HTTPS for Web Panel'" prop="huiHttps">
                 <div class="https-toggle">
                   <el-select v-model="huiHttps" ref="huiHttpsRef" style="width:200px">
                     <el-option
@@ -208,8 +208,8 @@
           <div class="card-header">
             <div class="card-icon"><i-ep-setting /></div>
             <div>
-              <h3 class="card-title">{{ $t("config.interfaceSettings") || "Interface" }}</h3>
-              <p class="card-desc">{{ $t("config.interfaceSettingsDesc") || "Language, theme, and display preferences" }}</p>
+              <h3 class="card-title">{{ $t("config.interfaceSettings") || "User Interface & Appearance" }}</h3>
+              <p class="card-desc">{{ $t("config.interfaceSettingsDesc") || "Customize language, theme, layout, and brand elements of the dashboard." }}</p>
             </div>
           </div>
           <div class="card-body">
@@ -217,48 +217,48 @@
               <div class="preference-item">
                 <div class="pref-info">
                   <span class="pref-label">Language</span>
-                  <span class="pref-hint">{{ $t("config.langHint") || "Interface language" }}</span>
+                  <span class="pref-hint">{{ $t("config.langHint") || "Select your preferred UI language" }}</span>
                 </div>
                 <lang-select class="pref-control" />
               </div>
               <div class="preference-item">
                 <div class="pref-info">
-                  <span class="pref-label">Layout Size</span>
-                  <span class="pref-hint">{{ $t("config.sizeHint") || "UI element sizing" }}</span>
+                  <span class="pref-label">UI Density</span>
+                  <span class="pref-hint">{{ $t("config.sizeHint") || "Adjust the compactness of the layout (Comfortable, Compact)" }}</span>
                 </div>
                 <size-select class="pref-control" />
               </div>
               <div class="preference-item">
                 <div class="pref-info">
-                  <span class="pref-label">Theme</span>
-                  <span class="pref-hint">{{ $t("config.themeHint") || "Color scheme" }}</span>
+                  <span class="pref-label">Color Theme</span>
+                  <span class="pref-hint">{{ $t("config.themeHint") || "Switch between Light, Dark, and Ultra modes" }}</span>
                 </div>
                 <div class="theme-group">
                   <button class="theme-btn" :class="{ active: theme === 'light' }" @click="theme !== 'light' && cycleTheme()">
                     <i-ep-sunny />
-                    <span class="theme-btn-label">Light</span>
+                    <span class="theme-btn-label">Light Mode</span>
                   </button>
                   <button class="theme-btn" :class="{ active: theme === 'dark' }" @click="theme !== 'dark' && cycleTheme()">
                     <i-ep-moon />
-                    <span class="theme-btn-label">Dark</span>
+                    <span class="theme-btn-label">Dark Mode</span>
                   </button>
                   <button class="theme-btn" :class="{ active: theme === 'ultra-dark' }" @click="theme !== 'ultra-dark' && cycleTheme()">
                     <i-ep-star-filled />
-                    <span class="theme-btn-label">Ultra</span>
+                    <span class="theme-btn-label">Ultra (High Contrast)</span>
                   </button>
                 </div>
               </div>
               <div class="preference-item">
                 <div class="pref-info">
-                  <span class="pref-label">Sidebar Logo</span>
-                  <span class="pref-hint">{{ $t("config.logoHint") || "Show logo in sidebar" }}</span>
+                  <span class="pref-label">Show Sidebar Logo</span>
+                  <span class="pref-hint">{{ $t("config.logoHint") || "Display the product logo in the sidebar header" }}</span>
                 </div>
                 <el-switch v-model="settingsStore.sidebarLogo" />
               </div>
               <div class="preference-item">
                 <div class="pref-info">
-                  <span class="pref-label">Theme Color</span>
-                  <span class="pref-hint">{{ $t("config.colorHint") || "Primary accent color" }}</span>
+                  <span class="pref-label">Primary Theme Color</span>
+                  <span class="pref-hint">{{ $t("config.colorHint") || "Choose the main accent color for the interface" }}</span>
                 </div>
                 <div class="color-group">
                   <span

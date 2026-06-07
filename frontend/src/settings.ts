@@ -1,6 +1,6 @@
 // Honest-UI version
-export const APP_VERSION = "0.5.2";
-export const APP_VERSION_PREFIXED = "v0.5.2";
+export const APP_VERSION = "0.5.3";
+export const APP_VERSION_PREFIXED = "v0.5.3";
 
 // System settings
 interface DefaultSettings {

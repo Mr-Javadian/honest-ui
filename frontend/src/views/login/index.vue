@@ -44,7 +44,7 @@
                 <span v-for="(d, i) in captchaDigits" :key="i" class="captcha-digit" :style="captchaStyle(i)">{{ d }}</span>
                 <button class="captcha-refresh" type="button" @click="refreshCaptcha" title="Refresh"><svg-icon icon-class="refresh" class="refresh-icon" /></button>
               </div>
-              <el-input v-model="loginForm.captcha" placeholder="Captcha" size="large" maxlength="4" class="captcha-input" @keyup.enter="handleLogin">
+              <el-input v-model="loginForm.captcha" placeholder="Captcha" size="large" maxlength="4" class="captcha-input" @input="onCaptchaInput" @keyup.enter="handleLogin">
                 <template #prefix><svg-icon icon-class="report" class="input-icon" /></template>
               </el-input>
             </div>
@@ -129,10 +129,14 @@ const generateCaptcha = () => {
 
 const refreshCaptcha = () => generateCaptcha();
 
+const onCaptchaInput = () => {
+  nextTick(() => loginFormRef.value?.clearValidate?.("captcha"));
+};
+
 const loginRules = {
   username: [{ required: true, message: "Required", trigger: ["change", "blur"] }, { pattern: /^[a-zA-Z0-9!@#$%^&*()_+=-]{3,32}$/, message: "Username format is incorrect", trigger: ["change", "blur"] }],
   pass: [{ required: true, message: "Required", trigger: ["change", "blur"] }, { pattern: /^[a-zA-Z0-9!@#$%^&*()_+=-]{6,32}$/, message: "Password format is incorrect", trigger: ["change", "blur"] }],
-  captcha: [{ required: true, message: "Enter captcha", trigger: ["change", "blur"] }, { pattern: /^\d{4}$/, message: "4 digits required", trigger: ["change", "blur"] }],
+  captcha: [{ required: true, message: "Enter captcha", trigger: "change" }, { pattern: /^\d{4}$/, message: "4 digits required", trigger: "change" }],
 };
 
 const checkCapslock = (e: any) => {

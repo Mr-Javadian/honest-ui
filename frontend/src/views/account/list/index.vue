@@ -79,111 +79,85 @@
             :data="records"
             stripe
             style="width: 100%"
+            :cell-style="{ padding: '6px 6px' }"
             @selection-change="handleSelectionChange"
           >
-            <el-table-column type="selection" width="36" />
+            <el-table-column type="selection" width="34" />
 
-            <el-table-column :label="$t('common.id')" align="center" prop="id" width="50" />
-
-            <el-table-column :label="$t('account.remark')" align="center" prop="remark" min-width="80" />
-
-            <el-table-column :label="$t('account.username')" align="center" prop="username" min-width="100">
+            <el-table-column :label="$t('account.username')" min-width="120">
               <template #default="scope">
                 <div class="client-cell">
                   <span class="client-email">{{ scope.row.username }}</span>
+                  <span class="client-remark">{{ scope.row.remark || '-' }}</span>
                 </div>
               </template>
             </el-table-column>
 
-            <el-table-column :label="$t('common.deleted')" align="center" width="70">
+            <el-table-column :label="$t('common.status')" width="130">
               <template #default="scope">
-                <el-switch
-                  v-model="scope.row.deleted"
-                  :active-value="0"
-                  :inactive-value="1"
-                  size="small"
-                  @change="toggleEnable(scope.row)"
-                />
+                <div class="status-cell">
+                  <el-switch
+                    v-model="scope.row.deleted"
+                    :active-value="0"
+                    :inactive-value="1"
+                    size="small"
+                    @change="toggleEnable(scope.row)"
+                  />
+                  <el-tag v-if="scope.row.online" type="success" size="small" effect="plain" class="online-tag">On</el-tag>
+                  <el-tag v-else type="info" size="small" effect="plain" class="online-tag">Off</el-tag>
+                </div>
               </template>
             </el-table-column>
 
-            <el-table-column :label="$t('account.onlineStatus')" align="center" width="80">
+            <el-table-column :label="$t('account.traffic') || 'Traffic'" min-width="120">
               <template #default="scope">
-                <el-tag v-if="scope.row.online" type="success" size="small">{{ $t("account.online") }}</el-tag>
-                <el-tag v-else type="info" size="small">{{ $t("account.offline") }}</el-tag>
+                <div class="traffic-cell">
+                  <span class="traffic-row"><span class="traffic-label">DL</span><span class="traffic-val down">{{ formatBytes(scope.row.download) }}</span></span>
+                  <span class="traffic-row"><span class="traffic-label">UL</span><span class="traffic-val up">{{ formatBytes(scope.row.upload) }}</span></span>
+                </div>
               </template>
             </el-table-column>
 
-            <el-table-column :label="$t('account.quota')" align="center" prop="quota" width="85">
+            <el-table-column :label="$t('account.quota')" width="85" align="center">
               <template #default="scope">
-                <el-tag>{{ formatBytes(scope.row.quota) }}</el-tag>
+                <el-tag size="small" effect="plain">{{ formatBytes(scope.row.quota) }}</el-tag>
               </template>
             </el-table-column>
 
-            <el-table-column :label="$t('account.download')" align="center" width="80">
+            <el-table-column :label="$t('account.remaining')" width="85" align="center">
               <template #default="scope">
-                <span class="traffic-down">{{ formatBytes(scope.row.download) }}</span>
+                <el-tag v-if="remainingBytes(scope.row) === '∞'" size="small" type="info" effect="plain">∞</el-tag>
+                <el-tag v-else :type="remainingColor(scope.row)" size="small" effect="plain">{{ remainingBytes(scope.row) }}</el-tag>
               </template>
             </el-table-column>
 
-            <el-table-column :label="$t('account.upload')" align="center" width="80">
+            <el-table-column :label="$t('account.expireTime')" width="115" align="center">
               <template #default="scope">
-                <span class="traffic-up">{{ formatBytes(scope.row.upload) }}</span>
+                <span v-if="!scope.row.expireTime" class="text-inf">∞</span>
+                <span v-else :class="expiryClass(scope.row)">{{ timestampToDateTime(scope.row.expireTime) }}</span>
               </template>
             </el-table-column>
 
-            <el-table-column :label="$t('account.remaining') || 'Remaining'" align="center" width="85">
-              <template #default="scope">
-                <el-tag v-if="remainingBytes(scope.row) === '∞'" type="info" size="small">∞</el-tag>
-                <el-tag v-else :type="remainingColor(scope.row)" size="small">{{ remainingBytes(scope.row) }}</el-tag>
-              </template>
-            </el-table-column>
-
-            <el-table-column :label="$t('account.kickUtilTimeLast') || 'Ban'" align="center" width="90">
-              <template #default="scope">
-                {{ calculateTimeDifference(scope.row.kickUtilTime) }}
-              </template>
-            </el-table-column>
-
-            <el-table-column :label="$t('account.expireTime')" align="center" width="120">
-              <template #default="scope">
-                <el-tag v-if="!scope.row.expireTime" type="info" size="small">∞</el-tag>
-                <el-tag v-else :type="expiryColor(scope.row)" size="small">{{ timestampToDateTime(scope.row.expireTime) }}</el-tag>
-              </template>
-            </el-table-column>
-
-            <el-table-column :label="$t('account.loginAt')" align="center" width="115">
-              <template #default="scope">
-                {{ scope.row.loginAt ? timestampToDateTime(scope.row.loginAt) : "-" }}
-              </template>
-            </el-table-column>
-
-            <el-table-column :label="$t('common.createTime')" align="center" width="115">
-              <template #default="scope">
-                {{ timestampToDateTime(scope.row.createTime) }}
-              </template>
-            </el-table-column>
-
-            <el-table-column :label="$t('common.operate')" align="center" width="200">
+            <el-table-column :label="$t('common.operate')" width="155" align="center" fixed="right">
               <template #default="scope">
                 <div class="action-buttons">
                   <el-tooltip :content="$t('common.nodeQrCode')" placement="top">
-                    <el-button text :icon="Plus" @click="handleInfo(scope.row)" />
+                    <el-button text :icon="Plus" size="small" @click="handleInfo(scope.row)" />
                   </el-tooltip>
                   <el-tooltip :content="$t('common.subscribe')" placement="top">
-                    <el-button text :icon="Link" @click="handleSubscribe(scope.row)" />
+                    <el-button text :icon="Link" size="small" @click="handleSubscribe(scope.row)" />
                   </el-tooltip>
                   <el-tooltip :content="$t('common.nodeUrl')" placement="top">
-                    <el-button text :icon="Share" @click="handleNodeUrl(scope.row)" />
+                    <el-button text :icon="Share" size="small" @click="handleNodeUrl(scope.row)" />
                   </el-tooltip>
                   <el-tooltip :content="$t('common.resetTraffic')" placement="top">
-                    <el-button text :icon="Refresh" @click="resetTraffic(scope.row)" />
+                    <el-button text :icon="Refresh" size="small" @click="resetTraffic(scope.row)" />
                   </el-tooltip>
                   <el-tooltip :content="$t('common.edit')" placement="top">
-                    <el-button text :icon="Edit" @click="handleUpdate(scope.row)" />
+                    <el-button text :icon="Edit" size="small" @click="handleUpdate(scope.row)" />
                   </el-tooltip>
                   <el-dropdown trigger="click" placement="bottom-end">
-                    <el-button text :icon="MoreFilled" />
+                    <el-button text :icon="MoreFilled" size="small" />
                     <template #dropdown>
                       <el-dropdown-menu>
                         <el-dropdown-item @click="handleKick(scope.row)">{{ $t("account.kick") }}</el-dropdown-item>
@@ -625,12 +599,12 @@ function remainingColor(row: AccountVo): "success" | "warning" | "danger" | "inf
   return "success";
 }
 
-function expiryColor(row: AccountVo): "success" | "warning" | "danger" | "info" {
-  if (!row.expireTime) return "info";
+function expiryClass(row: AccountVo): string {
+  if (!row.expireTime) return "text-inf";
   const now = Date.now();
-  if (row.expireTime <= now) return "danger";
-  if (row.expireTime - now < 86400000 * 3) return "warning";
-  return "success";
+  if (row.expireTime <= now) return "text-expiry-danger";
+  if (row.expireTime - now < 86400000 * 3) return "text-expiry-warning";
+  return "text-expiry-success";
 }
 
 const resetDataForm = () => {
@@ -1009,34 +983,92 @@ onMounted(() => {
 .client-cell {
   display: flex;
   flex-direction: column;
+  gap: 1px;
+  line-height: 1.3;
 }
 
 .client-email {
   font-weight: 600;
   font-size: 13px;
+  color: var(--el-text-color-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+
+.client-remark {
+  font-size: 11px;
+  color: var(--el-text-color-placeholder);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.status-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.online-tag {
+  font-size: 10px;
+  padding: 0 6px;
+  height: 20px;
+  line-height: 20px;
+}
+
+.traffic-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  line-height: 1.3;
+}
+
+.traffic-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.traffic-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--el-text-color-placeholder);
+  text-transform: uppercase;
+  min-width: 18px;
+}
+
+.traffic-val {
+  font-size: 12px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+
+  &.down { color: var(--el-color-primary); }
+  &.up { color: var(--el-color-success); }
+}
+
+.text-inf {
+  color: var(--el-text-color-placeholder);
+  font-size: 14px;
+}
+
+.text-expiry-danger { color: var(--el-color-danger); font-weight: 600; font-size: 12px; }
+.text-expiry-warning { color: var(--el-color-warning); font-weight: 500; font-size: 12px; }
+.text-expiry-success { color: var(--el-color-success); font-weight: 500; font-size: 12px; }
 
 .action-buttons {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 1px;
   flex-wrap: nowrap;
 
   :deep(.el-button) {
-    opacity: 0.7;
-    transition: opacity 0.2s ease;
+    opacity: 0.65;
+    transition: opacity 0.15s ease, color 0.15s ease;
     &:hover { opacity: 1; }
   }
-}
-
-.traffic-up {
-  color: var(--el-color-success);
-  font-weight: 500;
-}
-
-.traffic-down {
-  color: var(--el-color-primary);
-  font-weight: 500;
 }
 
 :deep(.el-table) {

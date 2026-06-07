@@ -10,6 +10,7 @@ const now = ref(new Date());
 const uptime = ref(0);
 let uptimeInterval: ReturnType<typeof setInterval> | null = null;
 let clockInterval: ReturnType<typeof setInterval> | null = null;
+let syncInterval: ReturnType<typeof setInterval> | null = null;
 
 function formatUptime(seconds: number): string {
   const d = Math.floor(seconds / 86400);
@@ -39,18 +40,24 @@ function formatDateTime(date: Date): { dateStr: string; timeStr: string } {
 
 const dateTime = computed(() => formatDateTime(now.value));
 
-onMounted(async () => {
+async function fetchUptime() {
   try {
     const { data } = await monitorDashboardApi();
     uptime.value = data.uptime || 0;
   } catch {}
+}
+
+onMounted(async () => {
+  await fetchUptime();
   uptimeInterval = setInterval(() => { uptime.value++; }, 1000);
   clockInterval = setInterval(() => { now.value = new Date(); }, 1000);
+  syncInterval = setInterval(fetchUptime, 30000);
 });
 
 onUnmounted(() => {
   if (uptimeInterval) clearInterval(uptimeInterval);
   if (clockInterval) clearInterval(clockInterval);
+  if (syncInterval) clearInterval(syncInterval);
 });
 
 const actions = [
@@ -94,17 +101,15 @@ function confirmAction(act: typeof actions[0]) {
   <div class="navbar modern-navbar">
     <div class="navbar-left">
       <breadcrumb />
-    </div>
-
-    <div class="navbar-center">
-      <div class="server-time">
-        <el-icon :size="14"><i-ep-clock /></el-icon>
-        <span class="time-value">{{ dateTime.timeStr }}</span>
-        <span class="date-value">{{ dateTime.dateStr }}</span>
-      </div>
-      <div class="server-uptime">
-        <el-icon :size="14"><i-ep-monitor /></el-icon>
-        <span class="uptime-value">{{ formatUptime(uptime) }}</span>
+      <div class="header-meta">
+        <div class="server-time">
+          <span class="time-value">{{ dateTime.timeStr }}</span>
+          <span class="date-value">{{ dateTime.dateStr }}</span>
+        </div>
+        <div class="server-uptime">
+          <span class="uptime-label">{{ t("navbar.uptime") || "Uptime" }}:</span>
+          <span class="uptime-value">{{ formatUptime(uptime) }}</span>
+        </div>
       </div>
     </div>
 
@@ -142,43 +147,54 @@ function confirmAction(act: typeof actions[0]) {
 .navbar-left {
   display: flex;
   align-items: center;
+  gap: 20px;
   flex-shrink: 0;
+  min-width: 0;
 }
 
-.navbar-center {
+.header-meta {
   display: flex;
   align-items: center;
-  gap: 20px;
-  padding: 0 16px;
+  gap: 16px;
+  padding-left: 16px;
+  border-left: 1px solid var(--el-border-color-light);
 }
 
-.server-time,
-.server-uptime {
+.server-time {
   display: flex;
   align-items: center;
   gap: 6px;
   font-size: 13px;
+
+  .time-value {
+    font-weight: 600;
+    color: var(--el-text-color-primary);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.5px;
+  }
+
+  .date-value {
+    color: var(--el-text-color-placeholder);
+    font-size: 12px;
+  }
+}
+
+.server-uptime {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
   color: var(--el-text-color-secondary);
 
-  .el-icon { color: var(--el-text-color-placeholder); }
-}
+  .uptime-label {
+    color: var(--el-text-color-placeholder);
+  }
 
-.time-value {
-  font-weight: 600;
-  color: var(--el-text-color-primary);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.5px;
-}
-
-.date-value {
-  color: var(--el-text-color-placeholder);
-  font-size: 12px;
-}
-
-.uptime-value {
-  font-weight: 500;
-  color: var(--el-color-success);
-  font-variant-numeric: tabular-nums;
+  .uptime-value {
+    font-weight: 500;
+    color: var(--el-color-success);
+    font-variant-numeric: tabular-nums;
+  }
 }
 
 .navbar-right {

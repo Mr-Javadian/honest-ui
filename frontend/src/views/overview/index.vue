@@ -28,15 +28,6 @@
         <div class="gauge-sub">{{ g.sub }}</div>
       </div>
 
-      <div class="card uptime-card">
-        <div class="card-icon-box" style="background:rgba(129,140,248,0.1);color:#818cf8">
-          <svg-icon icon-class="honestui" size="1.4em" />
-        </div>
-        <div class="card-body">
-          <div class="card-label">Uptime</div>
-          <div class="card-value">{{ formatUptime(dash.uptime) }}</div>
-        </div>
-      </div>
     </div>
 
     <div class="grid-4">
@@ -153,7 +144,7 @@ import { formatBytes } from "@/utils/byte";
 
 const dash = reactive({
   huiVersion: "", cpuPercent: 0, memPercent: 0, diskPercent: 0,
-  uptime: 0, userTotal: 0, deviceTotal: 0, version: "", running: false,
+  userTotal: 0, deviceTotal: 0, version: "", running: false,
   totalDownload: 0, totalUpload: 0, totalUsers: 0,
 });
 
@@ -170,18 +161,6 @@ const gauges = computed(() => [
   { label: "Memory", sub: "RAM", val: dash.memPercent, color: gaugeColors[1], circ: 2 * Math.PI * 42, off: 2 * Math.PI * 42 * (1 - (dash.memPercent ?? 0) / 100) },
   { label: "Disk", sub: "Storage", val: dash.diskPercent, color: gaugeColors[2], circ: 2 * Math.PI * 42, off: 2 * Math.PI * 42 * (1 - (dash.diskPercent ?? 0) / 100) },
 ]);
-
-function formatUptime(seconds: number): string {
-  if (!seconds) return "-";
-  const d = Math.floor(seconds / 86400);
-  const h = Math.floor((seconds % 86400) / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const parts: string[] = [];
-  if (d > 0) parts.push(`${d}d`);
-  if (h > 0) parts.push(`${h}h`);
-  parts.push(`${m}m`);
-  return parts.join(" ");
-}
 
 const rateDownloadPoints = computed(() =>
   rateHistory.map((p, i) => `${i},${100 - Math.min(p.dl / 1024 / 1024 * 50, 100)}`).join(" ")
@@ -235,7 +214,7 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="scss" scoped>
-.dashboard { padding: 24px; max-width: 1200px; margin: 0 auto; }
+.dashboard { padding: 24px; }
 
 .dashboard-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
 .header-title { margin: 0 0 2px; font-size: 22px; font-weight: 700; color: var(--el-text-color-primary); }
@@ -272,9 +251,6 @@ onBeforeUnmount(() => {
 .gauge-label { font-size: 14px; font-weight: 700; color: var(--el-text-color-primary); }
 .gauge-sub { font-size: 11px; color: var(--el-text-color-placeholder); margin-top: 2px; }
 
-.uptime-card { display: flex; align-items: center; gap: 16px; }
-.uptime-card .card-value { font-size: 18px; }
-
 .stat-card { display: flex; align-items: center; gap: 14px; }
 
 .online-list { display: flex; flex-direction: column; gap: 6px; max-height: 240px; overflow-y: auto; }
@@ -295,9 +271,22 @@ onBeforeUnmount(() => {
 .info-key { font-size: 12px; color: var(--el-text-color-secondary); }
 .info-val { font-size: 13px; font-weight: 600; color: var(--el-text-color-primary); }
 
+@media (max-width: 1100px) {
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 900px) {
+  .flex.gap-4 { flex-direction: column; }
+}
+
 @media (max-width: 768px) {
   .dashboard { padding: 16px; }
-  .grid-3, .grid-4 { grid-template-columns: 1fr 1fr; }
-  .flex.gap-4 { flex-direction: column; }
+  .grid-3 { grid-template-columns: 1fr; }
+  .grid-4 { grid-template-columns: 1fr 1fr; }
+  .dashboard-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+}
+
+@media (max-width: 480px) {
+  .grid-4 { grid-template-columns: 1fr; }
 }
 </style>
