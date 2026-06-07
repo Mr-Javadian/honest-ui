@@ -6,8 +6,9 @@ import { monitorDashboardApi } from "@/api/monitor";
 
 const { t } = useI18n();
 
-const now = ref(new Date());
 const uptime = ref(0);
+const serverTime = ref(Date.now());
+const syncFailCount = ref(0);
 let uptimeInterval: ReturnType<typeof setInterval> | null = null;
 let clockInterval: ReturnType<typeof setInterval> | null = null;
 let syncInterval: ReturnType<typeof setInterval> | null = null;
@@ -25,33 +26,42 @@ function formatUptime(seconds: number): string {
   return parts.join(" ");
 }
 
-function formatDateTime(date: Date): { dateStr: string; timeStr: string } {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  const hours = String(date.getHours()).padStart(2, "0");
-  const mins = String(date.getMinutes()).padStart(2, "0");
-  const secs = String(date.getSeconds()).padStart(2, "0");
-  return {
-    dateStr: `${year}-${month}-${day}`,
-    timeStr: `${hours}:${mins}:${secs}`,
-  };
-}
+const clockStr = computed(() => {
+  const d = new Date(serverTime.value);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  const hours = String(d.getHours()).padStart(2, "0");
+  const mins = String(d.getMinutes()).padStart(2, "0");
+  const secs = String(d.getSeconds()).padStart(2, "0");
+  return { date: `${year}-${month}-${day}`, time: `${hours}:${mins}:${secs}` };
+});
 
-const dateTime = computed(() => formatDateTime(now.value));
-
-async function fetchUptime() {
+async function fetchDashboard() {
   try {
     const { data } = await monitorDashboardApi();
-    uptime.value = data.uptime || 0;
-  } catch {}
+    const newUptime = data.uptime || 0;
+    if (newUptime < uptime.value - 5) {
+      uptime.value = newUptime;
+      ElMessage.success("Server restarted — uptime reset");
+    } else {
+      uptime.value = newUptime;
+    }
+    serverTime.value = data.serverTime || Date.now();
+    syncFailCount.value = 0;
+  } catch {
+    syncFailCount.value++;
+    if (syncFailCount.value >= 3) {
+      serverTime.value = Date.now();
+    }
+  }
 }
 
 onMounted(async () => {
-  await fetchUptime();
+  await fetchDashboard();
   uptimeInterval = setInterval(() => { uptime.value++; }, 1000);
-  clockInterval = setInterval(() => { now.value = new Date(); }, 1000);
-  syncInterval = setInterval(fetchUptime, 30000);
+  clockInterval = setInterval(() => { serverTime.value += 1000; }, 1000);
+  syncInterval = setInterval(fetchDashboard, 10000);
 });
 
 onUnmounted(() => {
@@ -59,6 +69,10 @@ onUnmounted(() => {
   if (clockInterval) clearInterval(clockInterval);
   if (syncInterval) clearInterval(syncInterval);
 });
+
+function refetchNow() {
+  fetchDashboard();
+}
 
 const actions = [
   {
@@ -90,6 +104,7 @@ function confirmAction(act: typeof actions[0]) {
   }).then(() => {
     act.action().then(() => {
       ElMessage.success(`${act.label} command sent successfully`);
+      setTimeout(refetchNow, 3000);
     }).catch(() => {
       ElMessage.error(`Failed to execute ${act.label}`);
     });
@@ -102,12 +117,14 @@ function confirmAction(act: typeof actions[0]) {
     <div class="navbar-left">
       <breadcrumb />
       <div class="header-meta">
-        <div class="server-time">
-          <span class="time-value">{{ dateTime.timeStr }}</span>
-          <span class="date-value">{{ dateTime.dateStr }}</span>
+        <div class="header-meta-item server-clock">
+          <svg-icon icon-class="report" size="1em" class="meta-icon" />
+          <span class="clock-time">{{ clockStr.time }}</span>
+          <span class="clock-date">{{ clockStr.date }}</span>
         </div>
-        <div class="server-uptime">
-          <span class="uptime-label">{{ t("navbar.uptime") || "Uptime" }}:</span>
+        <div class="header-meta-item server-uptime">
+          <svg-icon icon-class="connection" size="1em" class="meta-icon" />
+          <span class="uptime-label">Uptime:</span>
           <span class="uptime-value">{{ formatUptime(uptime) }}</span>
         </div>
       </div>
@@ -155,41 +172,41 @@ function confirmAction(act: typeof actions[0]) {
 .header-meta {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding-left: 16px;
+  gap: 14px;
+  padding-left: 14px;
   border-left: 1px solid var(--el-border-color-light);
 }
 
-.server-time {
+.header-meta-item {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 13px;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
+}
 
-  .time-value {
+.meta-icon {
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+
+.server-clock {
+  .clock-time {
     font-weight: 600;
     color: var(--el-text-color-primary);
     font-variant-numeric: tabular-nums;
     letter-spacing: 0.5px;
   }
-
-  .date-value {
+  .clock-date {
     color: var(--el-text-color-placeholder);
-    font-size: 12px;
+    font-size: 11px;
   }
 }
 
 .server-uptime {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-
   .uptime-label {
     color: var(--el-text-color-placeholder);
   }
-
   .uptime-value {
     font-weight: 500;
     color: var(--el-color-success);
@@ -233,5 +250,17 @@ function confirmAction(act: typeof actions[0]) {
   }
 
   &:active { transform: scale(0.97); }
+}
+
+@media (max-width: 900px) {
+  .navbar { padding: 0 16px; }
+  .header-meta { gap: 10px; }
+  .header-meta-item { font-size: 11px; }
+  .clock-date { display: none; }
+}
+@media (max-width: 768px) {
+  .navbar-left { gap: 10px; }
+  .header-meta { padding-left: 10px; gap: 8px; flex-wrap: wrap; }
+  .restart-btn span { display: none; }
 }
 </style>

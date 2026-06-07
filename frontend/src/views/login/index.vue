@@ -73,7 +73,7 @@ export default { name: "Login" }
 </script>
 
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount } from "vue";
+import { onMounted, onBeforeUnmount, watch } from "vue";
 import router from "@/router";
 import LangSelect from "@/components/LangSelect/index.vue";
 import SvgIcon from "@/components/SvgIcon/index.vue";
@@ -139,6 +139,12 @@ const loginRules = {
   captcha: [{ required: true, message: "Enter captcha", trigger: "change" }, { pattern: /^\d{4}$/, message: "4 digits required", trigger: "change" }],
 };
 
+watch(() => loginForm.value.captcha, (val) => {
+  if (val && val.length > 0) {
+    nextTick(() => loginFormRef.value?.clearValidate?.("captcha"));
+  }
+});
+
 const checkCapslock = (e: any) => {
   const { key } = e;
   isCapslock.value = key && key.length === 1 && key >= "A" && key <= "Z";
@@ -150,6 +156,7 @@ const handleLogin = () => {
     if (loginForm.value.captcha !== captchaValue.value) {
       ElMessage.warning("Captcha does not match");
       refreshCaptcha();
+      nextTick(() => loginFormRef.value?.clearValidate?.("captcha"));
       return;
     }
     loading.value = true;
@@ -162,7 +169,10 @@ const handleLogin = () => {
         return acc;
       }, {});
       router.push({ path: redirect, query: otherQueryParams });
-    }).catch(() => refreshCaptcha()).finally(() => { loading.value = false; });
+    }).catch(() => {
+      refreshCaptcha();
+      nextTick(() => loginFormRef.value?.clearValidate?.("captcha"));
+    }).finally(() => { loading.value = false; });
   });
 };
 
@@ -449,8 +459,16 @@ onBeforeUnmount(() => {
 }
 
 @media (max-width: 480px) {
-  .login-card-inner { padding: 24px 20px 20px; }
+  .login-card-inner { padding: 24px 16px 18px; }
   .login-title { font-size: 20px; }
-  .login-logo { font-size: 2em; }
+  .login-logo-img { width: 56px; height: 56px; }
+  .login-version { font-size: 10px; }
+}
+@media (max-width: 360px) {
+  .login-card { max-width: 96%; }
+  .login-card-inner { padding: 20px 12px 14px; }
+  .captcha-row { flex-direction: column; gap: 8px; }
+  .captcha-code { width: 100%; justify-content: center; }
+  .blob-1, .blob-2 { display: none; }
 }
 </style>

@@ -10,6 +10,7 @@ import (
 	"github.com/Mr-Javadian/honest-ui/util"
 	"regexp"
 	"strings"
+	"time"
 )
 
 func MonitorSystem() (vo.SystemMonitorVo, error) {
@@ -89,6 +90,7 @@ func MonitorDashboard() (vo.DashboardVo, error) {
 		MemPercent:    systemVo.MemPercent,
 		DiskPercent:   systemVo.DiskPercent,
 		Uptime:        uptime,
+		ServerTime:    time.Now().UnixMilli(),
 		UserTotal:     hotsVo.UserTotal,
 		DeviceTotal:   hotsVo.DeviceTotal,
 		Version:       hotsVo.Version,

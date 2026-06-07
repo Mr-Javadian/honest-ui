@@ -1,7 +1,20 @@
+:root {
+  --sidebar-bg: var(--el-bg-color);
+  --sidebar-border: var(--el-border-color-light);
+  --sidebar-text: var(--el-text-color-primary);
+  --sidebar-icon: var(--el-text-color-secondary);
+  --sidebar-hover: var(--el-fill-color-light);
+  --sidebar-sub-bg: rgba(0, 0, 0, 0.02);
+  --sidebar-sub-hover: rgba(0, 0, 0, 0.04);
+}
+
 @import "./sidebar";
 @import "./reset";
 @import "./dark";
 @import "./element-plus";
+
+html { overflow-x: hidden; }
+body { overflow-x: hidden; }
 
 .app-container {
   padding: 20px;

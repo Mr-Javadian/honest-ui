@@ -20,6 +20,7 @@ type DashboardVo struct {
 	MemPercent    float64 `json:"memPercent"`
 	DiskPercent   float64 `json:"diskPercent"`
 	Uptime        uint64  `json:"uptime"`
+	ServerTime    int64   `json:"serverTime"`
 	UserTotal     int64   `json:"userTotal"`
 	DeviceTotal   int64   `json:"deviceTotal"`
 	Version       string  `json:"version"`

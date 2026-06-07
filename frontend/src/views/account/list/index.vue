@@ -79,12 +79,12 @@
             :data="records"
             stripe
             style="width: 100%"
-            :cell-style="{ padding: '6px 6px' }"
+            :cell-style="{ padding: '5px 4px' }"
             @selection-change="handleSelectionChange"
           >
-            <el-table-column type="selection" width="34" />
+            <el-table-column type="selection" width="32" />
 
-            <el-table-column :label="$t('account.username')" min-width="120">
+            <el-table-column :label="$t('account.username')" min-width="130">
               <template #default="scope">
                 <div class="client-cell">
                   <span class="client-email">{{ scope.row.username }}</span>
@@ -93,7 +93,7 @@
               </template>
             </el-table-column>
 
-            <el-table-column :label="$t('common.status')" width="130">
+            <el-table-column :label="$t('common.status')" width="100">
               <template #default="scope">
                 <div class="status-cell">
                   <el-switch
@@ -109,36 +109,45 @@
               </template>
             </el-table-column>
 
-            <el-table-column :label="$t('account.traffic') || 'Traffic'" min-width="120">
+            <el-table-column :label="'DL'" width="75" align="right">
               <template #default="scope">
-                <div class="traffic-cell">
-                  <span class="traffic-row"><span class="traffic-label">DL</span><span class="traffic-val down">{{ formatBytes(scope.row.download) }}</span></span>
-                  <span class="traffic-row"><span class="traffic-label">UL</span><span class="traffic-val up">{{ formatBytes(scope.row.upload) }}</span></span>
-                </div>
+                <span class="cell-num down">{{ formatBytes(scope.row.download) }}</span>
               </template>
             </el-table-column>
 
-            <el-table-column :label="$t('account.quota')" width="85" align="center">
+            <el-table-column :label="'UL'" width="75" align="right">
               <template #default="scope">
-                <el-tag size="small" effect="plain">{{ formatBytes(scope.row.quota) }}</el-tag>
+                <span class="cell-num up">{{ formatBytes(scope.row.upload) }}</span>
               </template>
             </el-table-column>
 
-            <el-table-column :label="$t('account.remaining')" width="85" align="center">
+            <el-table-column :label="$t('account.quota')" width="75" align="right">
               <template #default="scope">
-                <el-tag v-if="remainingBytes(scope.row) === '∞'" size="small" type="info" effect="plain">∞</el-tag>
-                <el-tag v-else :type="remainingColor(scope.row)" size="small" effect="plain">{{ remainingBytes(scope.row) }}</el-tag>
+                <span class="cell-num">{{ formatBytes(scope.row.quota) }}</span>
               </template>
             </el-table-column>
 
-            <el-table-column :label="$t('account.expireTime')" width="115" align="center">
+            <el-table-column :label="$t('account.remaining')" width="75" align="right">
+              <template #default="scope">
+                <span v-if="remainingBytes(scope.row) === '∞'" class="cell-num text-inf">∞</span>
+                <span v-else :class="['cell-num', 'text-' + remainingColor(scope.row)]">{{ remainingBytes(scope.row) }}</span>
+              </template>
+            </el-table-column>
+
+            <el-table-column label="Devices" width="68" align="center">
+              <template #default="scope">
+                <span class="cell-num">{{ scope.row.device || 0 }}/{{ scope.row.deviceNo || '-' }}</span>
+              </template>
+            </el-table-column>
+
+            <el-table-column :label="$t('account.expireTime')" width="110" align="center">
               <template #default="scope">
                 <span v-if="!scope.row.expireTime" class="text-inf">∞</span>
-                <span v-else :class="expiryClass(scope.row)">{{ timestampToDateTime(scope.row.expireTime) }}</span>
+                <span v-else :class="'expiry-' + expiryClass(scope.row)">{{ timestampToDateTime(scope.row.expireTime) }}</span>
               </template>
             </el-table-column>
 
-            <el-table-column :label="$t('common.operate')" width="155" align="center" fixed="right">
+            <el-table-column :label="$t('common.operate')" width="175" align="center" fixed="right">
               <template #default="scope">
                 <div class="action-buttons">
                   <el-tooltip :content="$t('common.nodeQrCode')" placement="top">
@@ -589,7 +598,7 @@ function remainingBytes(row: AccountVo): string {
   return remaining > 0 ? formatBytes(remaining) : "0";
 }
 
-function remainingColor(row: AccountVo): "success" | "warning" | "danger" | "info" {
+function remainingColor(row: AccountVo): string {
   const quota = row.quota || 0;
   if (quota <= 0) return "info";
   const used = (row.download || 0) + (row.upload || 0);
@@ -600,11 +609,11 @@ function remainingColor(row: AccountVo): "success" | "warning" | "danger" | "inf
 }
 
 function expiryClass(row: AccountVo): string {
-  if (!row.expireTime) return "text-inf";
+  if (!row.expireTime) return "inf";
   const now = Date.now();
-  if (row.expireTime <= now) return "text-expiry-danger";
-  if (row.expireTime - now < 86400000 * 3) return "text-expiry-warning";
-  return "text-expiry-success";
+  if (row.expireTime <= now) return "danger";
+  if (row.expireTime - now < 86400000 * 3) return "warning";
+  return "success";
 }
 
 const resetDataForm = () => {
@@ -1049,15 +1058,6 @@ onMounted(() => {
   &.up { color: var(--el-color-success); }
 }
 
-.text-inf {
-  color: var(--el-text-color-placeholder);
-  font-size: 14px;
-}
-
-.text-expiry-danger { color: var(--el-color-danger); font-weight: 600; font-size: 12px; }
-.text-expiry-warning { color: var(--el-color-warning); font-weight: 500; font-size: 12px; }
-.text-expiry-success { color: var(--el-color-success); font-weight: 500; font-size: 12px; }
-
 .action-buttons {
   display: flex;
   align-items: center;
@@ -1074,21 +1074,21 @@ onMounted(() => {
 :deep(.el-table) {
   border-radius: 10px;
   overflow: hidden;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 :deep(.el-table th.el-table__cell) {
   background-color: var(--el-fill-color-light);
   font-weight: 600;
-  font-size: 11px;
+  font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--el-text-color-secondary);
-  padding: 10px 8px;
+  padding: 8px 4px;
 }
 
 :deep(.el-table .el-table__cell) {
-  padding: 8px 8px;
+  padding: 5px 4px;
 }
 
 :deep(.el-table__row) {
@@ -1112,6 +1112,30 @@ onMounted(() => {
 :deep(.el-table__body-wrapper) {
   &::-webkit-scrollbar { height: 6px; width: 6px; }
   &::-webkit-scrollbar-thumb { background: var(--el-border-color); border-radius: 3px; }
+}
+
+@media (max-width: 1200px) {
+  :deep(.el-table th.el-table__cell),
+  :deep(.el-table .el-table__cell) {
+    padding: 5px 3px;
+  }
+  .action-buttons :deep(.el-button) {
+    padding: 4px 3px;
+  }
+}
+@media (max-width: 768px) {
+  .clients-page { padding: 8px; }
+  .stat-value { font-size: 18px; }
+  .main-card :deep(.el-card__header) { padding: 10px 12px; }
+  .card-toolbar { gap: 6px; }
+  .card-toolbar :deep(.el-input) { width: 140px !important; }
+  :deep(.el-table) { font-size: 11px; }
+  :deep(.el-table th.el-table__cell) { font-size: 9px; }
+}
+@media (max-width: 480px) {
+  .clients-page { padding: 4px; }
+  .summary-card :deep(.el-card__body) { padding: 10px 12px; }
+  :deep(.el-table) { font-size: 10px; }
 }
 
 .dialog-body {

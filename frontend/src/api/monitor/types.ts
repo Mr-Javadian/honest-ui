@@ -18,6 +18,7 @@ export interface DashboardVo {
   memPercent: number;
   diskPercent: number;
   uptime: number;
+  serverTime: number;
   userTotal: number;
   deviceTotal: number;
   version: string;
