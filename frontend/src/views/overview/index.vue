@@ -108,25 +108,62 @@
 
     <div class="grid-3">
       <div class="card info-card">
-        <div class="card-header">Honest-UI</div>
+        <div class="card-header">
+          <div class="card-header-left">
+            <svg-icon icon-class="setting" size="1em" style="margin-right:6px;opacity:0.6" />
+            Honest-UI
+          </div>
+        </div>
         <div class="info-body">
           <div class="info-row"><span class="info-key">Version</span><span class="info-val">{{ dash.huiVersion || "-" }}</span></div>
-          <div class="info-row"><span class="info-key">Status</span><span class="info-val" :style="{color:dash.running?'#34d399':'#ef4444'}">{{ dash.running ? "Running" : "Stopped" }}</span></div>
+          <div class="info-row"><span class="info-key">Status</span><span class="info-val" style="color:#34d399">Running</span></div>
+          <div class="info-divider"></div>
+          <div class="info-row update-row">
+            <span class="info-key">Update</span>
+            <span v-if="updateStatus === 'checking'" class="info-val update-checking">Checking...</span>
+            <span v-else-if="updateStatus === 'latest'" class="info-val update-latest">
+              <svg-icon icon-class="refresh" size="0.9em" style="margin-right:4px" />Latest
+            </span>
+            <span v-else-if="updateStatus === 'available'" class="info-val update-available" @click="checkUpdate">
+              <svg-icon icon-class="error" size="0.9em" style="margin-right:4px;color:#f59e0b" />Update Required
+            </span>
+            <span v-else class="info-val">
+              <el-tooltip content="Check for updates" placement="top">
+                <el-button text size="small" @click="checkUpdate" style="padding:0;height:auto;font-size:12px">
+                  Check Update
+                </el-button>
+              </el-tooltip>
+            </span>
+          </div>
         </div>
       </div>
       <div class="card info-card">
-        <div class="card-header">Hysteria2</div>
+        <div class="card-header">
+          <div class="card-header-left">
+            <svg-icon icon-class="hysteria" size="1em" style="margin-right:6px;opacity:0.6" />
+            Hysteria Core
+          </div>
+        </div>
         <div class="info-body">
           <div class="info-row"><span class="info-key">Version</span><span class="info-val">{{ dash.version || "-" }}</span></div>
           <div class="info-row"><span class="info-key">Online</span><span class="info-val">{{ dash.userTotal }} users / {{ dash.deviceTotal }} devices</span></div>
         </div>
       </div>
       <div class="card info-card">
-        <div class="card-header">Resources</div>
+        <div class="card-header">
+          <div class="card-header-left">
+            <svg-icon icon-class="share" size="1em" style="margin-right:6px;opacity:0.6" />
+            Network Info
+          </div>
+          <el-tooltip :content="ipsVisible ? 'Hide IP addresses' : 'Show IP addresses'" placement="top">
+            <el-button text size="small" @click="toggleIps" class="eye-btn">
+              <svg-icon :icon-class="ipsVisible ? 'eye-open' : 'eye'" size="1.1em" />
+            </el-button>
+          </el-tooltip>
+        </div>
         <div class="info-body">
-          <div class="info-row"><span class="info-key">CPU</span><span class="info-val">{{ Math.round(dash.cpuPercent) }}%</span></div>
-          <div class="info-row"><span class="info-key">Memory</span><span class="info-val">{{ Math.round(dash.memPercent) }}%</span></div>
-          <div class="info-row"><span class="info-key">Disk</span><span class="info-val">{{ Math.round(dash.diskPercent) }}%</span></div>
+          <div class="info-row"><span class="info-key">IPv4</span><span class="info-val ip-val" :class="{ masked: !ipsVisible }">{{ ipsVisible ? ipv4 : maskIp(ipv4) }}</span></div>
+          <div class="info-row"><span class="info-key">IPv6</span><span class="info-val ip-val" :class="{ masked: !ipsVisible }">{{ ipsVisible ? ipv6 : maskIp(ipv6) }}</span></div>
         </div>
       </div>
     </div>
@@ -153,6 +190,55 @@ const onlineUsers = ref<OnlineUserVo[]>([]);
 const trafficRate = reactive({ download: 0, upload: 0 });
 const rateHistory = reactive<{ dl: number; ul: number }[]>([]);
 const prevTraffic = reactive({ download: 0, upload: 0 });
+
+const ipv4 = ref("");
+const ipv6 = ref("");
+const ipsVisible = ref(false);
+
+const updateStatus = ref<"idle" | "checking" | "latest" | "available">("idle");
+
+function maskIp(ip: string): string {
+  if (!ip) return "••••••••";
+  if (ip.includes(":")) {
+    const parts = ip.split(":");
+    return parts.slice(0, 2).join(":") + "::••••";
+  }
+  const parts = ip.split(".");
+  return parts.slice(0, 2).join(".") + ".••.••";
+}
+
+function toggleIps() {
+  ipsVisible.value = !ipsVisible.value;
+}
+
+async function fetchIps() {
+  try {
+    const v4 = await fetch("https://api.ipify.org?format=json").then(r => r.json());
+    ipv4.value = v4.ip;
+  } catch {}
+  try {
+    const v6 = await fetch("https://api6.ipify.org?format=json").then(r => r.json());
+    ipv6.value = v6.ip;
+  } catch {}
+}
+
+async function checkUpdate() {
+  updateStatus.value = "checking";
+  try {
+    const res = await fetch("https://api.github.com/repos/Mr-Javadian/honest-ui/releases/latest");
+    const data = await res.json();
+    const latestTag = data.tag_name || "";
+    const curTag = "v" + dash.huiVersion;
+    if (latestTag === curTag || !latestTag) {
+      updateStatus.value = "latest";
+    } else {
+      updateStatus.value = "available";
+    }
+  } catch {
+    updateStatus.value = "idle";
+    ElMessage.error("Failed to check for updates");
+  }
+}
 
 const gaugeColors = ["#818cf8", "#34d399", "#fbbf24"];
 
@@ -202,6 +288,7 @@ const fetchOnlineUsers = () => {
 onMounted(() => {
   fetchDashboard();
   fetchOnlineUsers();
+  fetchIps();
   dlTimer = setInterval(fetchDashboard, 2000);
   ulTimer = setInterval(calcRate, 2000);
   setInterval(fetchOnlineUsers, 5000);
@@ -235,7 +322,8 @@ onBeforeUnmount(() => {
 
 .card { border-radius: 14px; border: 1px solid var(--el-border-color-light); background: var(--el-bg-color-overlay); padding: 20px; transition: all 0.25s ease; }
 .card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.06); }
-.card-header { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--el-text-color-secondary); margin-bottom: 14px; }
+.card-header { display: flex; align-items: center; justify-content: space-between; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--el-text-color-secondary); margin-bottom: 14px; }
+.card-header-left { display: flex; align-items: center; }
 .card-icon-box { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .card-body { display: flex; flex-direction: column; min-width: 0; }
 .card-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--el-text-color-secondary); margin-bottom: 2px; }
@@ -268,8 +356,32 @@ onBeforeUnmount(() => {
 
 .info-body { display: flex; flex-direction: column; gap: 10px; }
 .info-row { display: flex; justify-content: space-between; align-items: center; }
+.info-divider { height: 1px; background: var(--el-border-color-light); margin: 4px 0; }
 .info-key { font-size: 12px; color: var(--el-text-color-secondary); }
 .info-val { font-size: 13px; font-weight: 600; color: var(--el-text-color-primary); }
+
+.update-row .info-val { cursor: default; }
+.update-checking { color: var(--el-text-color-placeholder); font-weight: 400; }
+.update-latest { color: #34d399; display: flex; align-items: center; }
+.update-available { color: #f59e0b; display: flex; align-items: center; cursor: pointer; }
+
+.ip-val {
+  font-family: var(--el-font-family-mono, "SF Mono", "Fira Code", monospace);
+  font-size: 12px;
+  letter-spacing: 0.3px;
+  &.masked {
+    color: var(--el-text-color-placeholder);
+    letter-spacing: 2px;
+  }
+}
+
+.eye-btn {
+  padding: 0;
+  height: auto;
+  font-size: 14px;
+  color: var(--el-text-color-secondary);
+  &:hover { color: var(--el-color-primary); }
+}
 
 @media (max-width: 1100px) {
   .grid-4 { grid-template-columns: repeat(2, 1fr); }

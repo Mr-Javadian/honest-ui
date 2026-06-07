@@ -134,7 +134,7 @@
 
             <el-table-column :label="$t('account.remaining') || 'Remaining'" align="center" width="100">
               <template #default="scope">
-                <el-tag v-if="remainingBytes(scope.row) === 'Γê₧'" type="info" size="small">Γê₧</el-tag>
+                <el-tag v-if="remainingBytes(scope.row) === '∞'" type="info" size="small">∞</el-tag>
                 <el-tag v-else :type="remainingColor(scope.row)" size="small">{{ remainingBytes(scope.row) }}</el-tag>
               </template>
             </el-table-column>
@@ -147,7 +147,7 @@
 
             <el-table-column :label="$t('account.expireTime')" align="center" width="130">
               <template #default="scope">
-                <el-tag v-if="!scope.row.expireTime" type="info" size="small">Γê₧</el-tag>
+                <el-tag v-if="!scope.row.expireTime" type="info" size="small">∞</el-tag>
                 <el-tag v-else :type="expiryColor(scope.row)" size="small">{{ timestampToDateTime(scope.row.expireTime) }}</el-tag>
               </template>
             </el-table-column>
@@ -164,7 +164,7 @@
               </template>
             </el-table-column>
 
-            <el-table-column :label="$t('common.operate')" align="center" width="240" fixed="right">
+            <el-table-column :label="$t('common.operate')" align="center" width="280" fixed="right">
               <template #default="scope">
                 <div class="action-buttons">
                   <el-tooltip :content="$t('common.nodeQrCode')" placement="top">
@@ -181,6 +181,9 @@
                   </el-tooltip>
                   <el-tooltip :content="$t('common.edit')" placement="top">
                     <el-button text :icon="Edit" @click="handleUpdate(scope.row)" />
+                  </el-tooltip>
+                  <el-tooltip :content="$t('common.delete')" placement="top">
+                    <el-button text :icon="Delete" @click="handleDelete(scope.row)" style="color:var(--el-color-danger)" />
                   </el-tooltip>
                   <el-dropdown trigger="click" placement="bottom-end">
                     <el-button text :icon="MoreFilled" />
@@ -384,7 +387,7 @@ import {
   importAccountApi,
   resetTrafficApi,
 } from "@/api/account";
-import { Search, Plus, Refresh, Edit, Share, Link, MoreFilled } from "@element-plus/icons-vue";
+import { Search, Plus, Refresh, Edit, Share, Link, MoreFilled, Delete } from "@element-plus/icons-vue";
 import {
   timestampToDateTime,
   getMonthLater,
@@ -594,7 +597,7 @@ const {
 function remainingBytes(row: AccountVo): string {
   const quota = row.quota || 0;
   const used = (row.download || 0) + (row.upload || 0);
-  if (quota <= 0) return "Γê₧";
+  if (quota <= 0) return "∞";
   const remaining = quota - used;
   return remaining > 0 ? formatBytes(remaining) : "0";
 }
@@ -720,8 +723,8 @@ const handleDelete = (row: { [key: string]: any }) => {
   const id = row.id;
   const username = row.username;
   ElMessageBox.confirm(
-    "Are you sure to delete the data item with the usernameπÇî" +
-      username + "πÇì?",
+    "Are you sure to delete the data item with the username「" +
+      username + "」?",
     "Warning",
     {
       confirmButtonText: t("common.confirm"),
@@ -923,7 +926,7 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .clients-page {
-  padding: 0;
+  padding: 8px;
 }
 
 .summary-card {

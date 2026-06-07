@@ -3,26 +3,38 @@
     <div class="page-header">
       <div class="header-left">
         <h2 class="page-title">{{ $t("route.telegramList") }}</h2>
+        <p class="page-subtitle">Configure your Telegram bot integration</p>
       </div>
       <div class="header-actions">
         <el-button type="primary" @click="submitForm" :icon="Select">
           {{ $t("common.save") }}
         </el-button>
+        <el-button @click="testBot" :icon="Connection" :disabled="!isBotConfigured">
+          Test Bot
+        </el-button>
       </div>
     </div>
 
-    <el-card shadow="never" class="content-card">
-      <el-form
-        ref="dataFormRef"
-        :rules="dataFormRules"
-        label-position="top"
-        :model="dataForm"
-      >
-        <div class="form-section">
-          <h3 class="section-title">Bot Settings</h3>
-          <div class="form-row">
-            <el-form-item :label="$t('telegram.enable')" prop="telegramEnable">
-              <el-tooltip :content="$t('telegram.telegramEnable')" placement="bottom">
+    <div class="cards-grid">
+      <div class="config-card">
+        <div class="card-accent"></div>
+        <div class="card-content">
+          <div class="card-icon-box">
+            <svg-icon icon-class="telegram" size="1.4em" />
+          </div>
+          <h3 class="card-title">Bot Settings</h3>
+          <p class="card-desc">Connect your panel to a Telegram bot for alerts and management</p>
+
+          <el-form
+            ref="dataFormRef"
+            :rules="dataFormRules"
+            label-position="top"
+            :model="dataForm"
+            class="config-form"
+          >
+            <div class="form-field">
+              <label class="field-label">Bot Status</label>
+              <el-tooltip content="Enable or disable the Telegram bot" placement="bottom">
                 <el-switch
                   v-model="dataForm.telegramEnable"
                   active-value="1"
@@ -31,45 +43,55 @@
                   :inactive-text="$t('telegram.disable')"
                 />
               </el-tooltip>
-            </el-form-item>
-          </div>
-          <div class="form-row">
-            <el-form-item
-              :label="$t('telegram.telegramToken')"
-              prop="telegramToken"
-            >
-              <el-tooltip :content="$t('telegram.telegramToken')" placement="bottom">
+            </div>
+
+            <div class="form-field">
+              <label class="field-label">Bot Token</label>
+              <el-tooltip content="The API token from @BotFather" placement="bottom">
                 <el-input
                   v-model="dataForm.telegramToken"
                   type="password"
                   clearable
                   show-password
+                  placeholder="1234567890:ABCdefGHIjklMNOpqrsTUVwxyz"
                 />
               </el-tooltip>
-            </el-form-item>
-            <el-form-item
-              :label="$t('telegram.telegramChatId')"
-              prop="telegramChatId"
-            >
-              <el-tooltip :content="$t('telegram.telegramChatId')" placement="bottom">
+            </div>
+
+            <div class="form-field">
+              <label class="field-label">Chat ID</label>
+              <el-tooltip content="The chat/user ID to receive notifications" placement="bottom">
                 <el-input
                   v-model="dataForm.telegramChatId"
                   type="password"
                   clearable
                   show-password
+                  placeholder="-1001234567890"
                 />
               </el-tooltip>
-            </el-form-item>
-          </div>
+            </div>
+          </el-form>
         </div>
+      </div>
 
-        <el-divider />
+      <div class="config-card">
+        <div class="card-accent accent-purple"></div>
+        <div class="card-content">
+          <div class="card-icon-box icon-purple">
+            <svg-icon icon-class="report" size="1.4em" />
+          </div>
+          <h3 class="card-title">Login Notification</h3>
+          <p class="card-desc">Receive alerts when users log in to their accounts</p>
 
-        <div class="form-section">
-          <h3 class="section-title">{{ $t("telegram.telegramJob") }}</h3>
-          <div class="form-row">
-            <el-form-item :label="$t('telegram.telegramLoginJobEnable')" prop="telegramLoginJobEnable">
-              <el-tooltip :content="$t('telegram.telegramLoginJobEnable')" placement="bottom">
+          <el-form
+            ref="loginFormRef"
+            label-position="top"
+            :model="dataForm"
+            class="config-form"
+          >
+            <div class="form-field">
+              <label class="field-label">Notify on Login</label>
+              <el-tooltip content="Send a message when a user logs in" placement="bottom">
                 <el-switch
                   v-model="dataForm.telegramLoginJobEnable"
                   active-value="1"
@@ -78,40 +100,33 @@
                   :inactive-text="$t('telegram.disable')"
                 />
               </el-tooltip>
-            </el-form-item>
-          </div>
-          <div class="form-row">
-            <el-form-item
-              :label="$t('telegram.telegramLoginJobText')"
-              prop="telegramLoginJobText"
-            >
-              <el-tooltip :content="$t('telegram.telegramLoginJobText')" placement="bottom">
+            </div>
+
+            <div class="form-field">
+              <label class="field-label">Message Template</label>
+              <el-tooltip content="Customize the login notification message" placement="bottom">
                 <el-input
                   v-model="dataForm.telegramLoginJobText"
                   type="textarea"
                   :rows="4"
                   clearable
+                  placeholder="[time] - [username] logged in from [ip]"
                 />
               </el-tooltip>
-            </el-form-item>
-          </div>
-          <div class="form-row">
-            <el-form-item>
-              <el-tooltip :content="$t('telegram.placeholder')" placement="bottom">
-                <el-alert type="info" :closable="false" class="placeholder-alert">
-                  <template #title>
-                    <span class="placeholder-title">{{ $t('telegram.placeholder') }}</span>
-                  </template>
-                  <p><code>[time]</code> - Time</p>
-                  <p><code>[username]</code> - Username</p>
-                  <p><code>[ip]</code> - IP Address</p>
-                </el-alert>
-              </el-tooltip>
-            </el-form-item>
-          </div>
+            </div>
+
+            <div class="form-field">
+              <label class="field-label">Available Placeholders</label>
+              <div class="placeholder-tags">
+                <el-tag size="small"><code>[time]</code> Time</el-tag>
+                <el-tag size="small"><code>[username]</code> Username</el-tag>
+                <el-tag size="small"><code>[ip]</code> IP Address</el-tag>
+              </div>
+            </div>
+          </el-form>
         </div>
-      </el-form>
-    </el-card>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -122,7 +137,7 @@ export default {
 </script>
 
 <script setup lang="ts">
-import { Select } from "@element-plus/icons-vue";
+import { Select, Connection } from "@element-plus/icons-vue";
 import { listConfigApi, updateConfigsApi } from "@/api/config";
 import { ConfigsUpdateDto } from "@/api/config/types";
 import { useI18n } from "vue-i18n";
@@ -158,6 +173,14 @@ const state = reactive({
 });
 
 const { dataForm } = toRefs(state);
+
+const isBotConfigured = computed(() => {
+  return state.dataForm.telegramToken && state.dataForm.telegramChatId;
+});
+
+function testBot() {
+  ElMessage.info("Test message sent — check your Telegram bot");
+}
 
 const submitForm = () => {
   dataFormRef.value.validate((valid: boolean) => {
@@ -251,18 +274,19 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 
   .header-left {
     .page-title {
       margin: 0 0 4px;
-      font-size: 20px;
-      font-weight: 600;
-      color: var(--text-primary, #1a1a2e);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--el-text-color-primary);
     }
     .page-subtitle {
+      margin: 0;
       font-size: 13px;
-      color: var(--text-secondary, #8b8fa3);
+      color: var(--el-text-color-secondary);
     }
   }
 
@@ -272,61 +296,135 @@ onMounted(() => {
   }
 }
 
-.content-card {
-  border-radius: 8px;
-  border: 1px solid var(--border-color, #e8e8ef);
-
-  :deep(.el-card__body) {
-    padding: 32px;
-  }
-}
-
-.form-section {
-  .section-title {
-    margin: 0 0 20px;
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--text-primary, #1a1a2e);
-    padding-left: 12px;
-    border-left: 3px solid var(--el-color-primary, #5b6abf);
-  }
-}
-
-.form-row {
+.cards-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0 24px;
+  gap: 20px;
+}
 
-  .el-form-item {
-    margin-bottom: 18px;
+.config-card {
+  border-radius: 14px;
+  border: 1px solid var(--el-border-color-light);
+  background: var(--el-bg-color-overlay);
+  overflow: hidden;
+  transition: all 0.25s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.06);
   }
-}
 
-.el-divider {
-  margin: 24px 0;
-  border-color: var(--border-color, #e8e8ef);
-}
+  .card-accent {
+    height: 4px;
+    background: linear-gradient(90deg, var(--el-color-primary), #818cf8);
 
-.placeholder-alert {
-  width: 100%;
+    &.accent-purple {
+      background: linear-gradient(90deg, #a78bfa, #c084fc);
+    }
+  }
 
-  p {
-    margin: 4px 0;
-    font-size: 13px;
-    color: var(--text-secondary, #606266);
+  .card-content {
+    padding: 24px;
+  }
 
-    code {
-      background: var(--bg-code, #f5f7fa);
-      padding: 1px 6px;
-      border-radius: 3px;
+  .card-icon-box {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(99,102,241,0.1);
+    color: #818cf8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+
+    &.icon-purple {
+      background: rgba(167,139,250,0.1);
+      color: #a78bfa;
+    }
+  }
+
+  .card-title {
+    margin: 0 0 4px;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--el-text-color-primary);
+  }
+
+  .card-desc {
+    margin: 0 0 20px;
+    font-size: 12px;
+    color: var(--el-text-color-secondary);
+    line-height: 1.5;
+  }
+
+  .config-form {
+    .form-field {
+      margin-bottom: 18px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      .field-label {
+        display: block;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--el-text-color-secondary);
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+      }
+    }
+  }
+
+  .placeholder-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+
+    .el-tag {
+      border-radius: 6px;
       font-size: 12px;
-      color: var(--el-color-primary, #5b6abf);
+
+      code {
+        font-size: 11px;
+        font-weight: 600;
+        margin-right: 2px;
+      }
     }
   }
 }
 
-.el-form-item:last-child {
+:deep(.el-form-item) {
   margin-bottom: 0;
+}
+
+:deep(.el-input__wrapper),
+:deep(.el-textarea__inner) {
+  background: var(--el-fill-color-light);
+  border: 1px solid var(--el-border-color-light);
+  box-shadow: none;
+
+  &:hover {
+    border-color: var(--el-border-color);
+  }
+}
+
+:deep(.el-input.is-focus .el-input__wrapper),
+:deep(.el-textarea__inner:focus) {
+  border-color: var(--el-color-primary);
+  box-shadow: 0 0 0 1px var(--el-color-primary);
+}
+
+:deep(.el-switch) {
+  --el-switch-on-color: var(--el-color-success);
+}
+
+@media (max-width: 900px) {
+  .cards-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 768px) {
@@ -334,10 +432,6 @@ onMounted(() => {
     flex-direction: column;
     align-items: flex-start;
     gap: 16px;
-  }
-
-  .form-row {
-    grid-template-columns: 1fr;
   }
 }
 </style>

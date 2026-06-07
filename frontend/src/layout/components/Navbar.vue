@@ -6,25 +6,10 @@ import { monitorDashboardApi } from "@/api/monitor";
 
 const { t } = useI18n();
 
-const uptime = ref(0);
 const serverTime = ref(Date.now());
 const syncFailCount = ref(0);
-let uptimeInterval: ReturnType<typeof setInterval> | null = null;
 let clockInterval: ReturnType<typeof setInterval> | null = null;
 let syncInterval: ReturnType<typeof setInterval> | null = null;
-
-function formatUptime(seconds: number): string {
-  const d = Math.floor(seconds / 86400);
-  const h = Math.floor((seconds % 86400) / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = seconds % 60;
-  const parts: string[] = [];
-  if (d > 0) parts.push(`${d}d`);
-  if (h > 0) parts.push(`${h}h`);
-  if (m > 0) parts.push(`${m}m`);
-  parts.push(`${s}s`);
-  return parts.join(" ");
-}
 
 const clockStr = computed(() => {
   const d = new Date(serverTime.value);
@@ -40,13 +25,6 @@ const clockStr = computed(() => {
 async function fetchDashboard() {
   try {
     const { data } = await monitorDashboardApi();
-    const newUptime = data.uptime || 0;
-    if (newUptime < uptime.value - 5) {
-      uptime.value = newUptime;
-      ElMessage.success("Server restarted — uptime reset");
-    } else {
-      uptime.value = newUptime;
-    }
     serverTime.value = data.serverTime || Date.now();
     syncFailCount.value = 0;
   } catch {
@@ -59,13 +37,11 @@ async function fetchDashboard() {
 
 onMounted(async () => {
   await fetchDashboard();
-  uptimeInterval = setInterval(() => { uptime.value++; }, 1000);
   clockInterval = setInterval(() => { serverTime.value += 1000; }, 1000);
   syncInterval = setInterval(fetchDashboard, 10000);
 });
 
 onUnmounted(() => {
-  if (uptimeInterval) clearInterval(uptimeInterval);
   if (clockInterval) clearInterval(clockInterval);
   if (syncInterval) clearInterval(syncInterval);
 });
@@ -118,14 +94,9 @@ function confirmAction(act: typeof actions[0]) {
       <breadcrumb />
       <div class="header-meta">
         <div class="header-meta-item server-clock">
-          <svg-icon icon-class="report" size="1em" class="meta-icon" />
+          <svg-icon icon-class="report" size="1.1em" class="meta-icon" />
           <span class="clock-time">{{ clockStr.time }}</span>
           <span class="clock-date">{{ clockStr.date }}</span>
-        </div>
-        <div class="header-meta-item server-uptime">
-          <svg-icon icon-class="connection" size="1em" class="meta-icon" />
-          <span class="uptime-label">Uptime:</span>
-          <span class="uptime-value">{{ formatUptime(uptime) }}</span>
         </div>
       </div>
     </div>
@@ -172,9 +143,8 @@ function confirmAction(act: typeof actions[0]) {
 .header-meta {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding-left: 14px;
-  border-left: 1px solid var(--el-border-color-light);
+  gap: 6px;
+  padding-left: 6px;
 }
 
 .header-meta-item {
@@ -192,25 +162,16 @@ function confirmAction(act: typeof actions[0]) {
 
 .server-clock {
   .clock-time {
-    font-weight: 600;
+    font-weight: 700;
     color: var(--el-text-color-primary);
     font-variant-numeric: tabular-nums;
     letter-spacing: 0.5px;
+    font-size: 14px;
   }
   .clock-date {
     color: var(--el-text-color-placeholder);
-    font-size: 11px;
-  }
-}
-
-.server-uptime {
-  .uptime-label {
-    color: var(--el-text-color-placeholder);
-  }
-  .uptime-value {
-    font-weight: 500;
-    color: var(--el-color-success);
-    font-variant-numeric: tabular-nums;
+    font-size: 12px;
+    margin-left: 2px;
   }
 }
 
@@ -254,8 +215,12 @@ function confirmAction(act: typeof actions[0]) {
 
 @media (max-width: 900px) {
   .navbar { padding: 0 16px; }
-  .header-meta { gap: 10px; }
+  .header-meta { gap: 6px; }
   .header-meta-item { font-size: 11px; }
+  .server-clock .clock-time { font-size: 13px; }
+  .server-clock .clock-date { font-size: 11px; }
+}
+@media (max-width: 600px) {
   .clock-date { display: none; }
 }
 @media (max-width: 768px) {

@@ -5,7 +5,7 @@ export PATH
 
 hui_systemd_version="${1:-latest}"
 hui_docker_version=":${hui_systemd_version#v}"
-hui_script_version="v0.5.5"
+hui_script_version="v0.5.6"
 
 # ────────────────────────────────────────────── Color ─────────────────────────────────────────────────────
 ECHO_TYPE="echo -e"
@@ -361,6 +361,18 @@ upgrade_h_ui_systemd() {
   echo "  [i] Current: ${current_version:-unknown}   Latest: ${latest_version:-unknown}"
   [[ "${latest_version}" == "${current_version}" ]] && { echo -e "  [\xE2\x9C\x93] Already up-to-date"; read -r -p "  Press Enter to continue..."; return; }
 
+  echo
+  echo_content yellow "  ───────────────────────────────────────────────"
+  echo_content yellow "  [!] Upgrade will perform the following:"
+  echo "      • Stop the Honest-UI panel service"
+  echo "      • Download & replace the panel binary"
+  echo "      • Restart the panel service"
+  echo "      • Downtime: ~10-20 seconds"
+  echo_content yellow "  ───────────────────────────────────────────────"
+  echo
+  read -r -p "  Are you sure you want to proceed with the upgrade? [y/N]: " confirm_upgrade
+  [[ "${confirm_upgrade}" != "y" && "${confirm_upgrade}" != "Y" ]] && { echo "  [i] Upgrade cancelled."; read -r -p "  Press Enter to continue..."; return; }
+
   echo "  [*] Stopping service..."
   systemctl stop honest-ui 2>/dev/null || true
 
@@ -508,6 +520,17 @@ upgrade_h_ui_docker() {
   current_version=$(docker exec honest-ui ./honest-ui -v 2>/dev/null | sed -n 's/.*version \([^\ ]*\).*/\1/p')
   echo "  [i] Current: ${current_version:-unknown}   Latest: ${latest_version:-unknown}"
   [[ "${latest_version}" == "${current_version}" ]] && { echo -e "  [\xE2\x9C\x93] Already up-to-date"; read -r -p "  Press Enter to continue..."; return; }
+
+  echo
+  echo_content yellow "  ───────────────────────────────────────────────"
+  echo_content yellow "  [!] Upgrade will perform the following:"
+  echo "      • Remove the existing Docker container"
+  echo "      • Pull & deploy the latest Docker image"
+  echo "      • Downtime: ~30-60 seconds"
+  echo_content yellow "  ───────────────────────────────────────────────"
+  echo
+  read -r -p "  Are you sure you want to proceed with the upgrade? [y/N]: " confirm_upgrade
+  [[ "${confirm_upgrade}" != "y" && "${confirm_upgrade}" != "Y" ]] && { echo "  [i] Upgrade cancelled."; read -r -p "  Press Enter to continue..."; return; }
 
   echo "  [*] Removing old container..." && docker rm -f honest-ui && docker rmi mr-javadian/honest-ui 2>/dev/null || true
   echo "  [*] Deploying new version..."
