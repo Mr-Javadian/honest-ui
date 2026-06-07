@@ -468,7 +468,7 @@ func RestartServer(c *gin.Context) {
 func RebootServer(c *gin.Context) {
 	go func() {
 		_ = service.StopServer()
-		_ = util.Exec("shutdown -r now")
+		_, _ = util.Exec("shutdown -r now")
 	}()
 	vo.Success(nil, c)
 }
