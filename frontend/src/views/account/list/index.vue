@@ -153,32 +153,24 @@
               </template>
             </el-table-column>
 
-            <el-table-column :label="$t('common.operate')" align="center" width="280" fixed="right">
+            <el-table-column :label="$t('common.operate')" align="center" width="100">
               <template #default="scope">
                 <div class="action-buttons">
-                  <el-tooltip :content="$t('common.nodeQrCode')" placement="top">
-                    <el-button text :icon="Plus" @click="handleInfo(scope.row)" />
-                  </el-tooltip>
-                  <el-tooltip :content="$t('common.subscribe')" placement="top">
-                    <el-button text :icon="Link" @click="handleSubscribe(scope.row)" />
-                  </el-tooltip>
-                  <el-tooltip :content="$t('common.nodeUrl')" placement="top">
-                    <el-button text :icon="Share" @click="handleNodeUrl(scope.row)" />
-                  </el-tooltip>
-                  <el-tooltip :content="$t('common.resetTraffic')" placement="top">
-                    <el-button text :icon="Refresh" @click="resetTraffic(scope.row)" />
-                  </el-tooltip>
                   <el-tooltip :content="$t('common.edit')" placement="top">
-                    <el-button text :icon="Edit" @click="handleUpdate(scope.row)" />
+                    <el-button text size="small" :icon="Edit" @click="handleUpdate(scope.row)" />
                   </el-tooltip>
                   <el-tooltip :content="$t('common.delete')" placement="top">
-                    <el-button text :icon="Delete" @click="handleDelete(scope.row)" style="color:var(--el-color-danger)" />
+                    <el-button text size="small" :icon="Delete" @click="handleDelete(scope.row)" style="color:var(--el-color-danger)" />
                   </el-tooltip>
                   <el-dropdown trigger="click" placement="bottom-end">
-                    <el-button text :icon="MoreFilled" />
+                    <el-button text size="small" :icon="MoreFilled" />
                     <template #dropdown>
                       <el-dropdown-menu>
-                        <el-dropdown-item @click="handleKick(scope.row)">{{ $t("account.kick") }}</el-dropdown-item>
+                        <el-dropdown-item :icon="Plus" @click="handleInfo(scope.row)">{{ $t("common.nodeQrCode") }}</el-dropdown-item>
+                        <el-dropdown-item :icon="Link" @click="handleSubscribe(scope.row)">{{ $t("common.subscribe") }}</el-dropdown-item>
+                        <el-dropdown-item :icon="Share" @click="handleNodeUrl(scope.row)">{{ $t("common.nodeUrl") }}</el-dropdown-item>
+                        <el-dropdown-item :icon="Refresh" @click="resetTraffic(scope.row)">{{ $t("common.resetTraffic") }}</el-dropdown-item>
+                        <el-dropdown-item divided :icon="MoreFilled" @click="handleKick(scope.row)">{{ $t("account.kick") }}</el-dropdown-item>
                         <el-dropdown-item
                           v-if="calculateTimeDifference(scope.row.kickUtilTime) !== '-'"
                           @click="confirmReleaseKick(scope.row)"
