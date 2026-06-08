@@ -64,6 +64,6 @@
 	"vite-plugin-dynamic-base": "1.0.2"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=26.0.0"
   }
 }

@@ -1,6 +1,6 @@
 module github.com/Mr-Javadian/honest-ui
 
-go 1.22
+go 1.26
 
 require (
 	github.com/didip/tollbooth v4.0.2+incompatible
