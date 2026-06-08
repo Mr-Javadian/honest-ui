@@ -3,7 +3,7 @@
     <div class="page-header">
       <div class="header-left">
         <h2 class="page-title">{{ $t("route.configList") }}</h2>
-        <p class="page-subtitle">{{ $t("config.subtitle") || "Configure panel settings, proxy, and interface preferences" }}</p>
+        <p class="page-subtitle">{{ $t("config.subtitle") || "Manage all core web, security, and interface settings from this page" }}</p>
       </div>
       <div class="header-actions">
         <el-button type="primary" @click="submitForm" :icon="Select" size="default">
@@ -41,8 +41,8 @@
           <div class="card-header">
             <div class="card-icon"><i-ep-monitor /></div>
             <div class="card-header-text">
-              <h3 class="card-title">{{ $t("config.webSettings") || "Web Server Configuration" }}</h3>
-              <p class="card-desc">{{ $t("config.webSettingsDesc") || "Configure the port and context path for the Honest-UI web panel" }}</p>
+              <h3 class="card-title">{{ $t("config.webSettings") || "Web Server Settings" }}</h3>
+              <p class="card-desc">{{ $t("config.webSettingsDesc") || "Configure the port and base path for the web interface" }}</p>
             </div>
           </div>
           <div class="card-body">
@@ -67,8 +67,8 @@
           <div class="card-header">
             <div class="card-icon icon-purple"><i-ep-connection /></div>
             <div class="card-header-text">
-              <h3 class="card-title">{{ $t("config.hysteria2Settings") || "Hysteria2 Protocol Settings" }}</h3>
-              <p class="card-desc">{{ $t("config.hysteria2SettingsDesc") || "Configure traffic synchronization intervals and auto-reset rules" }}</p>
+              <h3 class="card-title">{{ $t("config.hysteria2Settings") || "Core Engine Settings" }}</h3>
+              <p class="card-desc">{{ $t("config.hysteria2SettingsDesc") || "Traffic reporting interval and reset schedule" }}</p>
             </div>
           </div>
           <div class="card-body">
@@ -92,8 +92,8 @@
           <div class="card-header">
             <div class="card-icon icon-green"><i-ep-link /></div>
             <div class="card-header-text">
-              <h3 class="card-title">{{ $t("config.httpsSettings") || "HTTPS & SSL/TLS Configuration" }}</h3>
-              <p class="card-desc">{{ $t("config.httpsSettingsDesc") || "Enable HTTPS and manage SSL certificates for the web panel" }}</p>
+              <h3 class="card-title">{{ $t("config.httpsSettings") || "HTTPS & Security" }}</h3>
+              <p class="card-desc">{{ $t("config.httpsSettingsDesc") || "Enable secure connections for the admin panel" }}</p>
             </div>
           </div>
           <div class="card-body">
@@ -135,8 +135,8 @@
           <div class="card-header">
             <div class="card-icon icon-orange"><i-ep-setting /></div>
             <div class="card-header-text">
-              <h3 class="card-title">{{ $t("config.interfaceSettings") || "User Interface & Appearance" }}</h3>
-              <p class="card-desc">{{ $t("config.interfaceSettingsDesc") || "Customize language, theme, layout, and brand elements" }}</p>
+              <h3 class="card-title">{{ $t("config.interfaceSettings") || "Appearance & Personalization" }}</h3>
+              <p class="card-desc">{{ $t("config.interfaceSettingsDesc") || "Customize the panel's look, language, and theme" }}</p>
             </div>
           </div>
           <div class="card-body">
@@ -144,21 +144,21 @@
               <div class="preference-item">
                 <div class="pref-info">
                   <span class="pref-label">{{ $t("config.language") || "Language" }}</span>
-                  <span class="pref-hint">{{ $t("config.langHint") || "Select your preferred UI language" }}</span>
+                  <span class="pref-hint">{{ $t("config.langHint") || "Select the display language of the panel" }}</span>
                 </div>
                 <lang-select class="pref-control" />
               </div>
               <div class="preference-item">
                 <div class="pref-info">
-                  <span class="pref-label">{{ $t("config.size") || "UI Density" }}</span>
-                  <span class="pref-hint">{{ $t("config.sizeHint") || "Adjust layout compactness (Comfortable / Compact)" }}</span>
+                  <span class="pref-label">{{ $t("config.size") || "Font Size" }}</span>
+                  <span class="pref-hint">{{ $t("config.sizeHint") || "Adjust the base font size for the interface" }}</span>
                 </div>
                 <size-select class="pref-control" />
               </div>
               <div class="preference-item">
                 <div class="pref-info">
-                  <span class="pref-label">{{ $t("config.theme") || "Color Theme" }}</span>
-                  <span class="pref-hint">{{ $t("config.themeHint") || "Switch between Light, Dark, and High Contrast modes" }}</span>
+                  <span class="pref-label">{{ $t("config.theme") || "Theme" }}</span>
+                  <span class="pref-hint">{{ $t("config.themeHint") || "Choose between light, dark, or high contrast mode" }}</span>
                 </div>
                 <div class="theme-group">
                   <button class="theme-btn" :class="{ active: theme === 'light' }" @click="theme !== 'light' && cycleTheme()">
@@ -175,14 +175,14 @@
               <div class="preference-item">
                 <div class="pref-info">
                   <span class="pref-label">{{ $t("config.sidebarLogo") || "Show Sidebar Logo" }}</span>
-                  <span class="pref-hint">{{ $t("config.logoHint") || "Display product logo in sidebar header" }}</span>
+                  <span class="pref-hint">{{ $t("config.logoHint") || "Toggle the logo visibility in the sidebar" }}</span>
                 </div>
                 <el-switch v-model="settingsStore.sidebarLogo" />
               </div>
               <div class="preference-item">
                 <div class="pref-info">
-                  <span class="pref-label">{{ $t("config.themeColor") || "Primary Theme Color" }}</span>
-                  <span class="pref-hint">{{ $t("config.colorHint") || "Choose primary accent color for interface" }}</span>
+                  <span class="pref-label">{{ $t("config.themeColor") || "Accent Color" }}</span>
+                  <span class="pref-hint">{{ $t("config.colorHint") || "Pick a primary color for buttons and links" }}</span>
                 </div>
                 <div class="color-group">
                   <span v-for="color in themeColors" :key="color" class="color-swatch" :style="{ background: color }" :class="{ active: settingsStore.themeColor === color }" @click="changeThemeColor(color)" />
